@@ -1,0 +1,422 @@
+﻿@model InternshipPortal.Models.ViewModels.RegisterViewModel
+
+@{
+    ViewData["Title"] = "Create Account";
+}
+
+<div class="register-page">
+    <div class="register-decoration decoration-one"></div>
+    <div class="register-decoration decoration-two"></div>
+
+    <div class="register-container">
+        <div class="register-info">
+            <div class="info-badge">Internship Portal</div>
+
+            <h1>Start Your Professional Journey</h1>
+
+            <p>
+                Connect with companies, discover training opportunities,
+                and take the first step toward your career.
+            </p>
+
+            <div class="feature-item">
+                <span>✓</span>
+                Find suitable internship opportunities
+            </div>
+
+            <div class="feature-item">
+                <span>✓</span>
+                Apply and track your applications
+            </div>
+
+            <div class="feature-item">
+                <span>✓</span>
+                Connect students with trusted companies
+            </div>
+        </div>
+
+        <div class="register-card">
+            <div class="register-header">
+                <h2>Create Account</h2>
+                <p>Choose your account type and join us</p>
+            </div>
+
+            <form asp-action="Register"
+                  asp-controller="Account"
+                  method="post">
+
+                <div asp-validation-summary="ModelOnly"
+                     class="text-danger validation-summary"></div>
+
+                <label class="form-label">Account Type</label>
+
+                <div class="role-options">
+                    <label class="role-card">
+                        <input asp-for="Role"
+                               type="radio"
+                               value="Student" />
+
+                        <span class="role-content">
+                            <span class="role-icon">🎓</span>
+                            <span>
+                                <strong>Student</strong>
+                                <small>Search and apply for internships</small>
+                            </span>
+                        </span>
+                    </label>
+
+                    <label class="role-card">
+                        <input asp-for="Role"
+                               type="radio"
+                               value="Company" />
+
+                        <span class="role-content">
+                            <span class="role-icon">🏢</span>
+                            <span>
+                                <strong>Company</strong>
+                                <small>Publish training opportunities</small>
+                            </span>
+                        </span>
+                    </label>
+                </div>
+
+                <span asp-validation-for="Role"
+                      class="text-danger"></span>
+
+                <div class="form-group">
+                    <label asp-for="Email"
+                           class="form-label"></label>
+
+                    <input asp-for="Email"
+                           class="form-control custom-input"
+                           placeholder="name@example.com" />
+
+                    <span asp-validation-for="Email"
+                          class="text-danger"></span>
+                </div>
+
+                <div class="form-group">
+                    <label asp-for="Password"
+                           class="form-label"></label>
+
+                    <input asp-for="Password"
+                           class="form-control custom-input"
+                           placeholder="Enter your password" />
+
+                    <span asp-validation-for="Password"
+                          class="text-danger"></span>
+                </div>
+
+                <div class="form-group">
+                    <label asp-for="ConfirmPassword"
+                           class="form-label">
+                        Confirm Password
+                    </label>
+
+                    <input asp-for="ConfirmPassword"
+                           class="form-control custom-input"
+                           placeholder="Confirm your password" />
+
+                    <span asp-validation-for="ConfirmPassword"
+                          class="text-danger"></span>
+                </div>
+
+                <button type="submit"
+                        class="register-button">
+                    Create Account
+                </button>
+
+                <p class="login-link">
+                    Already have an account?
+                    <a asp-area="Identity"
+                       asp-page="/Account/Login">
+                        Sign in
+                    </a>
+                </p>
+            </form>
+        </div>
+    </div>
+</div>
+
+<style>
+    .register-page {
+        min-height: calc(100vh - 120px);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        position: relative;
+        overflow: hidden;
+        padding: 50px 20px;
+        background: linear-gradient(135deg, #eef4ff, #f7f4ff);
+    }
+
+    .register-decoration {
+        position: absolute;
+        border-radius: 50%;
+        filter: blur(5px);
+        animation: floating 7s ease-in-out infinite;
+    }
+
+    .decoration-one {
+        width: 280px;
+        height: 280px;
+        background: rgba(37, 99, 235, 0.14);
+        top: -80px;
+        left: -70px;
+    }
+
+    .decoration-two {
+        width: 330px;
+        height: 330px;
+        background: rgba(124, 58, 237, 0.13);
+        right: -100px;
+        bottom: -120px;
+        animation-delay: 2s;
+    }
+
+    .register-container {
+        width: 100%;
+        max-width: 1100px;
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        border-radius: 28px;
+        overflow: hidden;
+        background: white;
+        box-shadow: 0 25px 70px rgba(30, 64, 175, 0.15);
+        position: relative;
+        z-index: 2;
+        animation: pageEntrance 0.8s ease;
+    }
+
+    .register-info {
+        padding: 65px 55px;
+        color: white;
+        background: linear-gradient(145deg, #0f2b5b, #1d4ed8 60%, #6d28d9);
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+    }
+
+    .info-badge {
+        width: fit-content;
+        padding: 8px 15px;
+        border-radius: 30px;
+        background: rgba(255, 255, 255, 0.16);
+        font-size: 14px;
+        margin-bottom: 25px;
+    }
+
+    .register-info h1 {
+        font-size: 42px;
+        font-weight: 800;
+        line-height: 1.15;
+        margin-bottom: 20px;
+    }
+
+    .register-info p {
+        color: #dbeafe;
+        font-size: 17px;
+        line-height: 1.7;
+        margin-bottom: 30px;
+    }
+
+    .feature-item {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin-top: 18px;
+        font-size: 15px;
+    }
+
+    .feature-item span {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 25px;
+        height: 25px;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.2);
+    }
+
+    .register-card {
+        padding: 48px 55px;
+    }
+
+    .register-header {
+        text-align: center;
+        margin-bottom: 30px;
+    }
+
+    .register-header h2 {
+        color: #172554;
+        font-weight: 800;
+        margin-bottom: 8px;
+    }
+
+    .register-header p {
+        color: #64748b;
+    }
+
+    .form-group {
+        margin-top: 18px;
+    }
+
+    .form-label {
+        color: #334155;
+        font-weight: 600;
+        margin-bottom: 7px;
+    }
+
+    .custom-input {
+        height: 50px;
+        border-radius: 12px;
+        border: 1px solid #dbe3ef;
+        padding: 0 15px;
+        transition: 0.3s;
+    }
+
+    .custom-input:focus {
+        border-color: #2563eb;
+        box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.1);
+    }
+
+    .role-options {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 12px;
+    }
+
+    .role-card {
+        cursor: pointer;
+        margin: 0;
+    }
+
+    .role-card input {
+        display: none;
+    }
+
+    .role-content {
+        min-height: 95px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 15px;
+        border: 2px solid #e2e8f0;
+        border-radius: 14px;
+        transition: 0.3s;
+    }
+
+    .role-content:hover {
+        border-color: #93c5fd;
+        transform: translateY(-3px);
+    }
+
+    .role-card input:checked + .role-content {
+        border-color: #2563eb;
+        background: #eff6ff;
+        box-shadow: 0 8px 20px rgba(37, 99, 235, 0.13);
+    }
+
+    .role-icon {
+        font-size: 28px;
+    }
+
+    .role-content strong,
+    .role-content small {
+        display: block;
+    }
+
+    .role-content strong {
+        color: #172554;
+    }
+
+    .role-content small {
+        color: #64748b;
+        font-size: 11px;
+        margin-top: 3px;
+    }
+
+    .register-button {
+        width: 100%;
+        border: none;
+        border-radius: 13px;
+        padding: 14px;
+        margin-top: 25px;
+        color: white;
+        font-weight: 700;
+        background: linear-gradient(90deg, #2563eb, #7c3aed);
+        box-shadow: 0 10px 25px rgba(79, 70, 229, 0.25);
+        transition: 0.3s;
+    }
+
+    .register-button:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 14px 30px rgba(79, 70, 229, 0.35);
+    }
+
+    .login-link {
+        text-align: center;
+        margin-top: 20px;
+        color: #64748b;
+    }
+
+    .login-link a {
+        color: #2563eb;
+        font-weight: 700;
+        text-decoration: none;
+    }
+
+    .validation-summary {
+        font-size: 14px;
+    }
+
+    @@keyframes pageEntrance {
+        from {
+            opacity: 0;
+            transform: translateY(25px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    @@keyframes floating {
+        0%, 100% {
+            transform: translateY(0);
+        }
+
+        50% {
+            transform: translateY(25px);
+        }
+    }
+
+    @@media (max-width: 850px) {
+        .register-container {
+            grid-template-columns: 1fr;
+        }
+
+        .register-info {
+            padding: 40px 30px;
+        }
+
+        .register-info h1 {
+            font-size: 32px;
+        }
+
+        .register-card {
+            padding: 38px 25px;
+        }
+    }
+
+    @@media (max-width: 500px) {
+        .role-options {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

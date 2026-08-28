@@ -1,0 +1,457 @@
+﻿@model InternshipPortal.Models.ViewModels.EvaluationViewModel
+
+@{
+    ViewData["Title"] = "Evaluate Student";
+}
+
+<style>
+    .evaluation-page {
+        min-height: 100vh;
+        padding: 50px 0;
+        background: radial-gradient(circle at top left, rgba(245, 158, 11, 0.18), transparent 35%), radial-gradient(circle at bottom right, rgba(99, 102, 241, 0.16), transparent 35%);
+    }
+
+    .evaluation-container {
+        max-width: 850px;
+        margin: auto;
+    }
+
+    .evaluation-card {
+        overflow: hidden;
+        border: none;
+        border-radius: 28px;
+        background: white;
+        box-shadow: 0 25px 60px rgba(15, 23, 42, 0.13);
+        animation: cardAppear 0.7s ease;
+    }
+
+    .evaluation-header {
+        position: relative;
+        padding: 38px;
+        color: white;
+        text-align: center;
+        background: linear-gradient(135deg, #4f46e5, #7c3aed, #0ea5e9);
+    }
+
+        .evaluation-header::before,
+        .evaluation-header::after {
+            position: absolute;
+            content: "";
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .evaluation-header::before {
+            width: 170px;
+            height: 170px;
+            top: -90px;
+            left: -55px;
+        }
+
+        .evaluation-header::after {
+            width: 130px;
+            height: 130px;
+            right: -35px;
+            bottom: -65px;
+        }
+
+    .header-icon {
+        width: 76px;
+        height: 76px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 17px;
+        font-size: 35px;
+        border: 1px solid rgba(255, 255, 255, 0.3);
+        border-radius: 24px;
+        background: rgba(255, 255, 255, 0.17);
+        backdrop-filter: blur(10px);
+        animation: floatIcon 2.5s ease-in-out infinite;
+    }
+
+    .evaluation-header h1 {
+        margin-bottom: 8px;
+        font-weight: 900;
+    }
+
+    .evaluation-header p {
+        margin: 0;
+        color: rgba(255, 255, 255, 0.82);
+    }
+
+    .evaluation-body {
+        padding: 40px;
+    }
+
+    .student-summary {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 16px;
+        margin-bottom: 32px;
+    }
+
+    .summary-item {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        padding: 17px;
+        border: 1px solid #e2e8f0;
+        border-radius: 17px;
+        background: #f8fafc;
+        transition: 0.3s;
+    }
+
+        .summary-item:hover {
+            border-color: #a5b4fc;
+            background: #eef2ff;
+            transform: translateY(-3px);
+        }
+
+    .summary-icon {
+        min-width: 46px;
+        height: 46px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #4f46e5;
+        font-size: 21px;
+        border-radius: 14px;
+        background: #e0e7ff;
+    }
+
+    .summary-label {
+        display: block;
+        color: #94a3b8;
+        font-size: 12px;
+        font-weight: 700;
+        text-transform: uppercase;
+    }
+
+    .summary-value {
+        display: block;
+        color: #0f172a;
+        font-weight: 800;
+    }
+
+    .form-label {
+        margin-bottom: 10px;
+        color: #1e293b;
+        font-weight: 800;
+    }
+
+    .rating-box {
+        padding: 28px 20px;
+        margin-bottom: 25px;
+        text-align: center;
+        border: 2px dashed #c7d2fe;
+        border-radius: 20px;
+        background: linear-gradient(135deg, #f8fafc, #eef2ff);
+    }
+
+    .rating-title {
+        margin-bottom: 16px;
+        color: #475569;
+        font-weight: 700;
+    }
+
+    .star-rating {
+        display: flex;
+        flex-direction: row-reverse;
+        justify-content: center;
+        gap: 8px;
+    }
+
+        .star-rating input {
+            display: none;
+        }
+
+        .star-rating label {
+            color: #cbd5e1;
+            font-size: 48px;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+            .star-rating label:hover,
+            .star-rating label:hover ~ label,
+            .star-rating input:checked ~ label {
+                color: #f59e0b;
+                transform: scale(1.12);
+                text-shadow: 0 7px 15px rgba(245, 158, 11, 0.3);
+            }
+
+    .feedback-input {
+        min-height: 150px;
+        padding: 17px;
+        border: 2px solid #e2e8f0;
+        border-radius: 17px;
+        resize: vertical;
+        transition: 0.3s;
+    }
+
+        .feedback-input:focus {
+            border-color: #6366f1;
+            box-shadow: 0 0 0 5px rgba(99, 102, 241, 0.12);
+        }
+
+    .character-count {
+        margin-top: 7px;
+        color: #94a3b8;
+        font-size: 12px;
+        text-align: right;
+    }
+
+    .validation-summary-errors {
+        padding: 15px 20px;
+        margin-bottom: 22px;
+        color: #b91c1c;
+        border: 1px solid #fecaca;
+        border-radius: 14px;
+        background: #fef2f2;
+    }
+
+        .validation-summary-errors ul {
+            margin: 0;
+        }
+
+    .form-actions {
+        display: flex;
+        gap: 12px;
+        margin-top: 30px;
+    }
+
+    .submit-button {
+        flex: 1;
+        padding: 14px 25px;
+        color: white;
+        font-weight: 800;
+        border: none;
+        border-radius: 15px;
+        background: linear-gradient(135deg, #4f46e5, #7c3aed);
+        box-shadow: 0 10px 25px rgba(79, 70, 229, 0.25);
+        transition: 0.3s;
+    }
+
+        .submit-button:hover {
+            color: white;
+            transform: translateY(-4px);
+            box-shadow: 0 16px 32px rgba(79, 70, 229, 0.34);
+        }
+
+    .cancel-button {
+        padding: 14px 25px;
+        color: #475569;
+        font-weight: 800;
+        border: 1px solid #cbd5e1;
+        border-radius: 15px;
+        background: white;
+        transition: 0.3s;
+    }
+
+        .cancel-button:hover {
+            color: #dc2626;
+            border-color: #fecaca;
+            background: #fef2f2;
+            transform: translateY(-3px);
+        }
+
+    @@keyframes cardAppear {
+        from {
+            opacity: 0;
+            transform: translateY(30px) scale(0.97);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+        }
+    }
+
+    @@keyframes floatIcon {
+        0%, 100% {
+            transform: translateY(0);
+        }
+
+        50% {
+            transform: translateY(-8px);
+        }
+    }
+
+    @@media (max-width: 768px) {
+        .evaluation-body {
+            padding: 25px 18px;
+        }
+
+        .student-summary {
+            grid-template-columns: 1fr;
+        }
+
+        .star-rating label {
+            font-size: 39px;
+        }
+
+        .form-actions {
+            flex-direction: column;
+        }
+    }
+</style>
+
+<div class="evaluation-page">
+    <div class="container">
+        <div class="evaluation-container">
+            <div class="evaluation-card">
+                <div class="evaluation-header">
+                    <div class="header-icon">
+                        <i class="bi bi-star-fill"></i>
+                    </div>
+
+                    <h1>Evaluate Student</h1>
+
+                    <p>
+                        Share your feedback about the student's training performance.
+                    </p>
+                </div>
+
+                <div class="evaluation-body">
+                    <div class="student-summary">
+                        <div class="summary-item">
+                            <div class="summary-icon">
+                                <i class="bi bi-person-fill"></i>
+                            </div>
+
+                            <div>
+                                <span class="summary-label">Student</span>
+                                <span class="summary-value">@Model.StudentName</span>
+                            </div>
+                        </div>
+
+                        <div class="summary-item">
+                            <div class="summary-icon">
+                                <i class="bi bi-briefcase-fill"></i>
+                            </div>
+
+                            <div>
+                                <span class="summary-label">Internship</span>
+                                <span class="summary-value">@Model.InternshipTitle</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <form asp-action="Create" method="post">
+                        @Html.AntiForgeryToken()
+
+                        <input asp-for="InternshipApplicationId" type="hidden" />
+                        <input asp-for="StudentName" type="hidden" />
+                        <input asp-for="InternshipTitle" type="hidden" />
+
+                        <div asp-validation-summary="ModelOnly"></div>
+
+                        <div class="rating-box">
+                            <div class="rating-title">
+                                Select the student's performance rating
+                            </div>
+
+                            <div class="star-rating">
+                                <input asp-for="Rating"
+                                       type="radio"
+                                       value="5"
+                                       id="rating5" />
+                                <label for="rating5" title="Excellent">
+                                    <i class="bi bi-star-fill"></i>
+                                </label>
+
+                                <input asp-for="Rating"
+                                       type="radio"
+                                       value="4"
+                                       id="rating4" />
+                                <label for="rating4" title="Very Good">
+                                    <i class="bi bi-star-fill"></i>
+                                </label>
+
+                                <input asp-for="Rating"
+                                       type="radio"
+                                       value="3"
+                                       id="rating3" />
+                                <label for="rating3" title="Good">
+                                    <i class="bi bi-star-fill"></i>
+                                </label>
+
+                                <input asp-for="Rating"
+                                       type="radio"
+                                       value="2"
+                                       id="rating2" />
+                                <label for="rating2" title="Fair">
+                                    <i class="bi bi-star-fill"></i>
+                                </label>
+
+                                <input asp-for="Rating"
+                                       type="radio"
+                                       value="1"
+                                       id="rating1" />
+                                <label for="rating1" title="Needs Improvement">
+                                    <i class="bi bi-star-fill"></i>
+                                </label>
+                            </div>
+
+                            <span asp-validation-for="Rating"
+                                  class="text-danger d-block mt-2">
+                            </span>
+                        </div>
+
+                        <div>
+                            <label asp-for="Feedback" class="form-label">
+                                <i class="bi bi-chat-left-text-fill me-2 text-primary"></i>
+                                Performance Feedback
+                            </label>
+
+                            <textarea asp-for="Feedback"
+                                      class="form-control feedback-input"
+                                      id="feedbackInput"
+                                      maxlength="1000"
+                                      placeholder="Write your feedback about the student's skills, commitment, teamwork and overall performance..."></textarea>
+
+                            <div class="character-count">
+                                <span id="characterCount">0</span> / 1000 characters
+                            </div>
+
+                            <span asp-validation-for="Feedback"
+                                  class="text-danger">
+                            </span>
+                        </div>
+
+                        <div class="form-actions">
+                            <button type="submit" class="submit-button">
+                                <i class="bi bi-check-circle-fill me-2"></i>
+                                Submit Evaluation
+                            </button>
+
+                            <a asp-controller="Internship"
+                               asp-action="MyInternships"
+                               class="cancel-button text-decoration-none text-center">
+                                <i class="bi bi-arrow-left me-2"></i>
+                                Cancel
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+
+    <script>
+        const feedbackInput = document.getElementById("feedbackInput");
+        const characterCount = document.getElementById("characterCount");
+
+        function updateCharacterCount() {
+            characterCount.textContent = feedbackInput.value.length;
+        }
+
+        feedbackInput.addEventListener("input", updateCharacterCount);
+        updateCharacterCount();
+    </script>
+}

@@ -1,0 +1,477 @@
+﻿@model InternshipPortal.Models.Evaluation
+
+@{
+    ViewData["Title"] = "Training Certificate";
+
+    var application = Model.InternshipApplication;
+    var student = application.Student;
+    var internship = application.Internship;
+    var company = internship.Company;
+
+    var certificateNumber =
+        $"CERT-{Model.Id:D5}-{student.Id:D4}";
+}
+
+<style>
+    .certificate-page {
+        min-height: 100vh;
+        padding: 40px 0;
+        background: radial-gradient(circle at top left, rgba(99, 102, 241, 0.16), transparent 35%), radial-gradient(circle at bottom right, rgba(245, 158, 11, 0.15), transparent 35%), #f8fafc;
+    }
+
+    .certificate-actions {
+        max-width: 1050px;
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: space-between;
+        gap: 12px;
+        margin: 0 auto 22px;
+    }
+
+    .certificate-button {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        padding: 12px 20px;
+        font-weight: 800;
+        border: none;
+        border-radius: 13px;
+        text-decoration: none;
+        transition: 0.3s;
+    }
+
+    .back-button {
+        color: #475569;
+        border: 1px solid #cbd5e1;
+        background: white;
+    }
+
+        .back-button:hover {
+            color: #4338ca;
+            border-color: #a5b4fc;
+            background: #eef2ff;
+            transform: translateY(-3px);
+        }
+
+    .print-button {
+        color: white;
+        background: linear-gradient(135deg, #4f46e5, #7c3aed);
+        box-shadow: 0 9px 23px rgba(79, 70, 229, 0.25);
+    }
+
+        .print-button:hover {
+            color: white;
+            transform: translateY(-3px);
+            box-shadow: 0 14px 30px rgba(79, 70, 229, 0.35);
+        }
+
+    .certificate-wrapper {
+        max-width: 1050px;
+        margin: auto;
+        padding: 12px;
+        border-radius: 10px;
+        background: linear-gradient(135deg, #f59e0b, #7c3aed, #0ea5e9);
+        box-shadow: 0 28px 65px rgba(15, 23, 42, 0.2);
+        animation: certificateAppear 0.8s ease;
+    }
+
+    .certificate {
+        position: relative;
+        min-height: 700px;
+        overflow: hidden;
+        padding: 65px 75px;
+        text-align: center;
+        border: 3px solid #e2e8f0;
+        background: linear-gradient(rgba(255, 255, 255, 0.96), rgba(255, 255, 255, 0.96)), repeating-linear-gradient( 45deg, #eef2ff, #eef2ff 12px, #ffffff 12px, #ffffff 24px);
+    }
+
+        .certificate::before,
+        .certificate::after {
+            position: absolute;
+            content: "";
+            border-radius: 50%;
+        }
+
+        .certificate::before {
+            width: 300px;
+            height: 300px;
+            top: -170px;
+            left: -130px;
+            border: 40px solid rgba(99, 102, 241, 0.08);
+        }
+
+        .certificate::after {
+            width: 330px;
+            height: 330px;
+            right: -180px;
+            bottom: -180px;
+            border: 45px solid rgba(245, 158, 11, 0.09);
+        }
+
+    .certificate-content {
+        position: relative;
+        z-index: 2;
+    }
+
+    .portal-logo {
+        width: 78px;
+        height: 78px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: auto;
+        color: white;
+        font-size: 35px;
+        border-radius: 24px;
+        background: linear-gradient(135deg, #4f46e5, #0ea5e9);
+        box-shadow: 0 12px 26px rgba(79, 70, 229, 0.24);
+    }
+
+    .portal-name {
+        margin-top: 12px;
+        color: #4338ca;
+        font-size: 15px;
+        font-weight: 900;
+        letter-spacing: 3px;
+        text-transform: uppercase;
+    }
+
+    .certificate-title {
+        margin: 32px 0 5px;
+        color: #0f172a;
+        font-family: Georgia, "Times New Roman", serif;
+        font-size: 54px;
+        font-weight: 900;
+        letter-spacing: 2px;
+    }
+
+    .certificate-subtitle {
+        color: #64748b;
+        font-size: 16px;
+        letter-spacing: 4px;
+        text-transform: uppercase;
+    }
+
+    .awarded-text {
+        margin-top: 34px;
+        color: #64748b;
+        font-size: 16px;
+    }
+
+    .student-name {
+        display: inline-block;
+        min-width: 65%;
+        padding: 8px 30px 12px;
+        margin: 8px 0 15px;
+        color: #4338ca;
+        font-family: Georgia, "Times New Roman", serif;
+        font-size: 39px;
+        font-weight: 900;
+        border-bottom: 2px solid #f59e0b;
+    }
+
+    .completion-text {
+        max-width: 750px;
+        margin: auto;
+        color: #475569;
+        font-size: 17px;
+        line-height: 1.8;
+    }
+
+    .internship-name {
+        display: block;
+        margin: 10px 0 5px;
+        color: #0f172a;
+        font-size: 24px;
+        font-weight: 900;
+    }
+
+    .company-name {
+        color: #4f46e5;
+        font-weight: 800;
+    }
+
+    .rating-area {
+        display: inline-flex;
+        align-items: center;
+        gap: 12px;
+        padding: 11px 20px;
+        margin-top: 22px;
+        border: 1px solid #fde68a;
+        border-radius: 30px;
+        background: #fffbeb;
+    }
+
+    .certificate-stars {
+        display: flex;
+        gap: 3px;
+        color: #f59e0b;
+        font-size: 20px;
+    }
+
+    .empty-star {
+        color: #dbe2ea;
+    }
+
+    .rating-text {
+        color: #92400e;
+        font-size: 13px;
+        font-weight: 900;
+    }
+
+    .certificate-footer {
+        display: grid;
+        grid-template-columns: 1fr 170px 1fr;
+        align-items: end;
+        gap: 25px;
+        margin-top: 52px;
+    }
+
+    .signature {
+        padding-top: 8px;
+        border-top: 1px solid #94a3b8;
+    }
+
+        .signature strong {
+            display: block;
+            color: #0f172a;
+            font-size: 14px;
+        }
+
+        .signature span {
+            color: #64748b;
+            font-size: 12px;
+        }
+
+    .certificate-seal {
+        width: 120px;
+        height: 120px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        margin: auto;
+        color: #92400e;
+        border: 4px double #f59e0b;
+        border-radius: 50%;
+        background: radial-gradient(circle, #fef3c7, #fde68a);
+        box-shadow: 0 8px 22px rgba(245, 158, 11, 0.22);
+        transform: rotate(-7deg);
+    }
+
+        .certificate-seal i {
+            font-size: 30px;
+        }
+
+        .certificate-seal strong {
+            font-size: 12px;
+            letter-spacing: 1px;
+        }
+
+    .certificate-number {
+        margin-top: 35px;
+        color: #94a3b8;
+        font-size: 11px;
+        letter-spacing: 1px;
+    }
+
+    @@keyframes certificateAppear {
+        from {
+            opacity: 0;
+            transform: translateY(30px) scale(0.97);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+        }
+    }
+
+    @@media (max-width: 768px) {
+        .certificate {
+            min-height: auto;
+            padding: 40px 20px;
+        }
+
+        .certificate-title {
+            font-size: 37px;
+        }
+
+        .student-name {
+            min-width: 90%;
+            font-size: 29px;
+        }
+
+        .certificate-footer {
+            grid-template-columns: 1fr;
+            gap: 30px;
+        }
+
+        .signature {
+            max-width: 260px;
+            width: 100%;
+            margin: auto;
+        }
+    }
+
+    @@media print {
+        body {
+            background: white !important;
+        }
+
+        header,
+        footer,
+        .certificate-actions,
+        .navbar,
+        .no-print {
+            display: none !important;
+        }
+
+        .container,
+        .certificate-page {
+            width: 100% !important;
+            max-width: none !important;
+            padding: 0 !important;
+            margin: 0 !important;
+            background: white !important;
+        }
+
+        .certificate-wrapper {
+            width: 100%;
+            max-width: none;
+            padding: 8px;
+            box-shadow: none;
+            print-color-adjust: exact;
+            -webkit-print-color-adjust: exact;
+        }
+
+        .certificate {
+            min-height: 95vh;
+            print-color-adjust: exact;
+            -webkit-print-color-adjust: exact;
+        }
+
+        @@page {
+            size: landscape;
+            margin: 8mm;
+        }
+    }
+</style>
+
+<div class="certificate-page">
+    <div class="container">
+        <div class="certificate-actions">
+            <a asp-controller="Evaluation"
+               asp-action="MyEvaluations"
+               class="certificate-button back-button">
+                <i class="bi bi-arrow-left"></i>
+                Back to My Evaluations
+            </a>
+
+            <button type="button"
+                    class="certificate-button print-button"
+                    onclick="window.print()">
+                <i class="bi bi-printer-fill"></i>
+                Print / Save as PDF
+            </button>
+        </div>
+
+        <div class="certificate-wrapper">
+            <div class="certificate">
+                <div class="certificate-content">
+                    <div class="portal-logo">
+                        <i class="bi bi-mortarboard-fill"></i>
+                    </div>
+
+                    <div class="portal-name">
+                        Internship Portal
+                    </div>
+
+                    <h1 class="certificate-title">
+                        Certificate of Completion
+                    </h1>
+
+                    <div class="certificate-subtitle">
+                        Internship Training Program
+                    </div>
+
+                    <div class="awarded-text">
+                        This certificate is proudly presented to
+                    </div>
+
+                    <div class="student-name">
+                        @student.FullName
+                    </div>
+
+                    <div class="completion-text">
+                        For successfully completing the internship training program
+
+                        <span class="internship-name">
+                            @internship.Title
+                        </span>
+
+                        provided by
+
+                        <span class="company-name">
+                            @company.Name
+                        </span>
+
+                        from
+                        <strong>
+                            @internship.StartDate.ToString("dd MMMM yyyy")
+                        </strong>
+                        to
+                        <strong>
+                            @internship.EndDate.ToString("dd MMMM yyyy")
+                        </strong>.
+                    </div>
+
+                    <div class="rating-area">
+                        <div class="certificate-stars">
+                            @for (var star = 1; star <= 5; star++)
+                            {
+                                if (star <= Model.Rating)
+                                {
+                                    <i class="bi bi-star-fill"></i>
+                                }
+                                else
+                                {
+                                    <i class="bi bi-star-fill empty-star"></i>
+                                }
+                            }
+                        </div>
+
+                        <span class="rating-text">
+                            Performance Rating: @Model.Rating / 5
+                        </span>
+                    </div>
+
+                    <div class="certificate-footer">
+                        <div class="signature">
+                            <strong>@company.Name</strong>
+                            <span>Company Representative</span>
+                        </div>
+
+                        <div class="certificate-seal">
+                            <i class="bi bi-patch-check-fill"></i>
+                            <strong>VERIFIED</strong>
+                            <span>Certificate</span>
+                        </div>
+
+                        <div class="signature">
+                            <strong>
+                                @Model.EvaluationDate.ToString("dd MMMM yyyy")
+                            </strong>
+                            <span>Date of Completion</span>
+                        </div>
+                    </div>
+
+                    <div class="certificate-number">
+                        Certificate Number: @certificateNumber
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

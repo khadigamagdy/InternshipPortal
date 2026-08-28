@@ -1,0 +1,701 @@
+﻿@model InternshipPortal.Models.InternshipApplication
+@using InternshipPortal.Models.Enums
+
+@{
+    ViewData["Title"] = "Student Information";
+}
+
+<div class="student-details-page">
+    <div class="page-container">
+
+        <section class="student-header">
+            <div class="student-avatar">
+                @Model.Student.FullName
+                .Substring(0, 1)
+                .ToUpper()
+            </div>
+
+            <div class="student-heading">
+                <span class="applicant-badge">
+                    Internship Applicant
+                </span>
+
+                <h1>@Model.Student.FullName</h1>
+
+                <p>
+                    @Model.Student.Specialization
+                    · @Model.Student.University
+                </p>
+            </div>
+
+            <a asp-controller="Application"
+               asp-action="Applicants"
+               asp-route-internshipId="@Model.InternshipId"
+               class="back-button">
+                ← Back to Applicants
+            </a>
+        </section>
+
+        <section class="details-grid">
+            <main class="details-main">
+
+                <article class="information-card">
+                    <div class="card-heading">
+                        <span>🎓</span>
+
+                        <div>
+                            <h2>Academic Information</h2>
+
+                            <p>
+                                Student education and specialization
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="academic-grid">
+                        <div class="information-item">
+                            <small>Full Name</small>
+                            <strong>@Model.Student.FullName</strong>
+                        </div>
+
+                        <div class="information-item">
+                            <small>University</small>
+                            <strong>@Model.Student.University</strong>
+                        </div>
+
+                        <div class="information-item">
+                            <small>Faculty</small>
+                            <strong>@Model.Student.Faculty</strong>
+                        </div>
+
+                        <div class="information-item">
+                            <small>Specialization</small>
+
+                            <strong>
+                                @Model.Student.Specialization
+                            </strong>
+                        </div>
+
+                        <div class="information-item">
+                            <small>Graduation Year</small>
+
+                            <strong>
+                                @Model.Student.GraduationYear
+                            </strong>
+                        </div>
+
+                        <div class="information-item">
+                            <small>Profile Status</small>
+
+                            <strong class="completed-text">
+                                ✓ Completed
+                            </strong>
+                        </div>
+                    </div>
+                </article>
+
+                <article class="information-card">
+                    <div class="card-heading">
+                        <span>✉️</span>
+
+                        <div>
+                            <h2>Cover Letter</h2>
+
+                            <p>
+                                Student introduction and motivation
+                            </p>
+                        </div>
+                    </div>
+
+                    @if (!string.IsNullOrEmpty(Model.CoverLetter))
+                    {
+                        <div class="cover-letter">
+                            @Model.CoverLetter
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="empty-cover-letter">
+                            No cover letter was provided.
+                        </div>
+                    }
+                </article>
+
+                <article class="information-card">
+                    <div class="card-heading">
+                        <span>💼</span>
+
+                        <div>
+                            <h2>Application Information</h2>
+
+                            <p>
+                                Internship and application details
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="internship-information">
+                        <div>
+                            <small>Internship</small>
+                            <strong>@Model.Internship.Title</strong>
+                        </div>
+
+                        <div>
+                            <small>Application Date</small>
+
+                            <strong>
+                                @Model.AppliedAt
+                                .ToString("dd MMMM yyyy")
+                            </strong>
+                        </div>
+
+                        <div>
+                            <small>Work Mode</small>
+
+                            <strong>
+                                @Model.Internship.WorkMode
+                            </strong>
+                        </div>
+
+                        <div>
+                            <small>Location</small>
+
+                            <strong>
+                                @Model.Internship.Location
+                            </strong>
+                        </div>
+                    </div>
+                </article>
+            </main>
+
+            <aside class="details-sidebar">
+                <article class="application-card">
+                    <h2>Application Status</h2>
+
+                    @if (Model.Status == ApplicationStatus.Pending)
+                    {
+                        <div class="status-display pending-status">
+                            <span>⏳</span>
+
+                            <div>
+                                <strong>Pending Review</strong>
+
+                                <p>
+                                    A company decision is required.
+                                </p>
+                            </div>
+                        </div>
+                    }
+                    else if (Model.Status ==
+                             ApplicationStatus.Accepted)
+                    {
+                        <div class="status-display accepted-status">
+                            <span>✓</span>
+
+                            <div>
+                                <strong>Accepted</strong>
+
+                                <p>
+                                    This student has been accepted.
+                                </p>
+                            </div>
+                        </div>
+                    }
+                    else if (Model.Status ==
+                             ApplicationStatus.Rejected)
+                    {
+                        <div class="status-display rejected-status">
+                            <span>✕</span>
+
+                            <div>
+                                <strong>Rejected</strong>
+
+                                <p>
+                                    This application was rejected.
+                                </p>
+                            </div>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="status-display completed-status">
+                            <span>★</span>
+
+                            <div>
+                                <strong>Completed</strong>
+
+                                <p>
+                                    The internship was completed.
+                                </p>
+                            </div>
+                        </div>
+                    }
+
+                    <div class="application-number">
+                        <small>Application Number</small>
+                        <strong>#@Model.Id</strong>
+                    </div>
+
+                    @if (!string.IsNullOrEmpty(Model.CVPath))
+                    {
+                        <a href="@Model.CVPath"
+                           target="_blank"
+                           class="cv-button">
+                            📄 Open Student CV
+                        </a>
+                    }
+
+                    @if (Model.Status ==
+                         ApplicationStatus.Pending)
+                    {
+                        <div class="decision-actions">
+                            <form asp-controller="Application"
+                                  asp-action="Reject"
+                                  method="post">
+
+                                <input type="hidden"
+                                       name="id"
+                                       value="@Model.Id" />
+
+                                <button type="submit"
+                                        class="reject-button"
+                                        onclick="return confirm('Reject this application?')">
+                                    Reject Application
+                                </button>
+                            </form>
+
+                            <form asp-controller="Application"
+                                  asp-action="Accept"
+                                  method="post">
+
+                                <input type="hidden"
+                                       name="id"
+                                       value="@Model.Id" />
+
+                                <button type="submit"
+                                        class="accept-button">
+                                    ✓ Accept Student
+                                </button>
+                            </form>
+                        </div>
+                    }
+                    else if (Model.ReviewedAt != null)
+                    {
+                        <div class="review-information">
+                            Reviewed on
+                            @Model.ReviewedAt.Value
+                            .ToString("dd MMMM yyyy")
+                        </div>
+                    }
+                </article>
+
+                <article class="privacy-card">
+                    <span>🔒</span>
+
+                    <div>
+                        <strong>Confidential Information</strong>
+
+                        <p>
+                            Use the student information only
+                            for reviewing this application.
+                        </p>
+                    </div>
+                </article>
+            </aside>
+        </section>
+    </div>
+</div>
+
+<style>
+    .student-details-page {
+        min-height: 100vh;
+        padding: 40px 20px 70px;
+        background: radial-gradient(circle at top left, rgba(37, 99, 235, 0.09), transparent 30%), radial-gradient(circle at bottom right, rgba(16, 185, 129, 0.07), transparent 35%), #f5f7fb;
+    }
+
+    .page-container {
+        max-width: 1100px;
+        margin: auto;
+    }
+
+    .student-header {
+        padding: 34px 40px;
+        display: grid;
+        grid-template-columns: auto 1fr auto;
+        align-items: center;
+        gap: 18px;
+        color: white;
+        border-radius: 25px;
+        background: linear-gradient(135deg, #0f2b5b, #1d4ed8 58%, #059669);
+        box-shadow: 0 20px 46px rgba(30, 64, 175, 0.2);
+        animation: detailsEntrance 0.7s ease;
+    }
+
+    .student-avatar {
+        width: 82px;
+        height: 82px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #1e3a8a;
+        border-radius: 24px;
+        background: white;
+        font-size: 32px;
+        font-weight: 800;
+    }
+
+    .applicant-badge {
+        display: inline-block;
+        padding: 5px 11px;
+        margin-bottom: 7px;
+        border-radius: 20px;
+        background: rgba(255, 255, 255, 0.16);
+        font-size: 9px;
+    }
+
+    .student-heading h1 {
+        margin: 0;
+        font-size: 27px;
+        font-weight: 800;
+    }
+
+    .student-heading p {
+        margin: 7px 0 0;
+        color: #dbeafe;
+        font-size: 11px;
+    }
+
+    .back-button {
+        padding: 10px 15px;
+        color: #1e3a8a;
+        border-radius: 10px;
+        background: white;
+        text-decoration: none;
+        font-size: 10px;
+        font-weight: 800;
+        transition: 0.3s;
+    }
+
+        .back-button:hover {
+            color: #1e3a8a;
+            transform: translateY(-2px);
+        }
+
+    .details-grid {
+        margin-top: 21px;
+        display: grid;
+        grid-template-columns: 1.5fr 0.7fr;
+        gap: 20px;
+        align-items: start;
+    }
+
+    .details-main {
+        display: flex;
+        flex-direction: column;
+        gap: 17px;
+    }
+
+    .information-card,
+    .application-card,
+    .privacy-card {
+        border: 1px solid #e6ebf2;
+        border-radius: 19px;
+        background: white;
+        box-shadow: 0 9px 28px rgba(15, 23, 42, 0.05);
+        animation: detailsEntrance 0.8s ease;
+    }
+
+    .information-card {
+        padding: 25px;
+    }
+
+    .card-heading {
+        padding-bottom: 17px;
+        display: flex;
+        align-items: center;
+        gap: 11px;
+        border-bottom: 1px solid #eef2f7;
+    }
+
+        .card-heading > span {
+            width: 43px;
+            height: 43px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 12px;
+            background: #dbeafe;
+            font-size: 21px;
+        }
+
+        .card-heading h2 {
+            margin: 0;
+            color: #172554;
+            font-size: 16px;
+            font-weight: 800;
+        }
+
+        .card-heading p {
+            margin: 3px 0 0;
+            color: #94a3b8;
+            font-size: 9px;
+        }
+
+    .academic-grid,
+    .internship-information {
+        padding-top: 18px;
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 14px;
+    }
+
+        .information-item,
+        .internship-information > div {
+            padding: 13px;
+            border-radius: 11px;
+            background: #f8fafc;
+        }
+
+            .information-item small,
+            .information-item strong,
+            .internship-information small,
+            .internship-information strong {
+                display: block;
+            }
+
+            .information-item small,
+            .internship-information small {
+                color: #94a3b8;
+                font-size: 8px;
+            }
+
+            .information-item strong,
+            .internship-information strong {
+                margin-top: 4px;
+                color: #334155;
+                font-size: 10px;
+            }
+
+    .completed-text {
+        color: #047857 !important;
+    }
+
+    .cover-letter {
+        padding-top: 18px;
+        color: #475569;
+        line-height: 1.9;
+        white-space: pre-line;
+        font-size: 11px;
+    }
+
+    .empty-cover-letter {
+        padding: 15px;
+        margin-top: 17px;
+        color: #94a3b8;
+        border-radius: 11px;
+        background: #f8fafc;
+        font-size: 9px;
+    }
+
+    .details-sidebar {
+        position: sticky;
+        top: 20px;
+    }
+
+    .application-card {
+        padding: 23px;
+    }
+
+        .application-card > h2 {
+            margin: 0 0 17px;
+            color: #172554;
+            font-size: 16px;
+            font-weight: 800;
+        }
+
+    .status-display {
+        padding: 14px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        border-radius: 12px;
+    }
+
+        .status-display > span {
+            font-size: 24px;
+        }
+
+        .status-display strong {
+            font-size: 10px;
+        }
+
+        .status-display p {
+            margin: 3px 0 0;
+            font-size: 8px;
+        }
+
+    .pending-status {
+        color: #b45309;
+        background: #fffbeb;
+    }
+
+    .accepted-status {
+        color: #047857;
+        background: #ecfdf5;
+    }
+
+    .rejected-status {
+        color: #b91c1c;
+        background: #fef2f2;
+    }
+
+    .completed-status {
+        color: #6d28d9;
+        background: #f5f3ff;
+    }
+
+    .application-number {
+        padding: 14px 0;
+        margin-top: 14px;
+        display: flex;
+        justify-content: space-between;
+        border-bottom: 1px solid #eef2f7;
+    }
+
+        .application-number small {
+            color: #94a3b8;
+            font-size: 8px;
+        }
+
+        .application-number strong {
+            color: #334155;
+            font-size: 10px;
+        }
+
+    .cv-button {
+        display: block;
+        padding: 10px;
+        margin-top: 15px;
+        color: #047857;
+        border-radius: 9px;
+        background: #d1fae5;
+        text-align: center;
+        text-decoration: none;
+        font-size: 9px;
+        font-weight: 800;
+    }
+
+    .decision-actions {
+        margin-top: 14px;
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+    }
+
+        .decision-actions form {
+            margin: 0;
+        }
+
+    .reject-button,
+    .accept-button {
+        width: 100%;
+        padding: 10px;
+        border: none;
+        border-radius: 9px;
+        font-size: 9px;
+        font-weight: 800;
+        transition: 0.3s;
+    }
+
+    .reject-button {
+        color: #b91c1c;
+        background: #fee2e2;
+    }
+
+    .accept-button {
+        color: white;
+        background: linear-gradient(90deg, #059669, #10b981);
+    }
+
+        .reject-button:hover,
+        .accept-button:hover {
+            transform: translateY(-2px);
+        }
+
+    .review-information {
+        padding: 10px;
+        margin-top: 14px;
+        color: #64748b;
+        border-radius: 9px;
+        background: #f1f5f9;
+        text-align: center;
+        font-size: 8px;
+    }
+
+    .privacy-card {
+        padding: 15px;
+        margin-top: 14px;
+        display: flex;
+        gap: 9px;
+        color: #0369a1;
+        background: #f0f9ff;
+    }
+
+        .privacy-card > span {
+            font-size: 21px;
+        }
+
+        .privacy-card strong {
+            font-size: 9px;
+        }
+
+        .privacy-card p {
+            margin: 3px 0 0;
+            line-height: 1.6;
+            font-size: 8px;
+        }
+
+    @@keyframes detailsEntrance {
+        from {
+            opacity: 0;
+            transform: translateY(17px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    @@media (max-width: 800px) {
+        .details-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .details-sidebar {
+            position: static;
+        }
+    }
+
+    @@media (max-width: 600px) {
+        .student-header {
+            padding: 28px 20px;
+            grid-template-columns: auto 1fr;
+        }
+
+        .back-button {
+            grid-column: 1 / 3;
+            width: fit-content;
+        }
+
+        .student-avatar {
+            width: 65px;
+            height: 65px;
+        }
+
+        .academic-grid,
+        .internship-information {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>

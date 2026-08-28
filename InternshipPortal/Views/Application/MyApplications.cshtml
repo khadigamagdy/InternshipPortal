@@ -1,0 +1,845 @@
+﻿@model List<InternshipPortal.Models.InternshipApplication>
+@using InternshipPortal.Models.Enums
+
+@{
+    ViewData["Title"] = "My Applications";
+}
+
+<div class="applications-page">
+    <div class="applications-container">
+
+        @if (TempData["Success"] != null)
+        {
+            <div class="alert-message success-alert">
+                <span>✓</span>
+                @TempData["Success"]
+            </div>
+        }
+
+        @if (TempData["Error"] != null)
+        {
+            <div class="alert-message error-alert">
+                <span>!</span>
+                @TempData["Error"]
+            </div>
+        }
+
+        <section class="applications-header">
+            <div>
+                <span class="student-badge">
+                    Student Portal
+                </span>
+
+                <h1>My Applications</h1>
+
+                <p>
+                    Track your internship applications
+                    and company decisions.
+                </p>
+            </div>
+
+            <a asp-controller="Internship"
+               asp-action="Index"
+               class="browse-button">
+                Browse More Internships
+            </a>
+        </section>
+
+        <section class="summary-grid">
+            <div class="summary-card">
+                <span class="summary-icon blue-icon">
+                    📄
+                </span>
+
+                <div>
+                    <strong>@Model.Count</strong>
+                    <small>Total Applications</small>
+                </div>
+            </div>
+
+            <div class="summary-card">
+                <span class="summary-icon orange-icon">
+                    ⏳
+                </span>
+
+                <div>
+                    <strong>
+                        @Model.Count(a =>
+                            a.Status == ApplicationStatus.Pending)
+                    </strong>
+
+                    <small>Pending</small>
+                </div>
+            </div>
+
+            <div class="summary-card">
+                <span class="summary-icon green-icon">
+                    ✓
+                </span>
+
+                <div>
+                    <strong>
+                        @Model.Count(a =>
+                            a.Status == ApplicationStatus.Accepted)
+                    </strong>
+
+                    <small>Accepted</small>
+                </div>
+            </div>
+
+            <div class="summary-card">
+                <span class="summary-icon red-icon">
+                    ✕
+                </span>
+
+                <div>
+                    <strong>
+                        @Model.Count(a =>
+                            a.Status == ApplicationStatus.Rejected)
+                    </strong>
+
+                    <small>Rejected</small>
+                </div>
+            </div>
+        </section>
+
+        @if (Model.Any())
+        {
+            <section class="applications-list">
+                @foreach (var application in Model)
+                {
+                    <article class="application-card">
+                        <div class="application-top">
+                            <div class="company-logo">
+                                @if (!string.IsNullOrEmpty(
+                                    application.Internship
+                                        .Company.LogoPath))
+                                {
+                                    <img src="@application.Internship.Company.LogoPath"
+                                         alt="@application.Internship.Company.Name" />
+                                }
+                                else
+                                {
+                                    <span>🏢</span>
+                                }
+                            </div>
+
+                            <div class="application-title">
+                                <div class="company-name">
+                                    @application.Internship.Company.Name
+                                </div>
+
+                                <h2>
+                                    @application.Internship.Title
+                                </h2>
+
+                                <div class="application-meta">
+                                    <span>
+                                        📍 @application.Internship.Location
+                                    </span>
+
+                                    <span>
+                                        💻 @application.Internship.WorkMode
+                                    </span>
+
+                                    <span>
+                                        📅 Applied
+                                        @application.AppliedAt
+                                        .ToString("dd MMM yyyy")
+                                    </span>
+                                </div>
+                            </div>
+
+                            <div>
+                                @if (application.Status ==
+                                     ApplicationStatus.Pending)
+                                {
+                                    <span class="status pending">
+                                        ⏳ Pending
+                                    </span>
+                                }
+                                else if (application.Status ==
+                                          ApplicationStatus.Accepted)
+                                {
+                                    <span class="status accepted">
+                                        ✓ Accepted
+                                    </span>
+                                }
+                                else if (application.Status ==
+                                          ApplicationStatus.Rejected)
+                                {
+                                    <span class="status rejected">
+                                        ✕ Rejected
+                                    </span>
+                                }
+                                else
+                                {
+                                    <span class="status completed">
+                                        ★ Completed
+                                    </span>
+                                }
+                            </div>
+                        </div>
+
+                        <div class="progress-section">
+                            <div class="progress-step completed-step">
+                                <span>✓</span>
+                                <small>Submitted</small>
+                            </div>
+
+                            <div class="progress-line
+                                @(application.Status !=
+                                    ApplicationStatus.Pending
+                                    ? "completed-line"
+                                    : "")">
+                            </div>
+
+                            <div class="progress-step
+                                @(application.Status !=
+                                    ApplicationStatus.Pending
+                                    ? "completed-step"
+                                    : "current-step")">
+
+                                <span>
+                                    @if (application.Status ==
+                                         ApplicationStatus.Pending)
+                                    {
+                                        <text>2</text>
+                                    }
+                                    else
+                                    {
+                                        <text>✓</text>
+                                    }
+                                </span>
+
+                                <small>Reviewed</small>
+                            </div>
+
+                            <div class="progress-line
+                                @(application.Status ==
+                                    ApplicationStatus.Accepted ||
+                                    application.Status ==
+                                    ApplicationStatus.Completed
+                                    ? "completed-line"
+                                    : "")">
+                            </div>
+
+                            <div class="progress-step
+                                @(application.Status ==
+                                    ApplicationStatus.Accepted ||
+                                    application.Status ==
+                                    ApplicationStatus.Completed
+                                    ? "completed-step"
+                                    : "")">
+
+                                <span>3</span>
+                                <small>Decision</small>
+                            </div>
+                        </div>
+
+                        @if (!string.IsNullOrEmpty(
+                            application.CoverLetter))
+                        {
+                            <div class="cover-letter-preview">
+                                <strong>Cover Letter</strong>
+
+                                <p>@application.CoverLetter</p>
+                            </div>
+                        }
+
+                        <div class="application-footer">
+                            <div class="application-files">
+                                @if (!string.IsNullOrEmpty(
+                                    application.CVPath))
+                                {
+                                    <a href="@application.CVPath"
+                                       target="_blank"
+                                       class="cv-button">
+                                        📄 View Submitted CV
+                                    </a>
+                                }
+
+                                <a asp-controller="Internship"
+                                   asp-action="Details"
+                                   asp-route-id="@application.InternshipId"
+                                   class="details-button">
+                                    View Internship
+                                </a>
+                            </div>
+
+                            <span class="application-date">
+                                Application ID:
+                                #@application.Id
+                            </span>
+                        </div>
+
+                        @if (application.Status ==
+                             ApplicationStatus.Accepted)
+                        {
+                            <div class="decision-message accepted-message">
+                                <span>🎉</span>
+
+                                <div>
+                                    <strong>
+                                        Congratulations!
+                                    </strong>
+
+                                    <p>
+                                        The company has accepted
+                                        your application.
+                                    </p>
+                                </div>
+                            </div>
+                        }
+                        else if (application.Status ==
+                                  ApplicationStatus.Rejected)
+                        {
+                            <div class="decision-message rejected-message">
+                                <span>💡</span>
+
+                                <div>
+                                    <strong>
+                                        Keep Looking
+                                    </strong>
+
+                                    <p>
+                                        Explore other opportunities
+                                        that match your skills.
+                                    </p>
+                                </div>
+                            </div>
+                        }
+                    </article>
+                }
+            </section>
+        }
+        else
+        {
+            <section class="empty-applications">
+                <div class="empty-icon">
+                    📄
+                </div>
+
+                <h2>No Applications Yet</h2>
+
+                <p>
+                    Browse available internships and submit
+                    your first application.
+                </p>
+
+                <a asp-controller="Internship"
+                   asp-action="Index">
+                    Browse Internships
+                </a>
+            </section>
+        }
+    </div>
+</div>
+
+<style>
+    .applications-page {
+        min-height: 100vh;
+        padding: 40px 20px 70px;
+        background: radial-gradient(circle at top left, rgba(37, 99, 235, 0.09), transparent 30%), radial-gradient(circle at bottom right, rgba(16, 185, 129, 0.07), transparent 35%), #f5f7fb;
+    }
+
+    .applications-container {
+        max-width: 1100px;
+        margin: auto;
+    }
+
+    .alert-message {
+        padding: 14px 18px;
+        margin-bottom: 20px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        border-radius: 13px;
+        font-size: 12px;
+        font-weight: 700;
+    }
+
+    .success-alert {
+        color: #047857;
+        border: 1px solid #a7f3d0;
+        background: #ecfdf5;
+    }
+
+    .error-alert {
+        color: #b91c1c;
+        border: 1px solid #fecaca;
+        background: #fef2f2;
+    }
+
+    .applications-header {
+        padding: 36px 42px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        color: white;
+        border-radius: 25px;
+        background: linear-gradient(135deg, #0f2b5b, #1d4ed8 58%, #059669);
+        box-shadow: 0 20px 46px rgba(30, 64, 175, 0.2);
+        animation: applicationsEntrance 0.7s ease;
+    }
+
+    .student-badge {
+        display: inline-block;
+        padding: 5px 12px;
+        margin-bottom: 10px;
+        border-radius: 20px;
+        background: rgba(255, 255, 255, 0.16);
+        font-size: 10px;
+    }
+
+    .applications-header h1 {
+        margin: 0;
+        font-size: 31px;
+        font-weight: 800;
+    }
+
+    .applications-header p {
+        margin: 9px 0 0;
+        color: #dbeafe;
+        font-size: 12px;
+    }
+
+    .browse-button {
+        padding: 11px 17px;
+        color: #1e3a8a;
+        border-radius: 11px;
+        background: white;
+        text-decoration: none;
+        font-size: 11px;
+        font-weight: 800;
+        transition: 0.3s;
+    }
+
+        .browse-button:hover {
+            color: #1e3a8a;
+            transform: translateY(-3px);
+        }
+
+    .summary-grid {
+        margin-top: 21px;
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 16px;
+    }
+
+    .summary-card {
+        padding: 18px;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        border: 1px solid #e6ebf2;
+        border-radius: 17px;
+        background: white;
+        box-shadow: 0 8px 25px rgba(15, 23, 42, 0.05);
+        transition: 0.3s;
+    }
+
+        .summary-card:hover {
+            transform: translateY(-5px);
+        }
+
+    .summary-icon {
+        width: 46px;
+        height: 46px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 13px;
+        font-size: 22px;
+    }
+
+    .blue-icon {
+        background: #dbeafe;
+    }
+
+    .orange-icon {
+        background: #fef3c7;
+    }
+
+    .green-icon {
+        background: #d1fae5;
+    }
+
+    .red-icon {
+        background: #fee2e2;
+    }
+
+    .summary-card strong,
+    .summary-card small {
+        display: block;
+    }
+
+    .summary-card strong {
+        color: #172554;
+        font-size: 21px;
+        font-weight: 800;
+    }
+
+    .summary-card small {
+        margin-top: 2px;
+        color: #64748b;
+        font-size: 9px;
+    }
+
+    .applications-list {
+        margin-top: 21px;
+        display: flex;
+        flex-direction: column;
+        gap: 18px;
+    }
+
+    .application-card {
+        padding: 24px;
+        border: 1px solid #e6ebf2;
+        border-radius: 20px;
+        background: white;
+        box-shadow: 0 10px 30px rgba(15, 23, 42, 0.05);
+        transition: 0.35s;
+        animation: applicationsEntrance 0.8s ease;
+    }
+
+        .application-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 16px 38px rgba(30, 64, 175, 0.1);
+        }
+
+    .application-top {
+        display: grid;
+        grid-template-columns: auto 1fr auto;
+        align-items: start;
+        gap: 14px;
+    }
+
+    .company-logo {
+        width: 58px;
+        height: 58px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        overflow: hidden;
+        border: 3px solid #dbeafe;
+        border-radius: 16px;
+        background: #eff6ff;
+    }
+
+        .company-logo img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .company-logo span {
+            font-size: 28px;
+        }
+
+    .company-name {
+        color: #2563eb;
+        font-size: 9px;
+        font-weight: 800;
+    }
+
+    .application-title h2 {
+        margin: 5px 0 7px;
+        color: #172554;
+        font-size: 18px;
+        font-weight: 800;
+    }
+
+    .application-meta {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px;
+        color: #64748b;
+        font-size: 9px;
+    }
+
+    .status {
+        display: inline-block;
+        padding: 6px 10px;
+        border-radius: 20px;
+        font-size: 9px;
+        font-weight: 800;
+    }
+
+    .pending {
+        color: #b45309;
+        background: #fef3c7;
+    }
+
+    .accepted {
+        color: #047857;
+        background: #d1fae5;
+    }
+
+    .rejected {
+        color: #b91c1c;
+        background: #fee2e2;
+    }
+
+    .completed {
+        color: #6d28d9;
+        background: #ede9fe;
+    }
+
+    .progress-section {
+        padding: 18px;
+        margin-top: 19px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 13px;
+        background: #f8fafc;
+    }
+
+    .progress-step {
+        text-align: center;
+    }
+
+        .progress-step span {
+            width: 27px;
+            height: 27px;
+            margin: auto;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #94a3b8;
+            border-radius: 50%;
+            background: #e2e8f0;
+            font-size: 9px;
+            font-weight: 800;
+        }
+
+        .progress-step small {
+            display: block;
+            margin-top: 5px;
+            color: #94a3b8;
+            font-size: 8px;
+        }
+
+    .completed-step span {
+        color: white;
+        background: #10b981;
+    }
+
+    .current-step span {
+        color: white;
+        background: #2563eb;
+        animation: stepPulse 1.7s infinite;
+    }
+
+    .progress-line {
+        width: 90px;
+        height: 3px;
+        margin: 0 6px 15px;
+        border-radius: 10px;
+        background: #e2e8f0;
+    }
+
+    .completed-line {
+        background: #10b981;
+    }
+
+    .cover-letter-preview {
+        padding: 13px;
+        margin-top: 15px;
+        border-radius: 11px;
+        background: #f8fafc;
+    }
+
+        .cover-letter-preview strong {
+            color: #334155;
+            font-size: 9px;
+        }
+
+        .cover-letter-preview p {
+            margin: 4px 0 0;
+            color: #64748b;
+            line-height: 1.6;
+            font-size: 9px;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+    .application-footer {
+        margin-top: 16px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+
+    .application-files {
+        display: flex;
+        gap: 7px;
+    }
+
+    .cv-button,
+    .details-button {
+        padding: 7px 10px;
+        border-radius: 8px;
+        text-decoration: none;
+        font-size: 8px;
+        font-weight: 800;
+    }
+
+    .cv-button {
+        color: #047857;
+        background: #d1fae5;
+    }
+
+    .details-button {
+        color: #1d4ed8;
+        background: #dbeafe;
+    }
+
+    .application-date {
+        color: #94a3b8;
+        font-size: 8px;
+    }
+
+    .decision-message {
+        padding: 14px;
+        margin-top: 17px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        border-radius: 12px;
+    }
+
+        .decision-message > span {
+            font-size: 24px;
+        }
+
+        .decision-message strong {
+            font-size: 10px;
+        }
+
+        .decision-message p {
+            margin: 3px 0 0;
+            font-size: 8px;
+        }
+
+    .accepted-message {
+        color: #047857;
+        background: #ecfdf5;
+    }
+
+    .rejected-message {
+        color: #b45309;
+        background: #fffbeb;
+    }
+
+    .empty-applications {
+        padding: 75px 20px;
+        margin-top: 22px;
+        text-align: center;
+        border: 2px dashed #bfdbfe;
+        border-radius: 22px;
+        background: white;
+    }
+
+    .empty-icon {
+        width: 82px;
+        height: 82px;
+        margin: auto;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 24px;
+        background: #dbeafe;
+        font-size: 40px;
+    }
+
+    .empty-applications h2 {
+        margin: 18px 0 7px;
+        color: #172554;
+        font-size: 21px;
+        font-weight: 800;
+    }
+
+    .empty-applications p {
+        color: #64748b;
+        font-size: 11px;
+    }
+
+    .empty-applications a {
+        display: inline-block;
+        padding: 10px 16px;
+        margin-top: 12px;
+        color: white;
+        border-radius: 10px;
+        background: linear-gradient(90deg, #2563eb, #059669);
+        text-decoration: none;
+        font-size: 10px;
+        font-weight: 800;
+    }
+
+    @@keyframes applicationsEntrance {
+        from {
+            opacity: 0;
+            transform: translateY(18px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    @@keyframes stepPulse {
+        0%, 100% {
+            box-shadow: 0 0 0 0 rgba(37, 99, 235, 0.3);
+        }
+
+        50% {
+            box-shadow: 0 0 0 6px rgba(37, 99, 235, 0);
+        }
+    }
+
+    @@media (max-width: 850px) {
+        .summary-grid {
+            grid-template-columns: repeat(2, 1fr);
+        }
+    }
+
+    @@media (max-width: 600px) {
+        .applications-header {
+            padding: 30px 23px;
+            align-items: flex-start;
+            flex-direction: column;
+            gap: 18px;
+        }
+
+        .summary-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .application-top {
+            grid-template-columns: auto 1fr;
+        }
+
+            .application-top > div:last-child {
+                grid-column: 1 / 3;
+            }
+
+        .progress-line {
+            width: 38px;
+        }
+
+        .application-footer {
+            align-items: flex-start;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .application-files {
+            flex-wrap: wrap;
+        }
+    }
+</style>

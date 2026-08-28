@@ -1,0 +1,663 @@
+﻿@model IEnumerable<InternshipPortal.Models.ViewModels.UserManagementViewModel>
+
+@{
+    ViewData["Title"] = "User Management";
+
+    var users = Model.ToList();
+    var studentsCount = users.Count(user => user.Role == "Student");
+    var companiesCount = users.Count(user => user.Role == "Company");
+    var lockedCount = users.Count(user => user.IsLocked);
+}
+
+<style>
+    .users-page {
+        min-height: 100vh;
+        padding: 45px 0;
+        background: radial-gradient(circle at top left, rgba(99, 102, 241, 0.15), transparent 35%), radial-gradient(circle at bottom right, rgba(14, 165, 233, 0.14), transparent 35%), #f8fafc;
+    }
+
+    .users-header {
+        position: relative;
+        overflow: hidden;
+        padding: 35px;
+        margin-bottom: 25px;
+        color: white;
+        border-radius: 26px;
+        background: linear-gradient(135deg, #312e81, #6366f1, #0ea5e9);
+        box-shadow: 0 20px 45px rgba(49, 46, 129, 0.24);
+        animation: slideDown 0.7s ease;
+    }
+
+        .users-header::after {
+            position: absolute;
+            width: 220px;
+            height: 220px;
+            right: -80px;
+            bottom: -135px;
+            content: "";
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+    .header-content {
+        position: relative;
+        z-index: 2;
+    }
+
+    .header-icon {
+        width: 65px;
+        height: 65px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-right: 17px;
+        font-size: 29px;
+        border-radius: 20px;
+        background: rgba(255, 255, 255, 0.17);
+    }
+
+    .users-header h1 {
+        margin: 0;
+        font-weight: 900;
+    }
+
+    .users-header p {
+        margin: 7px 0 0;
+        color: rgba(255, 255, 255, 0.82);
+    }
+
+    .statistics-grid {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 17px;
+        margin-bottom: 25px;
+    }
+
+    .statistic-card {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        padding: 20px;
+        border: 1px solid #e2e8f0;
+        border-radius: 19px;
+        background: white;
+        box-shadow: 0 9px 25px rgba(15, 23, 42, 0.07);
+        transition: 0.3s;
+    }
+
+        .statistic-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 17px 35px rgba(79, 70, 229, 0.14);
+        }
+
+    .statistic-icon {
+        min-width: 50px;
+        height: 50px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 22px;
+        border-radius: 15px;
+    }
+
+    .total-icon {
+        color: #4338ca;
+        background: #e0e7ff;
+    }
+
+    .student-icon {
+        color: #0369a1;
+        background: #e0f2fe;
+    }
+
+    .company-icon {
+        color: #047857;
+        background: #d1fae5;
+    }
+
+    .locked-icon {
+        color: #b91c1c;
+        background: #fee2e2;
+    }
+
+    .statistic-number {
+        display: block;
+        color: #0f172a;
+        font-size: 25px;
+        font-weight: 900;
+    }
+
+    .statistic-label {
+        color: #64748b;
+        font-size: 12px;
+        font-weight: 700;
+    }
+
+    .filters-card {
+        padding: 20px;
+        margin-bottom: 25px;
+        border: 1px solid #e2e8f0;
+        border-radius: 20px;
+        background: white;
+        box-shadow: 0 9px 25px rgba(15, 23, 42, 0.06);
+    }
+
+    .filters-form {
+        display: grid;
+        grid-template-columns: 1fr 230px auto auto;
+        gap: 12px;
+    }
+
+    .filter-input {
+        height: 48px;
+        padding: 0 16px;
+        border: 2px solid #e2e8f0;
+        border-radius: 13px;
+        transition: 0.3s;
+    }
+
+        .filter-input:focus {
+            border-color: #6366f1;
+            box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.1);
+        }
+
+    .search-button {
+        padding: 0 20px;
+        color: white;
+        font-weight: 800;
+        border: none;
+        border-radius: 13px;
+        background: linear-gradient(135deg, #4f46e5, #7c3aed);
+        transition: 0.3s;
+    }
+
+        .search-button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 9px 22px rgba(79, 70, 229, 0.25);
+        }
+
+    .reset-button {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 0 18px;
+        color: #475569;
+        font-weight: 800;
+        border: 1px solid #cbd5e1;
+        border-radius: 13px;
+        text-decoration: none;
+        background: white;
+        transition: 0.3s;
+    }
+
+        .reset-button:hover {
+            color: #dc2626;
+            border-color: #fecaca;
+            background: #fef2f2;
+        }
+
+    .users-table-card {
+        overflow: hidden;
+        border: 1px solid #e2e8f0;
+        border-radius: 22px;
+        background: white;
+        box-shadow: 0 12px 32px rgba(15, 23, 42, 0.08);
+        animation: fadeUp 0.7s ease;
+    }
+
+    .users-table {
+        width: 100%;
+        margin: 0;
+    }
+
+        .users-table thead {
+            background: #f8fafc;
+        }
+
+        .users-table th {
+            padding: 17px 20px;
+            color: #64748b;
+            font-size: 12px;
+            font-weight: 900;
+            border-bottom: 1px solid #e2e8f0;
+            text-transform: uppercase;
+        }
+
+        .users-table td {
+            padding: 17px 20px;
+            vertical-align: middle;
+            border-bottom: 1px solid #f1f5f9;
+        }
+
+        .users-table tbody tr {
+            transition: 0.25s;
+        }
+
+            .users-table tbody tr:hover {
+                background: #f8faff;
+            }
+
+    .user-cell {
+        display: flex;
+        align-items: center;
+        gap: 13px;
+    }
+
+    .user-avatar {
+        min-width: 46px;
+        height: 46px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-weight: 900;
+        border-radius: 14px;
+        background: linear-gradient(135deg, #6366f1, #0ea5e9);
+    }
+
+    .display-name {
+        display: block;
+        color: #0f172a;
+        font-weight: 900;
+    }
+
+    .user-email {
+        color: #94a3b8;
+        font-size: 12px;
+    }
+
+    .role-badge,
+    .status-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 7px 11px;
+        font-size: 12px;
+        font-weight: 800;
+        border-radius: 20px;
+    }
+
+    .student-role {
+        color: #0369a1;
+        background: #e0f2fe;
+    }
+
+    .company-role {
+        color: #047857;
+        background: #d1fae5;
+    }
+
+    .admin-role {
+        color: #6d28d9;
+        background: #ede9fe;
+    }
+
+    .active-status {
+        color: #047857;
+        background: #d1fae5;
+    }
+
+    .locked-status {
+        color: #b91c1c;
+        background: #fee2e2;
+    }
+
+    .account-button {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 9px 13px;
+        font-size: 12px;
+        font-weight: 800;
+        border: none;
+        border-radius: 11px;
+        transition: 0.3s;
+    }
+
+    .lock-button {
+        color: #b91c1c;
+        background: #fee2e2;
+    }
+
+    .unlock-button {
+        color: #047857;
+        background: #d1fae5;
+    }
+
+    .lock-button:hover {
+        color: white;
+        background: #ef4444;
+        transform: translateY(-2px);
+    }
+
+    .unlock-button:hover {
+        color: white;
+        background: #10b981;
+        transform: translateY(-2px);
+    }
+
+    .empty-state {
+        padding: 70px 20px;
+        text-align: center;
+        color: #64748b;
+    }
+
+        .empty-state i {
+            display: block;
+            margin-bottom: 15px;
+            color: #cbd5e1;
+            font-size: 65px;
+        }
+
+    @@keyframes slideDown {
+        from {
+            opacity: 0;
+            transform: translateY(-25px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    @@keyframes fadeUp {
+        from {
+            opacity: 0;
+            transform: translateY(25px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    @@media (max-width: 992px) {
+        .statistics-grid {
+            grid-template-columns: repeat(2, 1fr);
+        }
+
+        .filters-form {
+            grid-template-columns: 1fr 1fr;
+        }
+    }
+
+    @@media (max-width: 768px) {
+        .statistics-grid,
+        .filters-form {
+            grid-template-columns: 1fr;
+        }
+
+        .users-table-card {
+            overflow-x: auto;
+        }
+
+        .users-table {
+            min-width: 800px;
+        }
+
+        .search-button,
+        .reset-button {
+            min-height: 48px;
+        }
+    }
+</style>
+
+<div class="users-page">
+    <div class="container">
+        @if (TempData["SuccessMessage"] != null)
+        {
+            <div class="alert alert-success alert-dismissible fade show shadow-sm">
+                <i class="bi bi-check-circle-fill me-2"></i>
+                @TempData["SuccessMessage"]
+
+                <button type="button"
+                        class="btn-close"
+                        data-bs-dismiss="alert">
+                </button>
+            </div>
+        }
+
+        @if (TempData["ErrorMessage"] != null)
+        {
+            <div class="alert alert-danger alert-dismissible fade show shadow-sm">
+                <i class="bi bi-exclamation-circle-fill me-2"></i>
+                @TempData["ErrorMessage"]
+
+                <button type="button"
+                        class="btn-close"
+                        data-bs-dismiss="alert">
+                </button>
+            </div>
+        }
+
+        <div class="users-header">
+            <div class="header-content d-flex align-items-center">
+                <div class="header-icon">
+                    <i class="bi bi-people-fill"></i>
+                </div>
+
+                <div>
+                    <h1>User Management</h1>
+                    <p>
+                        View, search and manage all portal accounts.
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <div class="statistics-grid">
+            <div class="statistic-card">
+                <div class="statistic-icon total-icon">
+                    <i class="bi bi-people-fill"></i>
+                </div>
+
+                <div>
+                    <span class="statistic-number">@users.Count</span>
+                    <span class="statistic-label">Displayed Users</span>
+                </div>
+            </div>
+
+            <div class="statistic-card">
+                <div class="statistic-icon student-icon">
+                    <i class="bi bi-mortarboard-fill"></i>
+                </div>
+
+                <div>
+                    <span class="statistic-number">@studentsCount</span>
+                    <span class="statistic-label">Students</span>
+                </div>
+            </div>
+
+            <div class="statistic-card">
+                <div class="statistic-icon company-icon">
+                    <i class="bi bi-building-fill"></i>
+                </div>
+
+                <div>
+                    <span class="statistic-number">@companiesCount</span>
+                    <span class="statistic-label">Companies</span>
+                </div>
+            </div>
+
+            <div class="statistic-card">
+                <div class="statistic-icon locked-icon">
+                    <i class="bi bi-lock-fill"></i>
+                </div>
+
+                <div>
+                    <span class="statistic-number">@lockedCount</span>
+                    <span class="statistic-label">Locked Accounts</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="filters-card">
+            <form asp-action="Index"
+                  method="get"
+                  class="filters-form">
+
+                <input type="search"
+                       name="search"
+                       value="@ViewBag.Search"
+                       class="form-control filter-input"
+                       placeholder="Search by email..." />
+
+                <select name="role"
+                        class="form-select filter-input">
+
+                    <option value="">All Roles</option>
+
+                    <option value="Student"
+                            selected="@(ViewBag.SelectedRole == "Student")">
+                        Students
+                    </option>
+
+                    <option value="Company"
+                            selected="@(ViewBag.SelectedRole == "Company")">
+                        Companies
+                    </option>
+
+                    <option value="Admin"
+                            selected="@(ViewBag.SelectedRole == "Admin")">
+                        Administrators
+                    </option>
+                </select>
+
+                <button type="submit" class="search-button">
+                    <i class="bi bi-search me-1"></i>
+                    Search
+                </button>
+
+                <a asp-action="Index" class="reset-button">
+                    <i class="bi bi-arrow-counterclockwise me-1"></i>
+                    Reset
+                </a>
+            </form>
+        </div>
+
+        <div class="users-table-card">
+            @if (users.Any())
+            {
+                <table class="table users-table">
+                    <thead>
+                        <tr>
+                            <th>User</th>
+                            <th>Role</th>
+                            <th>Status</th>
+                            <th class="text-end">Action</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        @foreach (var user in users)
+                        {
+                            var roleClass = user.Role switch
+                            {
+                                "Admin" => "admin-role",
+                                "Company" => "company-role",
+                                _ => "student-role"
+                            };
+
+                            var roleIcon = user.Role switch
+                            {
+                                "Admin" => "bi-shield-lock-fill",
+                                "Company" => "bi-building-fill",
+                                _ => "bi-mortarboard-fill"
+                            };
+
+                            <tr>
+                                <td>
+                                    <div class="user-cell">
+                                        <div class="user-avatar">
+                                            @(string.IsNullOrWhiteSpace(user.DisplayName)
+                                                ? "U"
+                                                : user.DisplayName.Substring(0, 1).ToUpper())
+                                        </div>
+
+                                        <div>
+                                            <span class="display-name">
+                                                @user.DisplayName
+                                            </span>
+
+                                            <span class="user-email">
+                                                @user.Email
+                                            </span>
+                                        </div>
+                                    </div>
+                                </td>
+
+                                <td>
+                                    <span class="role-badge @roleClass">
+                                        <i class="bi @roleIcon"></i>
+                                        @user.Role
+                                    </span>
+                                </td>
+
+                                <td>
+                                    @if (user.IsLocked)
+                                    {
+                                        <span class="status-badge locked-status">
+                                            <i class="bi bi-lock-fill"></i>
+                                            Locked
+                                        </span>
+                                    }
+                                    else
+                                    {
+                                        <span class="status-badge active-status">
+                                            <i class="bi bi-check-circle-fill"></i>
+                                            Active
+                                        </span>
+                                    }
+                                </td>
+
+                                <td class="text-end">
+                                    @if (user.IsLocked)
+                                    {
+                                        <form asp-action="Unlock"
+                                              asp-route-id="@user.UserId"
+                                              method="post"
+                                              class="d-inline">
+                                            @Html.AntiForgeryToken()
+
+                                            <button type="submit"
+                                                    class="account-button unlock-button">
+                                                <i class="bi bi-unlock-fill"></i>
+                                                Activate
+                                            </button>
+                                        </form>
+                                    }
+                                    else
+                                    {
+                                        <form asp-action="Lock"
+                                              asp-route-id="@user.UserId"
+                                              method="post"
+                                              class="d-inline"
+                                              onsubmit="return confirm('Lock this account?');">
+                                            @Html.AntiForgeryToken()
+
+                                            <button type="submit"
+                                                    class="account-button lock-button">
+                                                <i class="bi bi-lock-fill"></i>
+                                                Lock
+                                            </button>
+                                        </form>
+                                    }
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            }
+            else
+            {
+                <div class="empty-state">
+                    <i class="bi bi-person-x-fill"></i>
+                    <h4>No users found</h4>
+                    <p>Try changing the search or role filter.</p>
+                </div>
+            }
+        </div>
+    </div>
+</div>

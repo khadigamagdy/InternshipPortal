@@ -1,0 +1,394 @@
+﻿@model IEnumerable<InternshipPortal.Models.Notification>
+
+@{
+    ViewData["Title"] = "Notifications";
+    var unreadCount = Model.Count(n => !n.IsRead);
+}
+
+<style>
+    .notifications-page {
+        min-height: 100vh;
+        padding: 45px 0;
+        background: radial-gradient(circle at top left, rgba(99, 102, 241, 0.15), transparent 35%), radial-gradient(circle at bottom right, rgba(14, 165, 233, 0.14), transparent 35%);
+    }
+
+    .notifications-header {
+        padding: 30px;
+        margin-bottom: 25px;
+        color: white;
+        border-radius: 24px;
+        background: linear-gradient(135deg, #312e81, #6366f1, #0ea5e9);
+        box-shadow: 0 20px 45px rgba(49, 46, 129, 0.25);
+        animation: slideDown 0.7s ease;
+    }
+
+    .header-icon {
+        width: 65px;
+        height: 65px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-right: 18px;
+        font-size: 30px;
+        border-radius: 20px;
+        background: rgba(255, 255, 255, 0.18);
+    }
+
+    .notifications-header h1 {
+        margin: 0;
+        font-weight: 800;
+    }
+
+    .notifications-header p {
+        margin: 7px 0 0;
+        color: rgba(255, 255, 255, 0.82);
+    }
+
+    .header-actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+    }
+
+    .header-button {
+        padding: 11px 17px;
+        color: white;
+        border: 1px solid rgba(255, 255, 255, 0.35);
+        border-radius: 12px;
+        background: rgba(255, 255, 255, 0.14);
+        transition: 0.3s;
+    }
+
+        .header-button:hover {
+            color: #312e81;
+            background: white;
+            transform: translateY(-3px);
+        }
+
+    .notification-card {
+        display: flex;
+        align-items: center;
+        gap: 18px;
+        padding: 21px;
+        margin-bottom: 16px;
+        border: 1px solid #e2e8f0;
+        border-radius: 20px;
+        background: white;
+        box-shadow: 0 10px 28px rgba(15, 23, 42, 0.07);
+        transition: 0.3s;
+        animation: fadeUp 0.6s ease both;
+    }
+
+        .notification-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 18px 40px rgba(79, 70, 229, 0.15);
+        }
+
+        .notification-card.unread {
+            border-left: 6px solid #6366f1;
+            background: linear-gradient(90deg, #eef2ff, white 40%);
+        }
+
+    .notification-icon {
+        min-width: 55px;
+        height: 55px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 24px;
+        border-radius: 17px;
+        background: linear-gradient(135deg, #6366f1, #0ea5e9);
+        box-shadow: 0 8px 20px rgba(99, 102, 241, 0.25);
+    }
+
+    .notification-content {
+        flex: 1;
+    }
+
+        .notification-content h5 {
+            margin-bottom: 7px;
+            color: #0f172a;
+            font-weight: 800;
+        }
+
+        .notification-content p {
+            margin-bottom: 8px;
+            color: #64748b;
+        }
+
+    .notification-date {
+        color: #94a3b8;
+        font-size: 13px;
+    }
+
+    .new-badge {
+        display: inline-block;
+        padding: 4px 9px;
+        margin-left: 8px;
+        color: #4338ca;
+        font-size: 11px;
+        font-weight: 800;
+        border-radius: 20px;
+        background: #e0e7ff;
+    }
+
+    .notification-actions {
+        display: flex;
+        gap: 8px;
+    }
+
+    .action-button {
+        width: 42px;
+        height: 42px;
+        border: none;
+        border-radius: 12px;
+        transition: 0.3s;
+    }
+
+    .read-button {
+        color: #047857;
+        background: #d1fae5;
+    }
+
+    .delete-button {
+        color: #dc2626;
+        background: #fee2e2;
+    }
+
+    .action-button:hover {
+        color: white;
+        transform: scale(1.1);
+    }
+
+    .read-button:hover {
+        background: #10b981;
+    }
+
+    .delete-button:hover {
+        background: #ef4444;
+    }
+
+    .empty-notifications {
+        padding: 75px 25px;
+        text-align: center;
+        border: 2px dashed #cbd5e1;
+        border-radius: 25px;
+        background: white;
+        animation: fadeUp 0.7s ease;
+    }
+
+        .empty-notifications .empty-icon {
+            font-size: 75px;
+            animation: ring 2s infinite;
+        }
+
+        .empty-notifications h3 {
+            margin-top: 20px;
+            color: #0f172a;
+            font-weight: 800;
+        }
+
+        .empty-notifications p {
+            color: #64748b;
+        }
+
+    @@keyframes slideDown {
+        from {
+            opacity: 0;
+            transform: translateY(-25px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    @@keyframes fadeUp {
+        from {
+            opacity: 0;
+            transform: translateY(25px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    @@keyframes ring {
+        0%, 100% {
+            transform: rotate(0);
+        }
+
+        10%, 30% {
+            transform: rotate(10deg);
+        }
+
+        20%, 40% {
+            transform: rotate(-10deg);
+        }
+
+        50% {
+            transform: rotate(0);
+        }
+    }
+
+    @@media (max-width: 768px) {
+        .notification-card {
+            align-items: flex-start;
+            flex-wrap: wrap;
+        }
+
+        .notification-actions {
+            width: 100%;
+            justify-content: flex-end;
+        }
+    }
+</style>
+
+<div class="notifications-page">
+    <div class="container">
+        @if (TempData["SuccessMessage"] != null)
+        {
+            <div class="alert alert-success alert-dismissible fade show shadow-sm">
+                <i class="bi bi-check-circle-fill me-2"></i>
+                @TempData["SuccessMessage"]
+
+                <button type="button"
+                        class="btn-close"
+                        data-bs-dismiss="alert">
+                </button>
+            </div>
+        }
+
+        <div class="notifications-header">
+            <div class="d-flex flex-wrap align-items-center justify-content-between gap-4">
+                <div class="d-flex align-items-center">
+                    <div class="header-icon">
+                        <i class="bi bi-bell-fill"></i>
+                    </div>
+
+                    <div>
+                        <h1>Notifications</h1>
+                        <p>
+                            You have @unreadCount unread notification@(unreadCount == 1 ? "" : "s").
+                        </p>
+                    </div>
+                </div>
+
+                @if (Model.Any())
+                {
+                    <div class="header-actions">
+                        @if (unreadCount > 0)
+                        {
+                            <form asp-action="MarkAllAsRead" method="post">
+                                @Html.AntiForgeryToken()
+
+                                <button type="submit" class="header-button">
+                                    <i class="bi bi-check2-all me-1"></i>
+                                    Mark All as Read
+                                </button>
+                            </form>
+                        }
+
+                        <form asp-action="DeleteAll"
+                              method="post"
+                              onsubmit="return confirm('Are you sure you want to delete all notifications?');">
+                            @Html.AntiForgeryToken()
+
+                            <button type="submit" class="header-button">
+                                <i class="bi bi-trash3 me-1"></i>
+                                Delete All
+                            </button>
+                        </form>
+                    </div>
+                }
+            </div>
+        </div>
+
+        @if (!Model.Any())
+        {
+            <div class="empty-notifications">
+                <div class="empty-icon">🔔</div>
+                <h3>No Notifications Yet</h3>
+                <p>
+                    New updates about internships and applications will appear here.
+                </p>
+
+                <a asp-controller="Dashboard"
+                   asp-action="Index"
+                   class="btn btn-primary rounded-pill px-4 mt-2">
+                    <i class="bi bi-grid me-1"></i>
+                    Back to Dashboard
+                </a>
+            </div>
+        }
+        else
+        {
+            var delay = 0;
+
+            foreach (var notification in Model)
+            {
+                <div class="notification-card @(notification.IsRead ? "" : "unread")"
+                     style="animation-delay: @(delay)ms">
+
+                    <div class="notification-icon">
+                        <i class="bi @(notification.IsRead ? "bi-envelope-open-fill" : "bi-bell-fill")"></i>
+                    </div>
+
+                    <div class="notification-content">
+                        <h5>
+                            @notification.Title
+
+                            @if (!notification.IsRead)
+                            {
+                                <span class="new-badge">NEW</span>
+                            }
+                        </h5>
+
+                        <p>@notification.Message</p>
+
+                        <span class="notification-date">
+                            <i class="bi bi-clock me-1"></i>
+                            @notification.CreatedAt.ToString("dd MMM yyyy - hh:mm tt")
+                        </span>
+                    </div>
+
+                    <div class="notification-actions">
+                        @if (!notification.IsRead)
+                        {
+                            <form asp-action="MarkAsRead"
+                                  asp-route-id="@notification.Id"
+                                  method="post">
+                                @Html.AntiForgeryToken()
+
+                                <button type="submit"
+                                        class="action-button read-button"
+                                        title="Mark as read">
+                                    <i class="bi bi-check2"></i>
+                                </button>
+                            </form>
+                        }
+
+                        <form asp-action="Delete"
+                              asp-route-id="@notification.Id"
+                              method="post"
+                              onsubmit="return confirm('Delete this notification?');">
+                            @Html.AntiForgeryToken()
+
+                            <button type="submit"
+                                    class="action-button delete-button"
+                                    title="Delete notification">
+                                <i class="bi bi-trash3"></i>
+                            </button>
+                        </form>
+                    </div>
+                </div>
+
+                delay += 80;
+            }
+        }
+    </div>
+</div>

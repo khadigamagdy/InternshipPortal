@@ -1,0 +1,383 @@
+﻿@model InternshipPortal.Models.ViewModels.CompleteAccountSetupViewModel
+
+@{
+    ViewData["Title"] = "Complete Account Setup";
+}
+
+<style>
+    .setup-page {
+        min-height: calc(100vh - 80px);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 45px 20px;
+        background: radial-gradient( circle at top left, rgba(99, 102, 241, 0.17), transparent 35%), radial-gradient( circle at bottom right, rgba(14, 165, 233, 0.14), transparent 35%), #f8fafc;
+    }
+
+    .setup-card {
+        width: 100%;
+        max-width: 850px;
+        overflow: hidden;
+        border: 1px solid #e2e8f0;
+        border-radius: 28px;
+        background: white;
+        box-shadow: 0 25px 60px rgba(15, 23, 42, 0.13);
+        animation: setupEntrance 0.7s ease;
+    }
+
+    .setup-header {
+        position: relative;
+        overflow: hidden;
+        padding: 38px;
+        color: white;
+        text-align: center;
+        background: linear-gradient( 135deg, #312e81, #4f46e5, #0ea5e9);
+    }
+
+        .setup-header::after {
+            position: absolute;
+            right: -70px;
+            bottom: -130px;
+            width: 220px;
+            height: 220px;
+            content: "";
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+    .setup-icon {
+        position: relative;
+        z-index: 2;
+        width: 72px;
+        height: 72px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 17px;
+        font-size: 31px;
+        border-radius: 22px;
+        background: rgba(255, 255, 255, 0.17);
+        animation: iconFloat 2.5s ease-in-out infinite;
+    }
+
+    .setup-header h1,
+    .setup-header p {
+        position: relative;
+        z-index: 2;
+    }
+
+    .setup-header h1 {
+        margin: 0;
+        font-weight: 900;
+    }
+
+    .setup-header p {
+        margin: 8px auto 0;
+        color: rgba(255, 255, 255, 0.82);
+    }
+
+    .setup-body {
+        padding: 32px;
+    }
+
+    .role-options {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 18px;
+    }
+
+    .role-option {
+        position: relative;
+        cursor: pointer;
+    }
+
+        .role-option input {
+            position: absolute;
+            opacity: 0;
+            pointer-events: none;
+        }
+
+    .role-content {
+        height: 100%;
+        display: block;
+        padding: 25px;
+        border: 2px solid #e2e8f0;
+        border-radius: 20px;
+        background: #fbfdff;
+        transition: 0.35s;
+    }
+
+        .role-content:hover {
+            border-color: #a5b4fc;
+            transform: translateY(-5px);
+            box-shadow: 0 15px 30px rgba(79, 70, 229, 0.11);
+        }
+
+    .role-option input:checked + .role-content {
+        border-color: #4f46e5;
+        background: #eef2ff;
+        box-shadow: 0 0 0 5px rgba(79, 70, 229, 0.1);
+    }
+
+    .role-icon {
+        width: 58px;
+        height: 58px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-bottom: 16px;
+        font-size: 26px;
+        border-radius: 17px;
+    }
+
+    .student-icon {
+        background: #dbeafe;
+    }
+
+    .company-icon {
+        background: #d1fae5;
+    }
+
+    .role-content h3 {
+        margin-bottom: 8px;
+        color: #0f172a;
+        font-weight: 900;
+    }
+
+    .role-content p {
+        margin: 0 0 15px;
+        color: #64748b;
+        font-size: 13px;
+        line-height: 1.6;
+    }
+
+    .role-features {
+        padding: 0;
+        margin: 0;
+        list-style: none;
+    }
+
+        .role-features li {
+            margin-top: 8px;
+            color: #475569;
+            font-size: 12px;
+            font-weight: 700;
+        }
+
+        .role-features i {
+            margin-right: 6px;
+            color: #10b981;
+        }
+
+    .validation-message {
+        display: block;
+        margin-top: 13px;
+        color: #dc2626;
+        font-size: 12px;
+        font-weight: 700;
+        text-align: center;
+    }
+
+    .validation-summary-errors {
+        padding: 13px 16px;
+        margin-bottom: 20px;
+        color: #b91c1c;
+        border: 1px solid #fecaca;
+        border-radius: 13px;
+        background: #fef2f2;
+    }
+
+        .validation-summary-errors ul {
+            margin: 0;
+            padding-left: 20px;
+        }
+
+    .continue-button {
+        width: 100%;
+        min-height: 52px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        margin-top: 24px;
+        color: white;
+        font-weight: 900;
+        border: none;
+        border-radius: 14px;
+        background: linear-gradient( 135deg, #4f46e5, #7c3aed);
+        box-shadow: 0 10px 24px rgba(79, 70, 229, 0.24);
+        transition: 0.3s;
+    }
+
+        .continue-button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 30px rgba(79, 70, 229, 0.32);
+        }
+
+    .setup-warning {
+        display: flex;
+        align-items: flex-start;
+        gap: 9px;
+        padding: 13px;
+        margin-top: 18px;
+        color: #92400e;
+        font-size: 11px;
+        border-radius: 12px;
+        background: #fffbeb;
+    }
+
+    @@keyframes setupEntrance {
+        from {
+            opacity: 0;
+            transform: translateY(30px) scale(0.98);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+        }
+    }
+
+    @@keyframes iconFloat {
+        0%, 100% {
+            transform: translateY(0) rotate(0deg);
+        }
+
+        50% {
+            transform: translateY(-7px) rotate(5deg);
+        }
+    }
+
+    @@media (max-width: 700px) {
+        .role-options {
+            grid-template-columns: 1fr;
+        }
+
+        .setup-header,
+        .setup-body {
+            padding: 27px 20px;
+        }
+    }
+</style>
+
+<div class="setup-page">
+    <div class="setup-card">
+        <div class="setup-header">
+            <div class="setup-icon">
+                <i class="bi bi-person-gear"></i>
+            </div>
+
+            <h1>Complete Your Account</h1>
+
+            <p>
+                Select the account type that matches how
+                you want to use the internship portal.
+            </p>
+        </div>
+
+        <div class="setup-body">
+            <form asp-controller="Account"
+                  asp-action="CompleteSetup"
+                  method="post">
+
+                @Html.AntiForgeryToken()
+
+                <div asp-validation-summary="ModelOnly">
+                </div>
+
+                <div class="role-options">
+                    <label class="role-option">
+                        <input asp-for="Role"
+                               type="radio"
+                               value="Student" />
+
+                        <span class="role-content">
+                            <span class="role-icon student-icon">
+                                🎓
+                            </span>
+
+                            <h3>Student</h3>
+
+                            <p>
+                                Find internships, submit applications
+                                and manage your interview invitations.
+                            </p>
+
+                            <ul class="role-features">
+                                <li>
+                                    <i class="bi bi-check-circle-fill"></i>
+                                    Browse and save internships
+                                </li>
+
+                                <li>
+                                    <i class="bi bi-check-circle-fill"></i>
+                                    Track application progress
+                                </li>
+
+                                <li>
+                                    <i class="bi bi-check-circle-fill"></i>
+                                    Accept interview invitations
+                                </li>
+                            </ul>
+                        </span>
+                    </label>
+
+                    <label class="role-option">
+                        <input asp-for="Role"
+                               type="radio"
+                               value="Company" />
+
+                        <span class="role-content">
+                            <span class="role-icon company-icon">
+                                🏢
+                            </span>
+
+                            <h3>Company</h3>
+
+                            <p>
+                                Publish opportunities, review candidates
+                                and manage the interview process.
+                            </p>
+
+                            <ul class="role-features">
+                                <li>
+                                    <i class="bi bi-check-circle-fill"></i>
+                                    Publish internship opportunities
+                                </li>
+
+                                <li>
+                                    <i class="bi bi-check-circle-fill"></i>
+                                    Review student applications
+                                </li>
+
+                                <li>
+                                    <i class="bi bi-check-circle-fill"></i>
+                                    Schedule and manage interviews
+                                </li>
+                            </ul>
+                        </span>
+                    </label>
+                </div>
+
+                <span asp-validation-for="Role"
+                      class="validation-message">
+                </span>
+
+                <button type="submit"
+                        class="continue-button">
+                    Continue
+                    <i class="bi bi-arrow-right"></i>
+                </button>
+
+                <div class="setup-warning">
+                    <i class="bi bi-info-circle-fill"></i>
+
+                    <span>
+                        Account type cannot be changed from this page
+                        after completing the setup.
+                    </span>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,638 @@
+﻿@model IEnumerable<InternshipPortal.Models.SavedInternship>
+
+@{
+    ViewData["Title"] = "Saved Internships";
+
+    var savedInternships = Model.ToList();
+
+    var internshipImages = new[]
+    {
+        "https://images.unsplash.com/photo-1521737711867-e3b97375f902?auto=format&fit=crop&w=900&q=80",
+        "https://images.unsplash.com/photo-1497366811353-6870744d04b2?auto=format&fit=crop&w=900&q=80",
+        "https://images.unsplash.com/photo-1522071820081-009f0129c71c?auto=format&fit=crop&w=900&q=80",
+        "https://images.unsplash.com/photo-1556761175-b413da4baf72?auto=format&fit=crop&w=900&q=80"
+    };
+}
+
+<style>
+    .saved-page {
+        min-height: 100vh;
+        padding: 45px 0 80px;
+        background:
+            radial-gradient(circle at top left,
+                rgba(99, 102, 241, 0.15),
+                transparent 32%),
+            radial-gradient(circle at bottom right,
+                rgba(236, 72, 153, 0.12),
+                transparent 35%),
+            #f8fafc;
+    }
+
+    .saved-header {
+        position: relative;
+        min-height: 300px;
+        display: flex;
+        align-items: center;
+        overflow: hidden;
+        padding: 45px;
+        margin-bottom: 30px;
+        color: white;
+        border-radius: 30px;
+        background:
+            linear-gradient(
+                90deg,
+                rgba(30, 27, 75, 0.96),
+                rgba(79, 70, 229, 0.87),
+                rgba(79, 70, 229, 0.35)),
+            url("https://images.unsplash.com/photo-1521737711867-e3b97375f902?auto=format&fit=crop&w=1500&q=85")
+            center/cover;
+        box-shadow: 0 25px 55px rgba(49, 46, 129, 0.25);
+        animation: headerEntrance 0.8s ease;
+    }
+
+    .saved-header::before {
+        position: absolute;
+        width: 260px;
+        height: 260px;
+        top: -120px;
+        right: -80px;
+        content: "";
+        border: 2px solid rgba(255, 255, 255, 0.18);
+        border-radius: 50%;
+        animation: floatingCircle 6s ease-in-out infinite;
+    }
+
+    .saved-header::after {
+        position: absolute;
+        width: 160px;
+        height: 160px;
+        right: 130px;
+        bottom: -110px;
+        content: "";
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.12);
+        animation: floatingCircle 4s ease-in-out infinite reverse;
+    }
+
+    .header-content {
+        position: relative;
+        z-index: 2;
+        max-width: 620px;
+    }
+
+    .header-small-title {
+        display: inline-flex;
+        align-items: center;
+        gap: 7px;
+        padding: 8px 14px;
+        margin-bottom: 15px;
+        font-size: 12px;
+        font-weight: 800;
+        border: 1px solid rgba(255, 255, 255, 0.25);
+        border-radius: 30px;
+        background: rgba(255, 255, 255, 0.14);
+        backdrop-filter: blur(8px);
+    }
+
+    .saved-header h1 {
+        margin: 0;
+        font-size: clamp(35px, 5vw, 55px);
+        font-weight: 900;
+        letter-spacing: -1px;
+    }
+
+    .saved-header p {
+        max-width: 530px;
+        margin: 14px 0 24px;
+        color: rgba(255, 255, 255, 0.85);
+        font-size: 16px;
+        line-height: 1.7;
+    }
+
+    .saved-counter {
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        padding: 11px 17px;
+        font-weight: 800;
+        border-radius: 15px;
+        background: rgba(255, 255, 255, 0.17);
+        backdrop-filter: blur(9px);
+    }
+
+    .saved-counter i {
+        color: #fda4af;
+        font-size: 20px;
+        animation: heartBeat 1.4s infinite;
+    }
+
+    .section-heading {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin: 0 4px 20px;
+    }
+
+    .section-heading h3 {
+        margin: 0;
+        color: #0f172a;
+        font-weight: 900;
+    }
+
+    .section-heading span {
+        color: #64748b;
+        font-size: 14px;
+    }
+
+    .saved-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 23px;
+    }
+
+    .saved-card {
+        position: relative;
+        overflow: hidden;
+        border: 1px solid #e2e8f0;
+        border-radius: 24px;
+        background: white;
+        box-shadow: 0 12px 30px rgba(15, 23, 42, 0.08);
+        opacity: 0;
+        animation: cardEntrance 0.7s ease forwards;
+        transition: 0.35s;
+    }
+
+    .saved-card:hover {
+        border-color: #c7d2fe;
+        transform: translateY(-10px);
+        box-shadow: 0 25px 50px rgba(79, 70, 229, 0.18);
+    }
+
+    .internship-image-wrapper {
+        position: relative;
+        height: 205px;
+        overflow: hidden;
+    }
+
+    .internship-image {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        transition: transform 0.7s ease;
+    }
+
+    .saved-card:hover .internship-image {
+        transform: scale(1.1);
+    }
+
+    .image-overlay {
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(
+            to top,
+            rgba(15, 23, 42, 0.7),
+            transparent 60%);
+    }
+
+    .saved-heart {
+        position: absolute;
+        top: 15px;
+        right: 15px;
+        width: 43px;
+        height: 43px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #e11d48;
+        font-size: 19px;
+        border-radius: 14px;
+        background: rgba(255, 255, 255, 0.92);
+        box-shadow: 0 8px 20px rgba(15, 23, 42, 0.15);
+        backdrop-filter: blur(8px);
+        animation: heartBeat 1.8s infinite;
+    }
+
+    .image-label {
+        position: absolute;
+        left: 17px;
+        bottom: 15px;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 7px 12px;
+        color: white;
+        font-size: 12px;
+        font-weight: 800;
+        border-radius: 20px;
+        background: rgba(79, 70, 229, 0.85);
+        backdrop-filter: blur(7px);
+    }
+
+    .card-content {
+        padding: 22px;
+    }
+
+    .company-row {
+        display: flex;
+        align-items: center;
+        gap: 11px;
+        margin-bottom: 15px;
+    }
+
+    .company-logo {
+        min-width: 45px;
+        height: 45px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        overflow: hidden;
+        color: white;
+        font-weight: 900;
+        border-radius: 14px;
+        background: linear-gradient(135deg, #6366f1, #06b6d4);
+    }
+
+    .company-logo img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    .company-name {
+        display: block;
+        color: #475569;
+        font-size: 13px;
+        font-weight: 800;
+    }
+
+    .saved-date {
+        color: #94a3b8;
+        font-size: 11px;
+    }
+
+    .internship-title {
+        min-height: 56px;
+        margin-bottom: 17px;
+        color: #0f172a;
+        font-size: 20px;
+        font-weight: 900;
+        line-height: 1.35;
+    }
+
+    .card-actions {
+        display: grid;
+        grid-template-columns: 1fr auto;
+        gap: 10px;
+        padding-top: 17px;
+        border-top: 1px solid #f1f5f9;
+    }
+
+    .details-button {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 7px;
+        padding: 11px 15px;
+        color: white;
+        font-size: 13px;
+        font-weight: 800;
+        border-radius: 13px;
+        text-decoration: none;
+        background: linear-gradient(135deg, #4f46e5, #7c3aed);
+        transition: 0.3s;
+    }
+
+    .details-button:hover {
+        color: white;
+        transform: translateY(-3px);
+        box-shadow: 0 10px 23px rgba(79, 70, 229, 0.28);
+    }
+
+    .remove-button {
+        width: 44px;
+        height: 44px;
+        color: #dc2626;
+        font-size: 17px;
+        border: none;
+        border-radius: 13px;
+        background: #fee2e2;
+        transition: 0.3s;
+    }
+
+    .remove-button:hover {
+        color: white;
+        background: #ef4444;
+        transform: translateY(-3px) rotate(8deg);
+    }
+
+    .empty-state {
+        position: relative;
+        overflow: hidden;
+        padding: 70px 25px;
+        text-align: center;
+        border: 2px dashed #c7d2fe;
+        border-radius: 28px;
+        background: white;
+        box-shadow: 0 15px 40px rgba(15, 23, 42, 0.07);
+        animation: cardEntrance 0.8s ease;
+    }
+
+    .empty-image {
+        width: min(380px, 90%);
+        height: 220px;
+        margin-bottom: 20px;
+        object-fit: cover;
+        border-radius: 24px;
+        box-shadow: 0 17px 35px rgba(79, 70, 229, 0.18);
+    }
+
+    .empty-state h3 {
+        color: #0f172a;
+        font-weight: 900;
+    }
+
+    .empty-state p {
+        color: #64748b;
+    }
+
+    .browse-button {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 12px 22px;
+        color: white;
+        font-weight: 800;
+        border-radius: 14px;
+        text-decoration: none;
+        background: linear-gradient(135deg, #6366f1, #0ea5e9);
+        transition: 0.3s;
+    }
+
+    .browse-button:hover {
+        color: white;
+        transform: translateY(-4px);
+        box-shadow: 0 12px 25px rgba(99, 102, 241, 0.3);
+    }
+
+    @@keyframes headerEntrance {
+        from {
+            opacity: 0;
+            transform: translateY(-30px) scale(0.98);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+        }
+    }
+
+    @@keyframes cardEntrance {
+        from {
+            opacity: 0;
+            transform: translateY(35px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    @@keyframes heartBeat {
+        0%, 100% {
+            transform: scale(1);
+        }
+
+        50% {
+            transform: scale(1.18);
+        }
+    }
+
+    @@keyframes floatingCircle {
+        0%, 100% {
+            transform: translateY(0) rotate(0deg);
+        }
+
+        50% {
+            transform: translateY(18px) rotate(10deg);
+        }
+    }
+
+    @@media (max-width: 992px) {
+        .saved-grid {
+            grid-template-columns: repeat(2, 1fr);
+        }
+    }
+
+    @@media (max-width: 768px) {
+        .saved-page {
+            padding-top: 25px;
+        }
+
+        .saved-header {
+            min-height: 330px;
+            padding: 30px 23px;
+            background-position: 65% center;
+        }
+
+        .saved-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .section-heading {
+            align-items: flex-start;
+            flex-direction: column;
+            gap: 5px;
+        }
+    }
+</style>
+
+<div class="saved-page">
+    <div class="container">
+        @if (TempData["SuccessMessage"] != null)
+        {
+            <div class="alert alert-success alert-dismissible fade show shadow-sm">
+                <i class="bi bi-check-circle-fill me-2"></i>
+                @TempData["SuccessMessage"]
+
+                <button type="button"
+                        class="btn-close"
+                        data-bs-dismiss="alert">
+                </button>
+            </div>
+        }
+
+        @if (TempData["InfoMessage"] != null)
+        {
+            <div class="alert alert-info alert-dismissible fade show shadow-sm">
+                <i class="bi bi-info-circle-fill me-2"></i>
+                @TempData["InfoMessage"]
+
+                <button type="button"
+                        class="btn-close"
+                        data-bs-dismiss="alert">
+                </button>
+            </div>
+        }
+
+        <div class="saved-header">
+            <div class="header-content">
+                <span class="header-small-title">
+                    <i class="bi bi-stars"></i>
+                    YOUR FAVORITE OPPORTUNITIES
+                </span>
+
+                <h1>Saved Internships</h1>
+
+                <p>
+                    Keep your favorite internship opportunities together
+                    and return whenever you're ready to apply.
+                </p>
+
+                <div class="saved-counter">
+                    <i class="bi bi-heart-fill"></i>
+
+                    <span>
+                        @savedInternships.Count saved
+                        @(savedInternships.Count == 1
+                            ? "internship"
+                            : "internships")
+                    </span>
+                </div>
+            </div>
+        </div>
+
+        @if (savedInternships.Any())
+        {
+            <div class="section-heading">
+                <h3>
+                    <i class="bi bi-bookmark-heart-fill text-danger me-2"></i>
+                    Your Saved Opportunities
+                </h3>
+
+                <span>
+                    Review the details before submitting your application.
+                </span>
+            </div>
+
+            <div class="saved-grid">
+                @{
+                    var cardNumber = 0;
+                }
+
+                @foreach (var saved in savedInternships)
+                {
+                    var internship = saved.Internship;
+                    var company = internship.Company;
+                    var imageUrl =
+                        internshipImages[cardNumber % internshipImages.Length];
+                    var animationDelay = cardNumber * 100;
+
+                    <div class="saved-card"
+                         style="animation-delay: @(animationDelay)ms">
+
+                        <div class="internship-image-wrapper">
+                            <img src="@imageUrl"
+                                 class="internship-image"
+                                 alt="@internship.Title" />
+
+                            <div class="image-overlay"></div>
+
+                            <div class="saved-heart">
+                                <i class="bi bi-heart-fill"></i>
+                            </div>
+
+                            <span class="image-label">
+                                <i class="bi bi-bookmark-check-fill"></i>
+                                Saved Opportunity
+                            </span>
+                        </div>
+
+                        <div class="card-content">
+                            <div class="company-row">
+                                <div class="company-logo">
+                                    @if (!string.IsNullOrWhiteSpace(company.LogoPath))
+                                    {
+                                        <img src="@company.LogoPath"
+                                             alt="@company.Name" />
+                                    }
+                                    else
+                                    {
+                                        @(string.IsNullOrWhiteSpace(company.Name)
+                                            ? "C"
+                                            : company.Name.Substring(0, 1).ToUpper())
+                                    }
+                                </div>
+
+                                <div>
+                                    <span class="company-name">
+                                        <i class="bi bi-building-fill me-1"></i>
+                                        @company.Name
+                                    </span>
+
+                                    <span class="saved-date">
+                                        Saved on
+                                        @saved.SavedAt.ToString("dd MMM yyyy")
+                                    </span>
+                                </div>
+                            </div>
+
+                            <h4 class="internship-title">
+                                @internship.Title
+                            </h4>
+
+                            <div class="card-actions">
+                                <a asp-controller="Internship"
+                                   asp-action="Details"
+                                   asp-route-id="@internship.Id"
+                                   class="details-button">
+                                    View Details
+                                    <i class="bi bi-arrow-right"></i>
+                                </a>
+
+                                <form asp-controller="SavedInternship"
+                                      asp-action="Remove"
+                                      asp-route-internshipId="@internship.Id"
+                                      method="post"
+                                      onsubmit="return confirm('Remove this internship from saved opportunities?');">
+
+                                    @Html.AntiForgeryToken()
+
+                                    <button type="submit"
+                                            class="remove-button"
+                                            title="Remove from saved">
+                                        <i class="bi bi-trash3-fill"></i>
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+
+                    cardNumber++;
+                }
+            </div>
+        }
+        else
+        {
+            <div class="empty-state">
+                <img src="https://images.unsplash.com/photo-1522071820081-009f0129c71c?auto=format&fit=crop&w=900&q=80"
+                     class="empty-image"
+                     alt="Students searching for internships" />
+
+                <h3>No Saved Internships Yet</h3>
+
+                <p>
+                    Browse the available opportunities and press the heart
+                    button to save the internships you like.
+                </p>
+
+                <a asp-controller="Internship"
+                   asp-action="Index"
+                   class="browse-button">
+                    <i class="bi bi-search"></i>
+                    Browse Internships
+                </a>
+            </div>
+        }
+    </div>
+</div>

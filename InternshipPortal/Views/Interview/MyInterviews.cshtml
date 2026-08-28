@@ -1,0 +1,967 @@
+﻿@model IEnumerable<InternshipPortal.Models.Interview>
+@using InternshipPortal.Models.Enums
+
+@{
+    ViewData["Title"] = "My Interviews";
+
+    var interviews = Model.ToList();
+
+    var upcomingCount = interviews.Count(interview =>
+        interview.ScheduledAt > DateTime.Now &&
+        interview.Status != InterviewStatus.Cancelled &&
+        interview.Status != InterviewStatus.DeclinedByStudent);
+
+    var awaitingResponseCount = interviews.Count(interview =>
+        interview.Status == InterviewStatus.Pending &&
+        interview.ScheduledAt > DateTime.Now);
+
+    var completedCount = interviews.Count(interview =>
+        interview.Status == InterviewStatus.Completed);
+}
+
+<style>
+    .interviews-page {
+        min-height: 100vh;
+        padding: 45px 0 80px;
+        background: radial-gradient( circle at top left, rgba(99, 102, 241, 0.15), transparent 35%), radial-gradient( circle at bottom right, rgba(14, 165, 233, 0.13), transparent 35%), #f8fafc;
+    }
+
+    .interviews-header {
+        position: relative;
+        overflow: hidden;
+        padding: 40px;
+        margin-bottom: 25px;
+        color: white;
+        border-radius: 28px;
+        background: linear-gradient( 135deg, #1e1b4b, #4f46e5, #0284c7);
+        box-shadow: 0 22px 48px rgba(49, 46, 129, 0.25);
+        animation: headerEntrance 0.7s ease;
+    }
+
+        .interviews-header::after {
+            position: absolute;
+            right: -80px;
+            bottom: -130px;
+            width: 240px;
+            height: 240px;
+            content: "";
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.11);
+        }
+
+    .header-content {
+        position: relative;
+        z-index: 2;
+        display: flex;
+        align-items: center;
+        gap: 18px;
+    }
+
+    .header-icon {
+        min-width: 70px;
+        height: 70px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 31px;
+        border-radius: 22px;
+        background: rgba(255, 255, 255, 0.17);
+        backdrop-filter: blur(9px);
+        animation: calendarFloat 2.7s ease-in-out infinite;
+    }
+
+    .interviews-header h1 {
+        margin: 0;
+        font-weight: 900;
+    }
+
+    .interviews-header p {
+        margin: 8px 0 0;
+        color: rgba(255, 255, 255, 0.82);
+    }
+
+    .statistics-grid {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 16px;
+        margin-bottom: 27px;
+    }
+
+    .statistic-card {
+        display: flex;
+        align-items: center;
+        gap: 13px;
+        padding: 19px;
+        border: 1px solid #e2e8f0;
+        border-radius: 19px;
+        background: white;
+        box-shadow: 0 9px 25px rgba(15, 23, 42, 0.06);
+        transition: 0.3s;
+    }
+
+        .statistic-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 17px 35px rgba(79, 70, 229, 0.14);
+        }
+
+    .statistic-icon {
+        min-width: 49px;
+        height: 49px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 21px;
+        border-radius: 15px;
+    }
+
+    .total-icon {
+        color: #4338ca;
+        background: #e0e7ff;
+    }
+
+    .upcoming-icon {
+        color: #0369a1;
+        background: #e0f2fe;
+    }
+
+    .waiting-icon {
+        color: #b45309;
+        background: #fef3c7;
+    }
+
+    .completed-icon {
+        color: #047857;
+        background: #d1fae5;
+    }
+
+    .statistic-number {
+        display: block;
+        color: #0f172a;
+        font-size: 25px;
+        font-weight: 900;
+    }
+
+    .statistic-label {
+        color: #64748b;
+        font-size: 11px;
+        font-weight: 700;
+    }
+
+    .interviews-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 21px;
+    }
+
+    .interview-card {
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+        opacity: 0;
+        border: 1px solid #e2e8f0;
+        border-radius: 23px;
+        background: white;
+        box-shadow: 0 12px 30px rgba(15, 23, 42, 0.08);
+        animation: cardEntrance 0.7s ease forwards;
+        transition: 0.35s;
+    }
+
+        .interview-card:hover {
+            border-color: #c7d2fe;
+            transform: translateY(-8px);
+            box-shadow: 0 22px 45px rgba(79, 70, 229, 0.16);
+        }
+
+    .interview-card-top {
+        position: relative;
+        padding: 23px;
+        color: white;
+        background: linear-gradient( 135deg, #312e81, #4f46e5, #0ea5e9);
+    }
+
+        .interview-card-top::after {
+            position: absolute;
+            top: -50px;
+            right: -50px;
+            width: 125px;
+            height: 125px;
+            content: "";
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+    .company-row {
+        position: relative;
+        z-index: 2;
+        display: flex;
+        align-items: center;
+        gap: 13px;
+    }
+
+    .company-logo {
+        min-width: 53px;
+        height: 53px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        overflow: hidden;
+        color: #312e81;
+        font-size: 21px;
+        font-weight: 900;
+        border: 3px solid rgba(255, 255, 255, 0.25);
+        border-radius: 16px;
+        background: white;
+    }
+
+        .company-logo img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+    .company-name {
+        display: block;
+        color: rgba(255, 255, 255, 0.78);
+        font-size: 12px;
+        font-weight: 700;
+    }
+
+    .internship-title {
+        display: block;
+        margin-top: 3px;
+        color: white;
+        font-size: 17px;
+        font-weight: 900;
+    }
+
+    .interview-body {
+        display: flex;
+        flex: 1;
+        flex-direction: column;
+        padding: 22px;
+    }
+
+    .status-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        margin-bottom: 18px;
+    }
+
+    .status-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 7px 11px;
+        font-size: 11px;
+        font-weight: 900;
+        border-radius: 20px;
+    }
+
+    .status-pending {
+        color: #b45309;
+        background: #fef3c7;
+    }
+
+    .status-accepted {
+        color: #047857;
+        background: #d1fae5;
+    }
+
+    .status-declined,
+    .status-cancelled {
+        color: #b91c1c;
+        background: #fee2e2;
+    }
+
+    .status-completed {
+        color: #0369a1;
+        background: #e0f2fe;
+    }
+
+    .countdown {
+        color: #4f46e5;
+        font-size: 11px;
+        font-weight: 900;
+    }
+
+    .date-box {
+        display: grid;
+        grid-template-columns: auto 1fr;
+        gap: 14px;
+        padding: 17px;
+        margin-bottom: 16px;
+        border: 1px solid #e0e7ff;
+        border-radius: 16px;
+        background: #f8faff;
+    }
+
+    .date-icon {
+        width: 49px;
+        height: 49px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 21px;
+        border-radius: 15px;
+        background: linear-gradient(135deg, #6366f1, #0ea5e9);
+    }
+
+    .date-value {
+        display: block;
+        color: #0f172a;
+        font-size: 15px;
+        font-weight: 900;
+    }
+
+    .time-value {
+        display: block;
+        margin-top: 3px;
+        color: #64748b;
+        font-size: 12px;
+    }
+
+    .details-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 11px;
+        margin-bottom: 16px;
+    }
+
+    .detail-box {
+        padding: 13px;
+        border-radius: 13px;
+        background: #f8fafc;
+    }
+
+    .detail-label {
+        display: block;
+        color: #94a3b8;
+        font-size: 9px;
+        font-weight: 900;
+        text-transform: uppercase;
+    }
+
+    .detail-value {
+        display: block;
+        margin-top: 4px;
+        color: #334155;
+        font-size: 12px;
+        font-weight: 800;
+    }
+
+    .notes-box {
+        padding: 14px;
+        margin-bottom: 16px;
+        color: #475569;
+        font-size: 12px;
+        line-height: 1.6;
+        border-left: 4px solid #6366f1;
+        border-radius: 10px;
+        background: #f8fafc;
+    }
+
+    .meeting-button {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        padding: 12px;
+        margin-bottom: 13px;
+        color: white;
+        font-weight: 900;
+        border-radius: 13px;
+        background: linear-gradient(135deg, #0ea5e9, #4f46e5);
+        text-decoration: none;
+        transition: 0.3s;
+    }
+
+        .meeting-button:hover {
+            color: white;
+            transform: translateY(-3px);
+            box-shadow: 0 10px 22px rgba(79, 70, 229, 0.25);
+        }
+
+    .response-message {
+        padding: 13px;
+        margin-top: auto;
+        text-align: center;
+        color: #b45309;
+        font-size: 11px;
+        font-weight: 800;
+        border-radius: 12px;
+        background: #fffbeb;
+    }
+
+    .interview-actions {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 10px;
+        padding-top: 17px;
+        margin-top: auto;
+        border-top: 1px solid #e2e8f0;
+    }
+
+        .interview-actions form {
+            width: 100%;
+        }
+
+    .action-button {
+        width: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 7px;
+        padding: 11px;
+        font-size: 12px;
+        font-weight: 900;
+        border: none;
+        border-radius: 12px;
+        transition: 0.3s;
+    }
+
+    .accept-button {
+        color: #047857;
+        background: #d1fae5;
+    }
+
+    .decline-button {
+        color: #b91c1c;
+        background: #fee2e2;
+    }
+
+    .accept-button:hover {
+        color: white;
+        background: #10b981;
+        transform: translateY(-3px);
+    }
+
+    .decline-button:hover {
+        color: white;
+        background: #ef4444;
+        transform: translateY(-3px);
+    }
+
+    .empty-state {
+        padding: 75px 25px;
+        text-align: center;
+        border: 2px dashed #c7d2fe;
+        border-radius: 26px;
+        background: white;
+        box-shadow: 0 15px 38px rgba(15, 23, 42, 0.07);
+    }
+
+    .empty-icon {
+        font-size: 80px;
+        animation: calendarFloat 2.7s ease-in-out infinite;
+    }
+
+    .empty-state h3 {
+        margin-top: 17px;
+        color: #0f172a;
+        font-weight: 900;
+    }
+
+    .empty-state p {
+        color: #64748b;
+    }
+
+    .browse-button {
+        display: inline-flex;
+        align-items: center;
+        gap: 7px;
+        padding: 11px 19px;
+        color: white;
+        font-weight: 800;
+        border-radius: 13px;
+        background: linear-gradient(135deg, #6366f1, #0ea5e9);
+        text-decoration: none;
+    }
+
+        .browse-button:hover {
+            color: white;
+        }
+
+    @@keyframes headerEntrance {
+        from {
+            opacity: 0;
+            transform: translateY(-25px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    @@keyframes cardEntrance {
+        from {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    @@keyframes calendarFloat {
+        0%, 100% {
+            transform: translateY(0) rotate(0deg);
+        }
+
+        50% {
+            transform: translateY(-7px) rotate(5deg);
+        }
+    }
+
+    @@media (max-width: 992px) {
+        .statistics-grid,
+        .interviews-grid {
+            grid-template-columns: repeat(2, 1fr);
+        }
+    }
+
+    @@media (max-width: 768px) {
+        .statistics-grid,
+        .interviews-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .interviews-header {
+            padding: 28px 22px;
+        }
+
+        .details-grid,
+        .interview-actions {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+
+<div class="interviews-page">
+    <div class="container">
+        @if (TempData["SuccessMessage"] != null)
+        {
+            <div class="alert alert-success alert-dismissible fade show shadow-sm">
+                <i class="bi bi-check-circle-fill me-2"></i>
+                @TempData["SuccessMessage"]
+
+                <button type="button"
+                        class="btn-close"
+                        data-bs-dismiss="alert">
+                </button>
+            </div>
+        }
+
+        @if (TempData["ErrorMessage"] != null)
+        {
+            <div class="alert alert-danger alert-dismissible fade show shadow-sm">
+                <i class="bi bi-exclamation-circle-fill me-2"></i>
+                @TempData["ErrorMessage"]
+
+                <button type="button"
+                        class="btn-close"
+                        data-bs-dismiss="alert">
+                </button>
+            </div>
+        }
+
+        <div class="interviews-header">
+            <div class="header-content">
+                <div class="header-icon">
+                    <i class="bi bi-calendar2-check-fill"></i>
+                </div>
+
+                <div>
+                    <h1>My Interviews</h1>
+
+                    <p>
+                        Review your scheduled interviews,
+                        respond to invitations and join online meetings.
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <div class="statistics-grid">
+            <div class="statistic-card">
+                <div class="statistic-icon total-icon">
+                    <i class="bi bi-calendar2-week-fill"></i>
+                </div>
+
+                <div>
+                    <span class="statistic-number">
+                        @interviews.Count
+                    </span>
+
+                    <span class="statistic-label">
+                        Total Interviews
+                    </span>
+                </div>
+            </div>
+
+            <div class="statistic-card">
+                <div class="statistic-icon upcoming-icon">
+                    <i class="bi bi-calendar-event-fill"></i>
+                </div>
+
+                <div>
+                    <span class="statistic-number">
+                        @upcomingCount
+                    </span>
+
+                    <span class="statistic-label">
+                        Upcoming
+                    </span>
+                </div>
+            </div>
+
+            <div class="statistic-card">
+                <div class="statistic-icon waiting-icon">
+                    <i class="bi bi-hourglass-split"></i>
+                </div>
+
+                <div>
+                    <span class="statistic-number">
+                        @awaitingResponseCount
+                    </span>
+
+                    <span class="statistic-label">
+                        Awaiting Your Response
+                    </span>
+                </div>
+            </div>
+
+            <div class="statistic-card">
+                <div class="statistic-icon completed-icon">
+                    <i class="bi bi-check2-all"></i>
+                </div>
+
+                <div>
+                    <span class="statistic-number">
+                        @completedCount
+                    </span>
+
+                    <span class="statistic-label">
+                        Completed
+                    </span>
+                </div>
+            </div>
+        </div>
+
+        @if (interviews.Any())
+        {
+            <div class="interviews-grid">
+                @{
+                    var animationDelay = 0;
+                }
+
+                @foreach (var interview in interviews)
+                {
+                    var application =
+                        interview.InternshipApplication;
+
+                    var internship =
+                        application.Internship;
+
+                    var company =
+                        internship.Company;
+
+                    var statusClass = interview.Status switch
+                    {
+                        InterviewStatus.AcceptedByStudent =>
+                            "status-accepted",
+
+                        InterviewStatus.DeclinedByStudent =>
+                            "status-declined",
+
+                        InterviewStatus.Completed =>
+                            "status-completed",
+
+                        InterviewStatus.Cancelled =>
+                            "status-cancelled",
+
+                        _ => "status-pending"
+                    };
+
+                    var statusIcon = interview.Status switch
+                    {
+                        InterviewStatus.AcceptedByStudent =>
+                            "bi-check-circle-fill",
+
+                        InterviewStatus.DeclinedByStudent =>
+                            "bi-x-circle-fill",
+
+                        InterviewStatus.Completed =>
+                            "bi-check2-all",
+
+                        InterviewStatus.Cancelled =>
+                            "bi-calendar-x-fill",
+
+                        _ => "bi-hourglass-split"
+                    };
+
+                    <div class="interview-card"
+                         style="animation-delay: @(animationDelay)ms">
+
+                        <div class="interview-card-top">
+                            <div class="company-row">
+                                <div class="company-logo">
+                                    @if (!string.IsNullOrWhiteSpace(
+                                        company.LogoPath))
+                                    {
+                                        <img src="@company.LogoPath"
+                                             alt="@company.Name" />
+                                    }
+                                    else
+                                    {
+                                        @(string.IsNullOrWhiteSpace(
+                                            company.Name)
+                                            ? "C"
+                                            : company.Name
+                                                .Substring(0, 1)
+                                                .ToUpper())
+                                    }
+                                </div>
+
+                                <div>
+                                    <span class="company-name">
+                                        @company.Name
+                                    </span>
+
+                                    <span class="internship-title">
+                                        @internship.Title
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="interview-body">
+                            <div class="status-row">
+                                <span class="status-badge @statusClass">
+                                    <i class="bi @statusIcon"></i>
+                                    @interview.Status
+                                </span>
+
+                                @if (interview.ScheduledAt > DateTime.Now &&
+                                     interview.Status !=
+                                        InterviewStatus.Cancelled &&
+                                     interview.Status !=
+                                        InterviewStatus.DeclinedByStudent)
+                                {
+                                    <span class="countdown"
+                                          data-interview-date="@interview.ScheduledAt.ToString("O")">
+                                        Calculating...
+                                    </span>
+                                }
+                            </div>
+
+                            <div class="date-box">
+                                <div class="date-icon">
+                                    <i class="bi bi-calendar-event-fill"></i>
+                                </div>
+
+                                <div>
+                                    <span class="date-value">
+                                        @interview.ScheduledAt
+                                        .ToString("dddd, dd MMMM yyyy")
+                                    </span>
+
+                                    <span class="time-value">
+                                        <i class="bi bi-clock-fill me-1"></i>
+
+                                        @interview.ScheduledAt
+                                        .ToString("hh:mm tt")
+
+                                        · @interview.DurationMinutes minutes
+                                    </span>
+                                </div>
+                            </div>
+
+                            <div class="details-grid">
+                                <div class="detail-box">
+                                    <span class="detail-label">
+                                        Interview Type
+                                    </span>
+
+                                    <span class="detail-value">
+                                        <i class="bi bi-camera-video-fill me-1"></i>
+                                        @interview.Type
+                                    </span>
+                                </div>
+
+                                <div class="detail-box">
+                                    <span class="detail-label">
+                                        Application Status
+                                    </span>
+
+                                    <span class="detail-value">
+                                        <i class="bi bi-file-earmark-check-fill me-1"></i>
+                                        @application.Status
+                                    </span>
+                                </div>
+                            </div>
+
+                            @if (!string.IsNullOrWhiteSpace(
+                                interview.Location))
+                            {
+                                <div class="detail-box mb-3">
+                                    <span class="detail-label">
+                                        Location
+                                    </span>
+
+                                    <span class="detail-value">
+                                        <i class="bi bi-geo-alt-fill me-1"></i>
+                                        @interview.Location
+                                    </span>
+                                </div>
+                            }
+
+                            @if (!string.IsNullOrWhiteSpace(
+                                interview.Notes))
+                            {
+                                <div class="notes-box">
+                                    <i class="bi bi-info-circle-fill me-1"></i>
+                                    @interview.Notes
+                                </div>
+                            }
+
+                            @if (interview.Status ==
+                                    InterviewStatus.AcceptedByStudent &&
+                                 !string.IsNullOrWhiteSpace(
+                                    interview.MeetingLink))
+                            {
+                                <a href="@interview.MeetingLink"
+                                   target="_blank"
+                                   rel="noopener noreferrer"
+                                   class="meeting-button">
+                                    <i class="bi bi-camera-video-fill"></i>
+                                    Join Online Interview
+                                </a>
+                            }
+
+                            @if (interview.Status ==
+                                    InterviewStatus.Pending &&
+                                 interview.ScheduledAt > DateTime.Now)
+                            {
+                                <div class="response-message">
+                                    <i class="bi bi-bell-fill me-1"></i>
+                                    Please accept or decline this interview invitation.
+                                </div>
+
+                                <div class="interview-actions">
+                                    <form asp-controller="Interview"
+                                          asp-action="Accept"
+                                          asp-route-id="@interview.Id"
+                                          method="post">
+
+                                        @Html.AntiForgeryToken()
+
+                                        <button type="submit"
+                                                class="action-button accept-button"
+                                                onclick="return confirm('Accept this interview appointment?');">
+                                            <i class="bi bi-check-circle-fill"></i>
+                                            Accept
+                                        </button>
+                                    </form>
+
+                                    <form asp-controller="Interview"
+                                          asp-action="Decline"
+                                          asp-route-id="@interview.Id"
+                                          method="post">
+
+                                        @Html.AntiForgeryToken()
+
+                                        <button type="submit"
+                                                class="action-button decline-button"
+                                                onclick="return confirm('Decline this interview appointment?');">
+                                            <i class="bi bi-x-circle-fill"></i>
+                                            Decline
+                                        </button>
+                                    </form>
+                                </div>
+                            }
+                        </div>
+                    </div>
+
+                    animationDelay += 100;
+                }
+            </div>
+        }
+        else
+        {
+            <div class="empty-state">
+                <div class="empty-icon">📅</div>
+
+                <h3>No Interviews Yet</h3>
+
+                <p>
+                    Interview invitations will appear here
+                    when a company schedules a meeting with you.
+                </p>
+
+                <a asp-controller="Internship"
+                   asp-action="Index"
+                   class="browse-button">
+                    <i class="bi bi-search"></i>
+                    Browse Internships
+                </a>
+            </div>
+        }
+    </div>
+</div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        const countdownElements =
+            document.querySelectorAll("[data-interview-date]");
+
+        function updateCountdowns() {
+            countdownElements.forEach(function(element) {
+                const interviewDate =
+                    new Date(element.dataset.interviewDate);
+
+                const currentDate = new Date();
+
+                const difference =
+                    interviewDate - currentDate;
+
+                if (difference <= 0) {
+                    element.textContent =
+                        "Interview time reached";
+
+                    return;
+                }
+
+                const days = Math.floor(
+                    difference / (1000 * 60 * 60 * 24));
+
+                const hours = Math.floor(
+                    (difference / (1000 * 60 * 60)) % 24);
+
+                const minutes = Math.floor(
+                    (difference / (1000 * 60)) % 60);
+
+                if (days > 0) {
+                    element.textContent =
+                        `${days}d ${hours}h remaining`;
+                }
+                else {
+                    element.textContent =
+                        `${hours}h ${minutes}m remaining`;
+                }
+            });
+        }
+
+        updateCountdowns();
+
+        setInterval(
+            updateCountdowns,
+            60000);
+    });
+</script>

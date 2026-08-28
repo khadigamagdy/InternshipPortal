@@ -1,0 +1,550 @@
+﻿@model IEnumerable<InternshipPortal.Models.Evaluation>
+
+@{
+    ViewData["Title"] = "My Evaluations";
+
+    var evaluations = Model.ToList();
+    var averageRating = evaluations.Any()
+        ? evaluations.Average(e => e.Rating)
+        : 0;
+}
+
+<style>
+    .evaluations-page {
+        min-height: 100vh;
+        padding: 45px 0;
+        background: radial-gradient(circle at top left, rgba(245, 158, 11, 0.17), transparent 35%), radial-gradient(circle at bottom right, rgba(99, 102, 241, 0.15), transparent 35%);
+    }
+
+    .evaluations-header {
+        position: relative;
+        overflow: hidden;
+        padding: 38px;
+        margin-bottom: 25px;
+        color: white;
+        border-radius: 28px;
+        background: linear-gradient(135deg, #4338ca, #7c3aed, #0ea5e9);
+        box-shadow: 0 22px 48px rgba(67, 56, 202, 0.25);
+        animation: headerAppear 0.7s ease;
+    }
+
+        .evaluations-header::before,
+        .evaluations-header::after {
+            position: absolute;
+            content: "";
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .evaluations-header::before {
+            width: 200px;
+            height: 200px;
+            top: -120px;
+            left: -50px;
+        }
+
+        .evaluations-header::after {
+            width: 170px;
+            height: 170px;
+            right: -40px;
+            bottom: -100px;
+        }
+
+    .header-content {
+        position: relative;
+        z-index: 2;
+    }
+
+    .header-icon {
+        width: 70px;
+        height: 70px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-right: 18px;
+        font-size: 32px;
+        border-radius: 22px;
+        background: rgba(255, 255, 255, 0.17);
+        animation: trophyFloat 2.5s ease-in-out infinite;
+    }
+
+    .evaluations-header h1 {
+        margin: 0;
+        font-weight: 900;
+    }
+
+    .evaluations-header p {
+        margin: 8px 0 0;
+        color: rgba(255, 255, 255, 0.82);
+    }
+
+    .average-rating-box {
+        position: relative;
+        z-index: 2;
+        min-width: 170px;
+        padding: 17px 22px;
+        text-align: center;
+        border: 1px solid rgba(255, 255, 255, 0.25);
+        border-radius: 19px;
+        background: rgba(255, 255, 255, 0.14);
+        backdrop-filter: blur(10px);
+    }
+
+    .average-number {
+        display: block;
+        font-size: 32px;
+        font-weight: 900;
+    }
+
+    .average-stars {
+        color: #fde047;
+        letter-spacing: 2px;
+    }
+
+    .average-label {
+        display: block;
+        margin-top: 4px;
+        color: rgba(255, 255, 255, 0.8);
+        font-size: 12px;
+    }
+
+    .summary-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 17px;
+        margin-bottom: 27px;
+    }
+
+    .summary-card {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+        padding: 20px;
+        border: 1px solid #e2e8f0;
+        border-radius: 20px;
+        background: white;
+        box-shadow: 0 10px 28px rgba(15, 23, 42, 0.07);
+        transition: 0.3s;
+    }
+
+        .summary-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 17px 35px rgba(79, 70, 229, 0.14);
+        }
+
+    .summary-icon {
+        min-width: 52px;
+        height: 52px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 23px;
+        border-radius: 16px;
+    }
+
+    .purple-icon {
+        color: #4338ca;
+        background: #e0e7ff;
+    }
+
+    .orange-icon {
+        color: #c2410c;
+        background: #ffedd5;
+    }
+
+    .green-icon {
+        color: #047857;
+        background: #d1fae5;
+    }
+
+    .summary-number {
+        display: block;
+        color: #0f172a;
+        font-size: 25px;
+        font-weight: 900;
+    }
+
+    .summary-label {
+        color: #64748b;
+        font-size: 12px;
+        font-weight: 700;
+    }
+
+    .evaluation-card {
+        position: relative;
+        overflow: hidden;
+        padding: 28px;
+        margin-bottom: 20px;
+        border: 1px solid #e2e8f0;
+        border-radius: 24px;
+        background: white;
+        box-shadow: 0 12px 32px rgba(15, 23, 42, 0.08);
+        transition: 0.35s;
+        animation: cardAppear 0.65s ease both;
+    }
+
+        .evaluation-card::before {
+            position: absolute;
+            width: 7px;
+            top: 0;
+            bottom: 0;
+            left: 0;
+            content: "";
+            background: linear-gradient(to bottom, #6366f1, #f59e0b);
+        }
+
+        .evaluation-card:hover {
+            border-color: #c7d2fe;
+            transform: translateY(-6px);
+            box-shadow: 0 20px 43px rgba(79, 70, 229, 0.15);
+        }
+
+    .company-logo {
+        min-width: 64px;
+        height: 64px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        overflow: hidden;
+        color: white;
+        font-size: 26px;
+        font-weight: 900;
+        border-radius: 19px;
+        background: linear-gradient(135deg, #6366f1, #0ea5e9);
+        box-shadow: 0 9px 22px rgba(99, 102, 241, 0.22);
+    }
+
+        .company-logo img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+    .internship-title {
+        margin-bottom: 5px;
+        color: #0f172a;
+        font-weight: 900;
+    }
+
+    .company-name {
+        color: #6366f1;
+        font-size: 14px;
+        font-weight: 700;
+    }
+
+    .evaluation-date {
+        color: #94a3b8;
+        font-size: 12px;
+    }
+
+    .rating-section {
+        min-width: 150px;
+        padding: 13px 17px;
+        text-align: center;
+        border-radius: 17px;
+        background: #fffbeb;
+    }
+
+    .rating-stars {
+        display: flex;
+        justify-content: center;
+        gap: 3px;
+        color: #f59e0b;
+        font-size: 21px;
+    }
+
+    .empty-star {
+        color: #dbe2ea;
+    }
+
+    .rating-text {
+        display: block;
+        margin-top: 5px;
+        color: #92400e;
+        font-size: 12px;
+        font-weight: 800;
+    }
+
+    .feedback-box {
+        position: relative;
+        padding: 20px 22px 20px 50px;
+        margin-top: 22px;
+        color: #475569;
+        line-height: 1.8;
+        border-radius: 17px;
+        background: #f8fafc;
+    }
+
+    .quote-icon {
+        position: absolute;
+        top: 16px;
+        left: 18px;
+        color: #a5b4fc;
+        font-size: 22px;
+    }
+
+    .completed-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 7px 12px;
+        margin-top: 17px;
+        color: #047857;
+        font-size: 12px;
+        font-weight: 800;
+        border-radius: 20px;
+        background: #d1fae5;
+    }
+
+    .empty-state {
+        padding: 80px 25px;
+        text-align: center;
+        border: 2px dashed #cbd5e1;
+        border-radius: 26px;
+        background: white;
+        animation: cardAppear 0.7s ease;
+    }
+
+    .empty-icon {
+        font-size: 80px;
+        animation: trophyFloat 2.5s ease-in-out infinite;
+    }
+
+    .empty-state h3 {
+        margin-top: 20px;
+        color: #0f172a;
+        font-weight: 900;
+    }
+
+    .empty-state p {
+        color: #64748b;
+    }
+
+    @@keyframes headerAppear {
+        from {
+            opacity: 0;
+            transform: translateY(-25px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    @@keyframes cardAppear {
+        from {
+            opacity: 0;
+            transform: translateY(28px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    @@keyframes trophyFloat {
+        0%, 100% {
+            transform: translateY(0) rotate(0);
+        }
+
+        50% {
+            transform: translateY(-8px) rotate(4deg);
+        }
+    }
+
+    @@media (max-width: 768px) {
+        .summary-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .evaluation-card {
+            padding: 22px 18px;
+        }
+
+        .rating-section {
+            width: 100%;
+            margin-top: 15px;
+        }
+    }
+</style>
+
+<div class="evaluations-page">
+    <div class="container">
+        <div class="evaluations-header">
+            <div class="header-content d-flex flex-wrap align-items-center justify-content-between gap-4">
+                <div class="d-flex align-items-center">
+                    <div class="header-icon">
+                        <i class="bi bi-trophy-fill"></i>
+                    </div>
+
+                    <div>
+                        <h1>My Evaluations</h1>
+                        <p>
+                            View your completed training feedback and performance ratings.
+                        </p>
+                    </div>
+                </div>
+
+                @if (evaluations.Any())
+                {
+                    <div class="average-rating-box">
+                        <span class="average-number">
+                            @averageRating.ToString("0.0")
+                        </span>
+
+                        <div class="average-stars">
+                            <i class="bi bi-star-fill"></i>
+                            <i class="bi bi-star-fill"></i>
+                            <i class="bi bi-star-fill"></i>
+                            <i class="bi bi-star-fill"></i>
+                            <i class="bi bi-star-fill"></i>
+                        </div>
+
+                        <span class="average-label">Average Rating</span>
+                    </div>
+                }
+            </div>
+        </div>
+
+        @if (evaluations.Any())
+        {
+            <div class="summary-grid">
+                <div class="summary-card">
+                    <div class="summary-icon purple-icon">
+                        <i class="bi bi-briefcase-fill"></i>
+                    </div>
+
+                    <div>
+                        <span class="summary-number">@evaluations.Count</span>
+                        <span class="summary-label">Completed Internships</span>
+                    </div>
+                </div>
+
+                <div class="summary-card">
+                    <div class="summary-icon orange-icon">
+                        <i class="bi bi-star-fill"></i>
+                    </div>
+
+                    <div>
+                        <span class="summary-number">
+                            @averageRating.ToString("0.0")
+                        </span>
+                        <span class="summary-label">Average Performance</span>
+                    </div>
+                </div>
+
+                <div class="summary-card">
+                    <div class="summary-icon green-icon">
+                        <i class="bi bi-patch-check-fill"></i>
+                    </div>
+
+                    <div>
+                        <span class="summary-number">@evaluations.Count</span>
+                        <span class="summary-label">Verified Evaluations</span>
+                    </div>
+                </div>
+            </div>
+
+            var animationDelay = 0;
+
+            foreach (var evaluation in evaluations)
+            {
+                var application = evaluation.InternshipApplication;
+                var internship = application.Internship;
+                var company = internship.Company;
+
+                <div class="evaluation-card"
+                     style="animation-delay: @(animationDelay)ms">
+
+                    <div class="d-flex flex-wrap align-items-start justify-content-between gap-3">
+                        <div class="d-flex align-items-center gap-3">
+                            <div class="company-logo">
+                                @if (!string.IsNullOrWhiteSpace(company.LogoPath))
+                                {
+                                    <img src="@company.LogoPath"
+                                         alt="@company.Name" />
+                                }
+                                else
+                                {
+                                    @(string.IsNullOrWhiteSpace(company.Name)
+                                        ? "C"
+                                        : company.Name.Substring(0, 1).ToUpper())
+                                }
+                            </div>
+
+                            <div>
+                                <h4 class="internship-title">
+                                    @internship.Title
+                                </h4>
+
+                                <div class="company-name">
+                                    <i class="bi bi-building-fill me-1"></i>
+                                    @company.Name
+                                </div>
+
+                                <div class="evaluation-date">
+                                    <i class="bi bi-calendar-check me-1"></i>
+                                    Evaluated on
+                                    @evaluation.EvaluationDate.ToString("dd MMM yyyy")
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="rating-section">
+                            <div class="rating-stars">
+                                @for (var star = 1; star <= 5; star++)
+                                {
+                                    if (star <= evaluation.Rating)
+                                    {
+                                        <i class="bi bi-star-fill"></i>
+                                    }
+                                    else
+                                    {
+                                        <i class="bi bi-star-fill empty-star"></i>
+                                    }
+                                }
+                            </div>
+
+                            <span class="rating-text">
+                                @evaluation.Rating out of 5
+                            </span>
+                        </div>
+                    </div>
+
+                    <div class="feedback-box">
+                        <i class="bi bi-quote quote-icon"></i>
+                        @evaluation.Feedback
+                    </div>
+
+                    <span class="completed-badge">
+                        <i class="bi bi-patch-check-fill"></i>
+                        Training Completed
+                    </span>
+                </div>
+
+                animationDelay += 100;
+            }
+        }
+        else
+        {
+            <div class="empty-state">
+                <div class="empty-icon">🏆</div>
+
+                <h3>No Evaluations Yet</h3>
+
+                <p>
+                    Your evaluations will appear here after completing an accepted internship.
+                </p>
+
+                <a asp-controller="Internship"
+                   asp-action="Index"
+                   class="btn btn-primary rounded-pill px-4 mt-2">
+                    <i class="bi bi-search me-1"></i>
+                    Browse Internships
+                </a>
+            </div>
+        }
+    </div>
+</div>

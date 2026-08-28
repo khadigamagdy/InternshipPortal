@@ -1,0 +1,809 @@
+﻿@model InternshipPortal.Models.ViewModels.CompanyProfileViewModel
+
+@{
+    ViewData["Title"] = "Company Profile";
+}
+
+<div class="company-profile-page">
+    <div class="company-profile-container">
+
+        @if (TempData["Success"] != null)
+        {
+            <div class="success-alert">
+                <span>✓</span>
+                @TempData["Success"]
+            </div>
+        }
+
+        <section class="company-header">
+            <div class="company-header-content">
+                <span class="company-badge">
+                    Company Account
+                </span>
+
+                <h1>Build Your Company Profile</h1>
+
+                <p>
+                    Complete your company information to publish
+                    internship opportunities and connect with students.
+                </p>
+
+                <a asp-controller="Dashboard"
+                   asp-action="Index"
+                   class="back-button">
+                    ← Back to Dashboard
+                </a>
+            </div>
+
+            <div class="header-visual">
+                <div class="header-circle circle-one"></div>
+                <div class="header-circle circle-two"></div>
+
+                <div class="building-icon">🏢</div>
+
+                <div class="floating-label label-one">
+                    ✓ Verified Profile
+                </div>
+
+                <div class="floating-label label-two">
+                    🚀 Find Talents
+                </div>
+            </div>
+        </section>
+
+        <section class="profile-grid">
+            <aside class="company-preview-card">
+                <div class="logo-preview">
+                    @if (!string.IsNullOrEmpty(Model.CurrentLogoPath))
+                    {
+                        <img src="@Model.CurrentLogoPath"
+                             alt="Company Logo" />
+                    }
+                    else
+                    {
+                        <span>🏢</span>
+                    }
+                </div>
+
+                <h3>
+                    @(string.IsNullOrEmpty(Model.Name)
+                        ? "Your Company"
+                        : Model.Name)
+                </h3>
+
+                <p class="company-location">
+                    📍
+                    @(string.IsNullOrEmpty(Model.Location)
+                        ? "Company location"
+                        : Model.Location)
+                </p>
+
+                <div class="profile-status">
+                    <div>
+                        <span>Profile</span>
+                        <strong>
+                            @(Model.Id == 0
+                                ? "Incomplete"
+                                : "Completed")
+                        </strong>
+                    </div>
+
+                    <div>
+                        <span>Account</span>
+                        <strong>Company</strong>
+                    </div>
+                </div>
+
+                <div class="preview-feature">
+                    <span>💼</span>
+
+                    <div>
+                        <strong>Publish Internships</strong>
+                        <small>
+                            Add and manage training opportunities
+                        </small>
+                    </div>
+                </div>
+
+                <div class="preview-feature">
+                    <span>🎓</span>
+
+                    <div>
+                        <strong>Review Students</strong>
+                        <small>
+                            View and manage student applications
+                        </small>
+                    </div>
+                </div>
+
+                <div class="preview-feature">
+                    <span>⭐</span>
+
+                    <div>
+                        <strong>Evaluate Trainees</strong>
+                        <small>
+                            Submit student evaluations
+                        </small>
+                    </div>
+                </div>
+
+                @if (!string.IsNullOrEmpty(Model.Website))
+                {
+                    <a href="@Model.Website"
+                       target="_blank"
+                       class="website-preview-link">
+                        Visit Company Website ↗
+                    </a>
+                }
+            </aside>
+
+            <section class="company-form-card">
+                <div class="form-header">
+                    <div>
+                        <h2>Company Information</h2>
+                        <p>
+                            Provide accurate information about
+                            your organization.
+                        </p>
+                    </div>
+
+                    <span class="secure-badge">
+                        🔒 Secure
+                    </span>
+                </div>
+
+                <form asp-controller="Company"
+                      asp-action="Profile"
+                      method="post"
+                      enctype="multipart/form-data">
+
+                    <input asp-for="Id" type="hidden" />
+
+                    <input asp-for="CurrentLogoPath"
+                           type="hidden" />
+
+                    <div asp-validation-summary="ModelOnly"
+                         class="text-danger">
+                    </div>
+
+                    <div class="form-group">
+                        <label asp-for="Name">
+                            Company Name *
+                        </label>
+
+                        <input asp-for="Name"
+                               class="company-input"
+                               placeholder="Enter company name" />
+
+                        <span asp-validation-for="Name"
+                              class="text-danger"></span>
+                    </div>
+
+                    <div class="form-group">
+                        <label asp-for="Description">
+                            Company Description *
+                        </label>
+
+                        <textarea asp-for="Description"
+                                  class="company-input description-input"
+                                  placeholder="Tell students about your company, industry and work environment...">
+                        </textarea>
+
+                        <div class="field-information">
+                            Maximum 500 characters
+                        </div>
+
+                        <span asp-validation-for="Description"
+                              class="text-danger"></span>
+                    </div>
+
+                    <div class="form-fields-grid">
+                        <div class="form-group">
+                            <label asp-for="Location">
+                                Location *
+                            </label>
+
+                            <input asp-for="Location"
+                                   class="company-input"
+                                   placeholder="City, Country" />
+
+                            <span asp-validation-for="Location"
+                                  class="text-danger"></span>
+                        </div>
+
+                        <div class="form-group">
+                            <label asp-for="Website">
+                                Company Website
+                            </label>
+
+                            <input asp-for="Website"
+                                   class="company-input"
+                                   placeholder="https://company.com" />
+
+                            <span asp-validation-for="Website"
+                                  class="text-danger"></span>
+                        </div>
+                    </div>
+
+                    <div class="logo-upload-box">
+                        <div class="upload-icon">🖼️</div>
+
+                        <div class="upload-content">
+                            <label asp-for="LogoFile">
+                                Upload Company Logo
+                            </label>
+
+                            <p>
+                                JPG, JPEG, PNG or WEBP.
+                                Maximum file size is 3 MB.
+                            </p>
+
+                            <input asp-for="LogoFile"
+                                   type="file"
+                                   accept=".jpg,.jpeg,.png,.webp"
+                                   class="file-input" />
+
+                            <span asp-validation-for="LogoFile"
+                                  class="text-danger"></span>
+                        </div>
+                    </div>
+
+                    <div class="form-actions">
+                        <a asp-controller="Dashboard"
+                           asp-action="Index"
+                           class="cancel-button">
+                            Cancel
+                        </a>
+
+                        <button type="submit"
+                                class="save-button">
+                            Save Company Profile
+                        </button>
+                    </div>
+                </form>
+            </section>
+        </section>
+    </div>
+</div>
+
+<style>
+    .company-profile-page {
+        min-height: 100vh;
+        padding: 40px 20px 70px;
+        background: radial-gradient(circle at top left, rgba(14, 165, 233, 0.09), transparent 30%), radial-gradient(circle at bottom right, rgba(124, 58, 237, 0.08), transparent 35%), #f5f7fb;
+    }
+
+    .company-profile-container {
+        max-width: 1200px;
+        margin: auto;
+    }
+
+    .success-alert {
+        padding: 14px 18px;
+        margin-bottom: 20px;
+        color: #047857;
+        border: 1px solid #a7f3d0;
+        border-radius: 14px;
+        background: #ecfdf5;
+        font-weight: 600;
+        animation: companyEntrance 0.6s ease;
+    }
+
+        .success-alert span {
+            margin-right: 7px;
+        }
+
+    .company-header {
+        min-height: 270px;
+        padding: 42px 48px;
+        display: grid;
+        grid-template-columns: 1.3fr 1fr;
+        overflow: hidden;
+        color: white;
+        border-radius: 27px;
+        background: linear-gradient(135deg, #082f49, #0369a1 55%, #6d28d9);
+        box-shadow: 0 20px 48px rgba(3, 105, 161, 0.22);
+        animation: companyEntrance 0.7s ease;
+    }
+
+    .company-header-content {
+        position: relative;
+        z-index: 3;
+    }
+
+    .company-badge {
+        display: inline-block;
+        padding: 6px 13px;
+        margin-bottom: 16px;
+        border-radius: 30px;
+        background: rgba(255, 255, 255, 0.16);
+        font-size: 12px;
+    }
+
+    .company-header h1 {
+        max-width: 600px;
+        margin: 0;
+        font-size: 36px;
+        font-weight: 800;
+    }
+
+    .company-header p {
+        max-width: 620px;
+        margin: 14px 0 27px;
+        color: #e0f2fe;
+        line-height: 1.7;
+        font-size: 14px;
+    }
+
+    .back-button {
+        display: inline-block;
+        padding: 10px 17px;
+        color: #075985;
+        border-radius: 11px;
+        background: white;
+        text-decoration: none;
+        font-weight: 700;
+        transition: 0.3s;
+    }
+
+        .back-button:hover {
+            color: #075985;
+            transform: translateY(-3px);
+            box-shadow: 0 10px 23px rgba(15, 23, 42, 0.2);
+        }
+
+    .header-visual {
+        min-height: 190px;
+        position: relative;
+    }
+
+    .header-circle {
+        border: 1px solid rgba(255, 255, 255, 0.18);
+        border-radius: 50%;
+        position: absolute;
+        left: 50%;
+        top: 50%;
+        transform: translate(-50%, -50%);
+    }
+
+    .circle-one {
+        width: 220px;
+        height: 220px;
+    }
+
+    .circle-two {
+        width: 310px;
+        height: 310px;
+    }
+
+    .building-icon {
+        width: 125px;
+        height: 125px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 35px;
+        background: rgba(255, 255, 255, 0.18);
+        backdrop-filter: blur(10px);
+        font-size: 60px;
+        position: absolute;
+        left: 50%;
+        top: 50%;
+        transform: translate(-50%, -50%);
+        animation: companyFloat 4s ease-in-out infinite;
+    }
+
+    .floating-label {
+        padding: 10px 14px;
+        color: #0f172a;
+        border-radius: 12px;
+        background: rgba(255, 255, 255, 0.93);
+        box-shadow: 0 12px 25px rgba(15, 23, 42, 0.16);
+        font-size: 11px;
+        font-weight: 700;
+        position: absolute;
+        z-index: 2;
+        animation: labelFloat 5s ease-in-out infinite;
+    }
+
+    .label-one {
+        left: 0;
+        top: 20px;
+    }
+
+    .label-two {
+        right: 0;
+        bottom: 15px;
+        animation-delay: 1.5s;
+    }
+
+    .profile-grid {
+        margin-top: 24px;
+        display: grid;
+        grid-template-columns: 320px 1fr;
+        gap: 22px;
+        align-items: start;
+    }
+
+    .company-preview-card,
+    .company-form-card {
+        border: 1px solid #e6ebf2;
+        border-radius: 21px;
+        background: white;
+        box-shadow: 0 10px 30px rgba(15, 23, 42, 0.05);
+        animation: companyEntrance 0.8s ease;
+    }
+
+    .company-preview-card {
+        padding: 29px 24px;
+        text-align: center;
+        position: sticky;
+        top: 20px;
+    }
+
+    .logo-preview {
+        width: 92px;
+        height: 92px;
+        margin: auto;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        overflow: hidden;
+        border: 4px solid #e0f2fe;
+        border-radius: 24px;
+        background: #f0f9ff;
+    }
+
+        .logo-preview img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .logo-preview span {
+            font-size: 43px;
+        }
+
+    .company-preview-card h3 {
+        margin: 17px 0 5px;
+        color: #172554;
+        font-size: 19px;
+        font-weight: 800;
+    }
+
+    .company-location {
+        color: #64748b;
+        font-size: 12px;
+    }
+
+    .profile-status {
+        margin: 22px 0;
+        padding: 16px 0;
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        border-top: 1px solid #eef2f7;
+        border-bottom: 1px solid #eef2f7;
+    }
+
+        .profile-status div:first-child {
+            border-right: 1px solid #eef2f7;
+        }
+
+        .profile-status span,
+        .profile-status strong {
+            display: block;
+        }
+
+        .profile-status span {
+            color: #94a3b8;
+            font-size: 10px;
+        }
+
+        .profile-status strong {
+            margin-top: 4px;
+            color: #0f766e;
+            font-size: 12px;
+        }
+
+    .preview-feature {
+        margin-top: 14px;
+        padding: 12px;
+        display: flex;
+        align-items: center;
+        gap: 11px;
+        text-align: left;
+        border-radius: 12px;
+        background: #f8fafc;
+    }
+
+        .preview-feature > span {
+            font-size: 22px;
+        }
+
+        .preview-feature strong,
+        .preview-feature small {
+            display: block;
+        }
+
+        .preview-feature strong {
+            color: #334155;
+            font-size: 12px;
+        }
+
+        .preview-feature small {
+            margin-top: 3px;
+            color: #94a3b8;
+            font-size: 10px;
+        }
+
+    .website-preview-link {
+        display: block;
+        margin-top: 20px;
+        padding: 10px;
+        color: #0369a1;
+        border-radius: 10px;
+        background: #e0f2fe;
+        text-decoration: none;
+        font-size: 12px;
+        font-weight: 700;
+    }
+
+    .company-form-card {
+        padding: 33px;
+    }
+
+    .form-header {
+        margin-bottom: 27px;
+        padding-bottom: 20px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        border-bottom: 1px solid #eef2f7;
+    }
+
+        .form-header h2 {
+            margin: 0;
+            color: #172554;
+            font-size: 20px;
+            font-weight: 800;
+        }
+
+        .form-header p {
+            margin: 5px 0 0;
+            color: #94a3b8;
+            font-size: 11px;
+        }
+
+    .secure-badge {
+        padding: 6px 11px;
+        color: #047857;
+        border-radius: 20px;
+        background: #ecfdf5;
+        font-size: 11px;
+        font-weight: 700;
+    }
+
+    .form-fields-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 20px;
+    }
+
+    .form-group {
+        margin-bottom: 20px;
+    }
+
+        .form-group label,
+        .upload-content label {
+            display: block;
+            margin-bottom: 7px;
+            color: #334155;
+            font-size: 12px;
+            font-weight: 700;
+        }
+
+    .company-input {
+        width: 100%;
+        height: 49px;
+        padding: 0 14px;
+        color: #334155;
+        outline: none;
+        border: 1px solid #dce3ed;
+        border-radius: 11px;
+        background: #fbfdff;
+        transition: 0.3s;
+    }
+
+    .description-input {
+        min-height: 135px;
+        padding: 13px 14px;
+        resize: vertical;
+    }
+
+    .company-input:focus {
+        border-color: #0284c7;
+        background: white;
+        box-shadow: 0 0 0 4px rgba(2, 132, 199, 0.09);
+    }
+
+    .field-information {
+        margin-top: 5px;
+        color: #94a3b8;
+        font-size: 10px;
+        text-align: right;
+    }
+
+    .text-danger {
+        display: block;
+        margin-top: 5px;
+        font-size: 11px;
+    }
+
+    .logo-upload-box {
+        padding: 22px;
+        display: flex;
+        align-items: center;
+        gap: 18px;
+        border: 2px dashed #bae6fd;
+        border-radius: 16px;
+        background: #f0f9ff;
+        transition: 0.3s;
+    }
+
+        .logo-upload-box:hover {
+            border-color: #0284c7;
+            background: #e0f2fe;
+        }
+
+    .upload-icon {
+        width: 57px;
+        height: 57px;
+        flex-shrink: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 16px;
+        background: white;
+        font-size: 27px;
+    }
+
+    .upload-content {
+        width: 100%;
+    }
+
+        .upload-content p {
+            margin: 0 0 10px;
+            color: #64748b;
+            font-size: 11px;
+        }
+
+    .file-input {
+        width: 100%;
+        color: #475569;
+        font-size: 12px;
+    }
+
+        .file-input::file-selector-button {
+            padding: 8px 13px;
+            margin-right: 10px;
+            color: #0369a1;
+            border: none;
+            border-radius: 8px;
+            background: white;
+            font-weight: 700;
+            cursor: pointer;
+        }
+
+    .form-actions {
+        margin-top: 27px;
+        display: flex;
+        justify-content: flex-end;
+        gap: 12px;
+    }
+
+    .cancel-button,
+    .save-button {
+        padding: 11px 20px;
+        border-radius: 11px;
+        font-size: 13px;
+        font-weight: 700;
+        transition: 0.3s;
+    }
+
+    .cancel-button {
+        color: #475569;
+        border: 1px solid #dce3ed;
+        background: white;
+        text-decoration: none;
+    }
+
+    .save-button {
+        color: white;
+        border: none;
+        background: linear-gradient(90deg, #0284c7, #7c3aed);
+        box-shadow: 0 8px 20px rgba(2, 132, 199, 0.23);
+    }
+
+        .cancel-button:hover,
+        .save-button:hover {
+            transform: translateY(-2px);
+        }
+
+    @@keyframes companyEntrance {
+        from {
+            opacity: 0;
+            transform: translateY(18px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    @@keyframes companyFloat {
+        0%, 100% {
+            transform: translate(-50%, -50%) rotate(-4deg) translateY(0);
+        }
+
+        50% {
+            transform: translate(-50%, -50%) rotate(4deg) translateY(-10px);
+        }
+    }
+
+    @@keyframes labelFloat {
+        0%, 100% {
+            transform: translateY(0);
+        }
+
+        50% {
+            transform: translateY(-9px);
+        }
+    }
+
+    @@media (max-width: 900px) {
+        .company-header {
+            grid-template-columns: 1fr;
+        }
+
+        .header-visual {
+            display: none;
+        }
+
+        .profile-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .company-preview-card {
+            position: static;
+        }
+    }
+
+    @@media (max-width: 650px) {
+        .company-header {
+            padding: 35px 25px;
+        }
+
+            .company-header h1 {
+                font-size: 29px;
+            }
+
+        .form-fields-grid {
+            grid-template-columns: 1fr;
+            gap: 0;
+        }
+
+        .company-form-card {
+            padding: 24px 18px;
+        }
+
+        .logo-upload-box {
+            align-items: flex-start;
+            flex-direction: column;
+        }
+    }
+</style>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

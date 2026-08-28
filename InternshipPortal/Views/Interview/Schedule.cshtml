@@ -1,0 +1,611 @@
+﻿@model InternshipPortal.Models.ViewModels.ScheduleInterviewViewModel
+@using InternshipPortal.Models.Enums
+
+@{
+    ViewData["Title"] = "Schedule Interview";
+}
+
+<style>
+    .schedule-page {
+        min-height: 100vh;
+        padding: 45px 20px 80px;
+        background: radial-gradient( circle at top left, rgba(79, 70, 229, 0.14), transparent 32%), radial-gradient( circle at bottom right, rgba(14, 165, 233, 0.12), transparent 35%), #f8fafc;
+    }
+
+    .schedule-container {
+        max-width: 950px;
+        margin: auto;
+    }
+
+    .schedule-header {
+        position: relative;
+        overflow: hidden;
+        padding: 38px;
+        margin-bottom: 25px;
+        color: white;
+        border-radius: 27px;
+        background: linear-gradient( 135deg, #312e81, #4f46e5, #0ea5e9);
+        box-shadow: 0 20px 45px rgba(49, 46, 129, 0.23);
+        animation: headerEntrance 0.7s ease;
+    }
+
+        .schedule-header::after {
+            position: absolute;
+            right: -70px;
+            bottom: -130px;
+            width: 230px;
+            height: 230px;
+            content: "";
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.11);
+        }
+
+    .header-content {
+        position: relative;
+        z-index: 2;
+        display: flex;
+        align-items: center;
+        gap: 18px;
+    }
+
+    .header-icon {
+        min-width: 68px;
+        height: 68px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 30px;
+        border-radius: 21px;
+        background: rgba(255, 255, 255, 0.17);
+        backdrop-filter: blur(9px);
+        animation: calendarFloat 2.5s ease-in-out infinite;
+    }
+
+    .schedule-header h1 {
+        margin: 0;
+        font-weight: 900;
+    }
+
+    .schedule-header p {
+        margin: 7px 0 0;
+        color: rgba(255, 255, 255, 0.82);
+    }
+
+    .application-summary {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 15px;
+        padding: 20px;
+        margin-bottom: 23px;
+        border: 1px solid #e2e8f0;
+        border-radius: 20px;
+        background: white;
+        box-shadow: 0 9px 25px rgba(15, 23, 42, 0.06);
+        animation: formEntrance 0.7s ease;
+    }
+
+    .summary-item {
+        display: flex;
+        align-items: center;
+        gap: 13px;
+        padding: 15px;
+        border-radius: 15px;
+        background: #f8fafc;
+    }
+
+    .summary-icon {
+        min-width: 44px;
+        height: 44px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #4f46e5;
+        font-size: 19px;
+        border-radius: 13px;
+        background: #e0e7ff;
+    }
+
+    .summary-label {
+        display: block;
+        color: #94a3b8;
+        font-size: 11px;
+        font-weight: 800;
+        text-transform: uppercase;
+    }
+
+    .summary-value {
+        display: block;
+        margin-top: 3px;
+        color: #0f172a;
+        font-weight: 900;
+    }
+
+    .schedule-form-card {
+        padding: 30px;
+        border: 1px solid #e2e8f0;
+        border-radius: 24px;
+        background: white;
+        box-shadow: 0 15px 38px rgba(15, 23, 42, 0.08);
+        animation: formEntrance 0.8s ease;
+    }
+
+    .form-section-title {
+        display: flex;
+        align-items: center;
+        gap: 9px;
+        padding-bottom: 14px;
+        margin-bottom: 20px;
+        color: #0f172a;
+        font-size: 16px;
+        font-weight: 900;
+        border-bottom: 1px solid #e2e8f0;
+    }
+
+        .form-section-title i {
+            color: #4f46e5;
+        }
+
+    .form-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 19px;
+    }
+
+    .form-group {
+        margin-bottom: 19px;
+    }
+
+    .full-width {
+        grid-column: 1 / -1;
+    }
+
+    .form-label {
+        display: block;
+        margin-bottom: 7px;
+        color: #334155;
+        font-size: 12px;
+        font-weight: 800;
+    }
+
+    .required-star {
+        color: #ef4444;
+    }
+
+    .form-control,
+    .form-select {
+        min-height: 49px;
+        padding: 11px 14px;
+        color: #334155;
+        border: 2px solid #e2e8f0;
+        border-radius: 13px;
+        background: #fbfdff;
+        transition: 0.3s;
+    }
+
+    textarea.form-control {
+        min-height: 125px;
+        resize: vertical;
+    }
+
+    .form-control:focus,
+    .form-select:focus {
+        border-color: #6366f1;
+        background: white;
+        box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.1);
+    }
+
+    .field-hint {
+        display: block;
+        margin-top: 6px;
+        color: #94a3b8;
+        font-size: 10px;
+    }
+
+    .text-danger {
+        display: block;
+        margin-top: 5px;
+        font-size: 11px;
+    }
+
+    .validation-summary-errors {
+        padding: 14px 17px;
+        margin-bottom: 20px;
+        color: #b91c1c;
+        border: 1px solid #fecaca;
+        border-radius: 13px;
+        background: #fef2f2;
+    }
+
+        .validation-summary-errors ul {
+            margin: 0;
+            padding-left: 20px;
+        }
+
+    .conditional-field {
+        animation: fieldEntrance 0.4s ease;
+    }
+
+    .form-actions {
+        display: flex;
+        align-items: center;
+        justify-content: flex-end;
+        gap: 11px;
+        padding-top: 22px;
+        margin-top: 5px;
+        border-top: 1px solid #e2e8f0;
+    }
+
+    .cancel-button {
+        padding: 12px 19px;
+        color: #475569;
+        font-weight: 800;
+        border: 1px solid #cbd5e1;
+        border-radius: 13px;
+        background: white;
+        text-decoration: none;
+        transition: 0.3s;
+    }
+
+        .cancel-button:hover {
+            color: #dc2626;
+            border-color: #fecaca;
+            background: #fef2f2;
+        }
+
+    .schedule-button {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 13px 21px;
+        color: white;
+        font-weight: 800;
+        border: none;
+        border-radius: 13px;
+        background: linear-gradient( 135deg, #4f46e5, #7c3aed);
+        box-shadow: 0 9px 22px rgba(79, 70, 229, 0.24);
+        transition: 0.3s;
+    }
+
+        .schedule-button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 14px 28px rgba(79, 70, 229, 0.32);
+        }
+
+    @@keyframes headerEntrance {
+        from {
+            opacity: 0;
+            transform: translateY(-25px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    @@keyframes formEntrance {
+        from {
+            opacity: 0;
+            transform: translateY(25px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    @@keyframes fieldEntrance {
+        from {
+            opacity: 0;
+            transform: translateY(-8px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    @@keyframes calendarFloat {
+        0%, 100% {
+            transform: translateY(0) rotate(0deg);
+        }
+
+        50% {
+            transform: translateY(-6px) rotate(5deg);
+        }
+    }
+
+    @@media (max-width: 768px) {
+        .schedule-page {
+            padding: 25px 12px 60px;
+        }
+
+        .schedule-header {
+            padding: 27px 22px;
+        }
+
+        .header-content {
+            align-items: flex-start;
+        }
+
+        .application-summary,
+        .form-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .schedule-form-card {
+            padding: 22px 17px;
+        }
+
+        .form-actions {
+            align-items: stretch;
+            flex-direction: column-reverse;
+        }
+
+        .cancel-button,
+        .schedule-button {
+            justify-content: center;
+            text-align: center;
+        }
+    }
+</style>
+
+<div class="schedule-page">
+    <div class="schedule-container">
+        <div class="schedule-header">
+            <div class="header-content">
+                <div class="header-icon">
+                    <i class="bi bi-calendar2-check-fill"></i>
+                </div>
+
+                <div>
+                    <h1>Schedule Interview</h1>
+
+                    <p>
+                        Choose a suitable interview appointment and
+                        send the details directly to the student.
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <div class="application-summary">
+            <div class="summary-item">
+                <div class="summary-icon">
+                    <i class="bi bi-person-fill"></i>
+                </div>
+
+                <div>
+                    <span class="summary-label">
+                        Candidate
+                    </span>
+
+                    <span class="summary-value">
+                        @Model.StudentName
+                    </span>
+                </div>
+            </div>
+
+            <div class="summary-item">
+                <div class="summary-icon">
+                    <i class="bi bi-briefcase-fill"></i>
+                </div>
+
+                <div>
+                    <span class="summary-label">
+                        Internship
+                    </span>
+
+                    <span class="summary-value">
+                        @Model.InternshipTitle
+                    </span>
+                </div>
+            </div>
+        </div>
+
+        <div class="schedule-form-card">
+            <form asp-controller="Interview"
+                  asp-action="Schedule"
+                  method="post">
+
+                @Html.AntiForgeryToken()
+
+                <input asp-for="InternshipApplicationId"
+                       type="hidden" />
+
+                <input asp-for="StudentName"
+                       type="hidden" />
+
+                <input asp-for="InternshipTitle"
+                       type="hidden" />
+
+                <div asp-validation-summary="ModelOnly"
+                     class="text-danger">
+                </div>
+
+                <div class="form-section-title">
+                    <i class="bi bi-calendar-event-fill"></i>
+                    Appointment Details
+                </div>
+
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label asp-for="ScheduledAt"
+                               class="form-label">
+                            Interview Date and Time
+                            <span class="required-star">*</span>
+                        </label>
+
+                        <input asp-for="ScheduledAt"
+                               type="datetime-local"
+                               class="form-control"
+                               min="@DateTime.Now.ToString("yyyy-MM-ddTHH:mm")" />
+
+                        <span asp-validation-for="ScheduledAt"
+                              class="text-danger">
+                        </span>
+                    </div>
+
+                    <div class="form-group">
+                        <label asp-for="DurationMinutes"
+                               class="form-label">
+                            Duration
+                            <span class="required-star">*</span>
+                        </label>
+
+                        <div class="input-group">
+                            <input asp-for="DurationMinutes"
+                                   type="number"
+                                   min="10"
+                                   max="480"
+                                   class="form-control" />
+
+                            <span class="input-group-text">
+                                minutes
+                            </span>
+                        </div>
+
+                        <span asp-validation-for="DurationMinutes"
+                              class="text-danger">
+                        </span>
+                    </div>
+
+                    <div class="form-group full-width">
+                        <label asp-for="Type"
+                               class="form-label">
+                            Interview Type
+                            <span class="required-star">*</span>
+                        </label>
+
+                        <select asp-for="Type"
+                                asp-items="Html.GetEnumSelectList<InterviewType>()"
+                                class="form-select"
+                                id="interviewType">
+                        </select>
+
+                        <span asp-validation-for="Type"
+                              class="text-danger">
+                        </span>
+                    </div>
+
+                    <div class="form-group full-width conditional-field"
+                         id="meetingLinkGroup">
+
+                        <label asp-for="MeetingLink"
+                               class="form-label">
+                            Meeting Link
+                            <span class="required-star">*</span>
+                        </label>
+
+                        <input asp-for="MeetingLink"
+                               type="url"
+                               class="form-control"
+                               placeholder="https://meet.google.com/..." />
+
+                        <span class="field-hint">
+                            Add a Microsoft Teams, Zoom or Google Meet link.
+                        </span>
+
+                        <span asp-validation-for="MeetingLink"
+                              class="text-danger">
+                        </span>
+                    </div>
+
+                    <div class="form-group full-width conditional-field"
+                         id="locationGroup"
+                         style="display: none;">
+
+                        <label asp-for="Location"
+                               class="form-label">
+                            Interview Location
+                            <span class="required-star">*</span>
+                        </label>
+
+                        <input asp-for="Location"
+                               class="form-control"
+                               placeholder="Company office address..." />
+
+                        <span asp-validation-for="Location"
+                              class="text-danger">
+                        </span>
+                    </div>
+
+                    <div class="form-group full-width">
+                        <label asp-for="Notes"
+                               class="form-label">
+                            Instructions and Notes
+                        </label>
+
+                        <textarea asp-for="Notes"
+                                  class="form-control"
+                                  placeholder="What should the student prepare for the interview?">
+                        </textarea>
+
+                        <span class="field-hint">
+                            Example: Bring your CV and prepare a short
+                            introduction about your previous projects.
+                        </span>
+
+                        <span asp-validation-for="Notes"
+                              class="text-danger">
+                        </span>
+                    </div>
+                </div>
+
+                <div class="form-actions">
+                    <a asp-controller="Application"
+                       asp-action="Applicants"
+                       class="cancel-button">
+                        <i class="bi bi-x-circle me-1"></i>
+                        Cancel
+                    </a>
+
+                    <button type="submit"
+                            class="schedule-button">
+                        <i class="bi bi-send-fill"></i>
+                        Schedule and Notify Student
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        const interviewType =
+            document.getElementById("interviewType");
+
+        const meetingLinkGroup =
+            document.getElementById("meetingLinkGroup");
+
+        const locationGroup =
+            document.getElementById("locationGroup");
+
+        function updateConditionalFields() {
+            const selectedType =
+                Number(interviewType.value);
+
+            if (selectedType === 0) {
+                meetingLinkGroup.style.display = "block";
+                locationGroup.style.display = "none";
+            }
+            else if (selectedType === 1) {
+                meetingLinkGroup.style.display = "none";
+                locationGroup.style.display = "block";
+            }
+            else {
+                meetingLinkGroup.style.display = "none";
+                locationGroup.style.display = "none";
+            }
+        }
+
+        interviewType.addEventListener(
+            "change",
+            updateConditionalFields);
+
+        updateConditionalFields();
+    });
+</script>

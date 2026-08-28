@@ -1,0 +1,381 @@
+﻿@model InternshipPortal.Models.Internship
+
+@{
+    ViewData["Title"] = "Delete Internship";
+}
+
+<div class="delete-page">
+    <div class="delete-container">
+
+        <section class="delete-card">
+            <div class="danger-icon">
+                🗑️
+            </div>
+
+            <span class="danger-badge">
+                Delete Confirmation
+            </span>
+
+            <h1>Delete Internship?</h1>
+
+            <p class="delete-message">
+                Are you sure you want to delete this internship?
+                This action cannot be undone.
+            </p>
+
+            <div class="internship-preview">
+                <div class="preview-header">
+                    <div class="preview-icon">
+                        💼
+                    </div>
+
+                    <div>
+                        <h2>@Model.Title</h2>
+
+                        <span>
+                            Created on
+                            @Model.CreatedAt.ToString("dd MMMM yyyy")
+                        </span>
+                    </div>
+                </div>
+
+                <div class="preview-information">
+                    <div>
+                        <small>Location</small>
+                        <strong>📍 @Model.Location</strong>
+                    </div>
+
+                    <div>
+                        <small>Work Mode</small>
+                        <strong>💻 @Model.WorkMode</strong>
+                    </div>
+
+                    <div>
+                        <small>Positions</small>
+                        <strong>
+                            👥 @Model.AvailablePositions
+                        </strong>
+                    </div>
+
+                    <div>
+                        <small>Status</small>
+
+                        @if (Model.IsApproved)
+                        {
+                            <strong class="approved-text">
+                                ✓ Approved
+                            </strong>
+                        }
+                        else
+                        {
+                            <strong class="pending-text">
+                                ⏳ Pending
+                            </strong>
+                        }
+                    </div>
+                </div>
+
+                <div class="preview-description">
+                    <small>Description</small>
+
+                    <p>@Model.Description</p>
+                </div>
+            </div>
+
+            <div class="warning-box">
+                <span>⚠️</span>
+
+                <div>
+                    <strong>Important Warning</strong>
+
+                    <p>
+                        The internship cannot be deleted if
+                        students have already applied for it.
+                    </p>
+                </div>
+            </div>
+
+            <form asp-controller="Internship"
+                  asp-action="Delete"
+                  asp-route-id="@Model.Id"
+                  method="post">
+
+                <input asp-for="Id" type="hidden" />
+
+                <div class="delete-actions">
+                    <a asp-controller="Internship"
+                       asp-action="MyInternships"
+                       class="cancel-button">
+                        Cancel
+                    </a>
+
+                    <button type="submit"
+                            class="delete-button">
+                        Yes, Delete Internship
+                    </button>
+                </div>
+            </form>
+        </section>
+    </div>
+</div>
+
+<style>
+    .delete-page {
+        min-height: 100vh;
+        padding: 55px 20px 80px;
+        display: flex;
+        justify-content: center;
+        background: radial-gradient(circle at top left, rgba(239, 68, 68, 0.08), transparent 32%), radial-gradient(circle at bottom right, rgba(124, 58, 237, 0.07), transparent 35%), #f5f7fb;
+    }
+
+    .delete-container {
+        width: 100%;
+        max-width: 720px;
+    }
+
+    .delete-card {
+        padding: 42px;
+        text-align: center;
+        border: 1px solid #fee2e2;
+        border-radius: 25px;
+        background: white;
+        box-shadow: 0 22px 55px rgba(127, 29, 29, 0.1);
+        animation: deleteEntrance 0.7s ease;
+    }
+
+    .danger-icon {
+        width: 88px;
+        height: 88px;
+        margin: auto;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 27px;
+        background: linear-gradient(135deg, #fee2e2, #fecaca);
+        font-size: 42px;
+        animation: dangerShake 3s ease-in-out infinite;
+    }
+
+    .danger-badge {
+        display: inline-block;
+        padding: 5px 12px;
+        margin-top: 20px;
+        color: #b91c1c;
+        border-radius: 20px;
+        background: #fef2f2;
+        font-size: 10px;
+        font-weight: 800;
+    }
+
+    .delete-card > h1 {
+        margin: 11px 0 7px;
+        color: #7f1d1d;
+        font-size: 29px;
+        font-weight: 800;
+    }
+
+    .delete-message {
+        max-width: 500px;
+        margin: auto;
+        color: #64748b;
+        line-height: 1.7;
+        font-size: 13px;
+    }
+
+    .internship-preview {
+        padding: 21px;
+        margin-top: 27px;
+        text-align: left;
+        border: 1px solid #e6ebf2;
+        border-radius: 17px;
+        background: #f8fafc;
+    }
+
+    .preview-header {
+        padding-bottom: 16px;
+        display: flex;
+        align-items: center;
+        gap: 13px;
+        border-bottom: 1px solid #e2e8f0;
+    }
+
+    .preview-icon {
+        width: 52px;
+        height: 52px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 14px;
+        background: #dbeafe;
+        font-size: 25px;
+    }
+
+    .preview-header h2 {
+        margin: 0;
+        color: #172554;
+        font-size: 17px;
+        font-weight: 800;
+    }
+
+    .preview-header span {
+        display: block;
+        margin-top: 4px;
+        color: #94a3b8;
+        font-size: 10px;
+    }
+
+    .preview-information {
+        padding: 17px 0;
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 12px;
+    }
+
+        .preview-information small,
+        .preview-information strong {
+            display: block;
+        }
+
+        .preview-information small {
+            color: #94a3b8;
+            font-size: 9px;
+        }
+
+        .preview-information strong {
+            margin-top: 5px;
+            color: #334155;
+            font-size: 10px;
+        }
+
+    .approved-text {
+        color: #047857 !important;
+    }
+
+    .pending-text {
+        color: #b45309 !important;
+    }
+
+    .preview-description {
+        padding-top: 14px;
+        border-top: 1px solid #e2e8f0;
+    }
+
+        .preview-description small {
+            color: #94a3b8;
+            font-size: 9px;
+        }
+
+        .preview-description p {
+            margin: 6px 0 0;
+            color: #475569;
+            line-height: 1.6;
+            font-size: 11px;
+        }
+
+    .warning-box {
+        padding: 15px;
+        margin-top: 20px;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        text-align: left;
+        border: 1px solid #fde68a;
+        border-radius: 13px;
+        background: #fffbeb;
+    }
+
+        .warning-box > span {
+            font-size: 24px;
+        }
+
+        .warning-box strong {
+            color: #92400e;
+            font-size: 11px;
+        }
+
+        .warning-box p {
+            margin: 3px 0 0;
+            color: #b45309;
+            font-size: 10px;
+        }
+
+    .delete-actions {
+        margin-top: 27px;
+        display: flex;
+        justify-content: center;
+        gap: 12px;
+    }
+
+    .cancel-button,
+    .delete-button {
+        padding: 11px 20px;
+        border-radius: 11px;
+        font-size: 12px;
+        font-weight: 800;
+        transition: 0.3s;
+    }
+
+    .cancel-button {
+        color: #475569;
+        border: 1px solid #dce3ed;
+        background: white;
+        text-decoration: none;
+    }
+
+    .delete-button {
+        color: white;
+        border: none;
+        background: linear-gradient(90deg, #dc2626, #b91c1c);
+        box-shadow: 0 9px 22px rgba(220, 38, 38, 0.23);
+    }
+
+        .cancel-button:hover,
+        .delete-button:hover {
+            transform: translateY(-2px);
+        }
+
+    @@keyframes deleteEntrance {
+        from {
+            opacity: 0;
+            transform: translateY(20px) scale(0.98);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+        }
+    }
+
+    @@keyframes dangerShake {
+        0%, 90%, 100% {
+            transform: rotate(0);
+        }
+
+        93% {
+            transform: rotate(-5deg);
+        }
+
+        96% {
+            transform: rotate(5deg);
+        }
+    }
+
+    @@media (max-width: 650px) {
+        .delete-card {
+            padding: 32px 18px;
+        }
+
+        .preview-information {
+            grid-template-columns: 1fr 1fr;
+        }
+
+        .delete-actions {
+            flex-direction: column-reverse;
+        }
+
+        .cancel-button,
+        .delete-button {
+            width: 100%;
+        }
+    }
+</style>

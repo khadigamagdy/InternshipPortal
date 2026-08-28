@@ -1,0 +1,724 @@
+﻿@model InternshipPortal.Models.ViewModels.ApplicationViewModel
+
+@{
+    ViewData["Title"] = "Apply for Internship";
+}
+
+<div class="apply-page">
+    <div class="apply-container">
+
+        <section class="apply-header">
+            <div>
+                <span class="application-badge">
+                    Internship Application
+                </span>
+
+                <h1>Apply for This Opportunity</h1>
+
+                <p>
+                    Submit your CV and a short cover letter
+                    to complete your application.
+                </p>
+            </div>
+
+            <div class="header-icon">
+                🚀
+            </div>
+        </section>
+
+        <section class="apply-grid">
+            <aside class="opportunity-card">
+                <div class="opportunity-icon">
+                    💼
+                </div>
+
+                <span class="opportunity-label">
+                    You are applying for
+                </span>
+
+                <h2>@Model.InternshipTitle</h2>
+
+                <p class="company-name">
+                    🏢 @Model.CompanyName
+                </p>
+
+                <div class="application-steps">
+                    <div class="step completed-step">
+                        <span>✓</span>
+
+                        <div>
+                            <strong>Student Profile</strong>
+                            <small>Profile information completed</small>
+                        </div>
+                    </div>
+
+                    <div class="step active-step">
+                        <span>2</span>
+
+                        <div>
+                            <strong>Application Details</strong>
+                            <small>CV and cover letter</small>
+                        </div>
+                    </div>
+
+                    <div class="step">
+                        <span>3</span>
+
+                        <div>
+                            <strong>Company Review</strong>
+                            <small>Track your application status</small>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="privacy-note">
+                    <span>🔒</span>
+
+                    <p>
+                        Your information will only be shared
+                        with the company offering this internship.
+                    </p>
+                </div>
+            </aside>
+
+            <section class="application-form-card">
+                <div class="form-heading">
+                    <div>
+                        <h2>Application Details</h2>
+
+                        <p>
+                            Review your CV and introduce yourself.
+                        </p>
+                    </div>
+
+                    <span class="secure-badge">
+                        Secure Submission
+                    </span>
+                </div>
+
+                <form asp-controller="Application"
+                      asp-action="Apply"
+                      method="post"
+                      enctype="multipart/form-data">
+
+                    <input asp-for="InternshipId"
+                           type="hidden" />
+
+                    <input asp-for="InternshipTitle"
+                           type="hidden" />
+
+                    <input asp-for="CompanyName"
+                           type="hidden" />
+
+                    <input asp-for="CurrentCVPath"
+                           type="hidden" />
+
+                    <div asp-validation-summary="ModelOnly"
+                         class="validation-summary text-danger">
+                    </div>
+
+                    <div class="form-group">
+                        <label asp-for="CoverLetter">
+                            Cover Letter
+                        </label>
+
+                        <textarea asp-for="CoverLetter"
+                                  class="application-input cover-letter"
+                                  placeholder="Introduce yourself and explain why you are interested in this internship...">
+                        </textarea>
+
+                        <div class="field-hint">
+                            Maximum 1000 characters
+                        </div>
+
+                        <span asp-validation-for="CoverLetter"
+                              class="text-danger"></span>
+                    </div>
+
+                    @if (!string.IsNullOrEmpty(Model.CurrentCVPath))
+                    {
+                        <div class="current-cv-card">
+                            <div class="cv-icon">📄</div>
+
+                            <div>
+                                <strong>Profile CV Available</strong>
+
+                                <p>
+                                    Your uploaded profile CV will
+                                    be used with this application.
+                                </p>
+
+                                <a href="@Model.CurrentCVPath"
+                                   target="_blank">
+                                    View Current CV ↗
+                                </a>
+                            </div>
+
+                            <span class="ready-badge">
+                                ✓ Ready
+                            </span>
+                        </div>
+                    }
+
+                    <div class="cv-upload-box">
+                        <div class="upload-icon">
+                            ☁
+                        </div>
+
+                        <div class="upload-content">
+                            <label asp-for="CVFile">
+                                Upload Updated CV
+                            </label>
+
+                            <p>
+                                Optional if you already have a CV
+                                in your profile. PDF only, maximum 5 MB.
+                            </p>
+
+                            <input asp-for="CVFile"
+                                   type="file"
+                                   accept=".pdf,application/pdf"
+                                   class="file-input" />
+
+                            <span asp-validation-for="CVFile"
+                                  class="text-danger"></span>
+                        </div>
+                    </div>
+
+                    <label class="confirmation-box">
+                        <input type="checkbox"
+                               id="confirmationCheckbox"
+                               required />
+
+                        <span>
+                            I confirm that the information provided
+                            in this application is accurate.
+                        </span>
+                    </label>
+
+                    <div class="form-actions">
+                        <a asp-controller="Internship"
+                           asp-action="Details"
+                           asp-route-id="@Model.InternshipId"
+                           class="cancel-button">
+                            Cancel
+                        </a>
+
+                        <button type="submit"
+                                class="submit-button">
+                            Submit Application
+                        </button>
+                    </div>
+                </form>
+            </section>
+        </section>
+    </div>
+</div>
+
+<style>
+    .apply-page {
+        min-height: 100vh;
+        padding: 40px 20px 70px;
+        background: radial-gradient(circle at top left, rgba(37, 99, 235, 0.09), transparent 30%), radial-gradient(circle at bottom right, rgba(16, 185, 129, 0.08), transparent 35%), #f5f7fb;
+    }
+
+    .apply-container {
+        max-width: 1100px;
+        margin: auto;
+    }
+
+    .apply-header {
+        padding: 35px 42px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        color: white;
+        border-radius: 25px;
+        background: linear-gradient(135deg, #0f2b5b, #1d4ed8 57%, #059669);
+        box-shadow: 0 20px 47px rgba(30, 64, 175, 0.2);
+        animation: applyEntrance 0.7s ease;
+    }
+
+    .application-badge {
+        display: inline-block;
+        padding: 5px 12px;
+        margin-bottom: 10px;
+        border-radius: 20px;
+        background: rgba(255, 255, 255, 0.16);
+        font-size: 10px;
+    }
+
+    .apply-header h1 {
+        margin: 0;
+        font-size: 31px;
+        font-weight: 800;
+    }
+
+    .apply-header p {
+        margin: 9px 0 0;
+        color: #dbeafe;
+        font-size: 12px;
+    }
+
+    .header-icon {
+        width: 80px;
+        height: 80px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 23px;
+        background: rgba(255, 255, 255, 0.17);
+        font-size: 40px;
+        animation: rocketFloat 4s ease-in-out infinite;
+    }
+
+    .apply-grid {
+        margin-top: 22px;
+        display: grid;
+        grid-template-columns: 320px 1fr;
+        gap: 22px;
+        align-items: start;
+    }
+
+    .opportunity-card,
+    .application-form-card {
+        border: 1px solid #e6ebf2;
+        border-radius: 21px;
+        background: white;
+        box-shadow: 0 10px 30px rgba(15, 23, 42, 0.05);
+        animation: applyEntrance 0.8s ease;
+    }
+
+    .opportunity-card {
+        padding: 29px 24px;
+        position: sticky;
+        top: 20px;
+    }
+
+    .opportunity-icon {
+        width: 62px;
+        height: 62px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 18px;
+        background: linear-gradient(135deg, #dbeafe, #d1fae5);
+        font-size: 30px;
+    }
+
+    .opportunity-label {
+        display: block;
+        margin-top: 18px;
+        color: #94a3b8;
+        font-size: 9px;
+        font-weight: 700;
+    }
+
+    .opportunity-card h2 {
+        margin: 6px 0;
+        color: #172554;
+        font-size: 19px;
+        font-weight: 800;
+    }
+
+    .company-name {
+        margin: 0;
+        color: #2563eb;
+        font-size: 11px;
+        font-weight: 700;
+    }
+
+    .application-steps {
+        margin-top: 25px;
+        padding-top: 20px;
+        border-top: 1px solid #eef2f7;
+    }
+
+    .step {
+        padding: 11px 0;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+        .step > span {
+            width: 28px;
+            height: 28px;
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #64748b;
+            border-radius: 50%;
+            background: #f1f5f9;
+            font-size: 10px;
+            font-weight: 800;
+        }
+
+    .completed-step > span {
+        color: #047857;
+        background: #d1fae5;
+    }
+
+    .active-step > span {
+        color: white;
+        background: #2563eb;
+        box-shadow: 0 5px 13px rgba(37, 99, 235, 0.25);
+    }
+
+    .step strong,
+    .step small {
+        display: block;
+    }
+
+    .step strong {
+        color: #334155;
+        font-size: 11px;
+    }
+
+    .step small {
+        margin-top: 2px;
+        color: #94a3b8;
+        font-size: 8px;
+    }
+
+    .privacy-note {
+        padding: 13px;
+        margin-top: 20px;
+        display: flex;
+        gap: 9px;
+        border-radius: 12px;
+        background: #f0fdf4;
+    }
+
+        .privacy-note span {
+            font-size: 19px;
+        }
+
+        .privacy-note p {
+            margin: 0;
+            color: #047857;
+            line-height: 1.6;
+            font-size: 8px;
+        }
+
+    .application-form-card {
+        padding: 32px;
+    }
+
+    .form-heading {
+        padding-bottom: 20px;
+        margin-bottom: 27px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        border-bottom: 1px solid #eef2f7;
+    }
+
+        .form-heading h2 {
+            margin: 0;
+            color: #172554;
+            font-size: 20px;
+            font-weight: 800;
+        }
+
+        .form-heading p {
+            margin: 4px 0 0;
+            color: #94a3b8;
+            font-size: 10px;
+        }
+
+    .secure-badge {
+        padding: 6px 10px;
+        color: #047857;
+        border-radius: 20px;
+        background: #d1fae5;
+        font-size: 9px;
+        font-weight: 800;
+    }
+
+    .form-group {
+        margin-bottom: 21px;
+    }
+
+        .form-group label,
+        .upload-content label {
+            display: block;
+            margin-bottom: 7px;
+            color: #334155;
+            font-size: 11px;
+            font-weight: 800;
+        }
+
+    .application-input {
+        width: 100%;
+        padding: 13px 14px;
+        color: #334155;
+        outline: none;
+        border: 1px solid #dce3ed;
+        border-radius: 11px;
+        background: #fbfdff;
+        transition: 0.3s;
+    }
+
+    .cover-letter {
+        min-height: 175px;
+        resize: vertical;
+        line-height: 1.7;
+        font-size: 11px;
+    }
+
+    .application-input:focus {
+        border-color: #2563eb;
+        background: white;
+        box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.08);
+    }
+
+    .field-hint {
+        margin-top: 5px;
+        color: #94a3b8;
+        font-size: 8px;
+        text-align: right;
+    }
+
+    .current-cv-card {
+        padding: 16px;
+        margin-bottom: 18px;
+        display: grid;
+        grid-template-columns: auto 1fr auto;
+        align-items: center;
+        gap: 12px;
+        border: 1px solid #a7f3d0;
+        border-radius: 14px;
+        background: #ecfdf5;
+    }
+
+    .cv-icon {
+        width: 43px;
+        height: 43px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 12px;
+        background: white;
+        font-size: 22px;
+    }
+
+    .current-cv-card strong {
+        color: #047857;
+        font-size: 10px;
+    }
+
+    .current-cv-card p {
+        margin: 3px 0;
+        color: #059669;
+        font-size: 8px;
+    }
+
+    .current-cv-card a {
+        color: #047857;
+        text-decoration: none;
+        font-size: 8px;
+        font-weight: 800;
+    }
+
+    .ready-badge {
+        padding: 5px 8px;
+        color: #047857;
+        border-radius: 20px;
+        background: white;
+        font-size: 8px;
+        font-weight: 800;
+    }
+
+    .cv-upload-box {
+        padding: 20px;
+        display: flex;
+        align-items: center;
+        gap: 15px;
+        border: 2px dashed #bfdbfe;
+        border-radius: 15px;
+        background: #f8fbff;
+        transition: 0.3s;
+    }
+
+        .cv-upload-box:hover {
+            border-color: #2563eb;
+            background: #eff6ff;
+        }
+
+    .upload-icon {
+        width: 52px;
+        height: 52px;
+        flex-shrink: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #2563eb;
+        border-radius: 15px;
+        background: #dbeafe;
+        font-size: 25px;
+    }
+
+    .upload-content {
+        width: 100%;
+    }
+
+        .upload-content p {
+            margin: 0 0 9px;
+            color: #64748b;
+            font-size: 8px;
+        }
+
+    .file-input {
+        width: 100%;
+        color: #475569;
+        font-size: 10px;
+    }
+
+        .file-input::file-selector-button {
+            padding: 7px 11px;
+            margin-right: 9px;
+            color: #1d4ed8;
+            border: none;
+            border-radius: 8px;
+            background: white;
+            font-size: 9px;
+            font-weight: 800;
+            cursor: pointer;
+        }
+
+    .confirmation-box {
+        padding: 14px;
+        margin-top: 18px;
+        display: flex;
+        align-items: center;
+        gap: 9px;
+        border-radius: 12px;
+        background: #f8fafc;
+        color: #475569;
+        font-size: 9px;
+        cursor: pointer;
+    }
+
+        .confirmation-box input {
+            width: 16px;
+            height: 16px;
+            accent-color: #2563eb;
+        }
+
+    .text-danger {
+        display: block;
+        margin-top: 5px;
+        font-size: 9px;
+    }
+
+    .form-actions {
+        margin-top: 25px;
+        display: flex;
+        justify-content: flex-end;
+        gap: 11px;
+    }
+
+    .cancel-button,
+    .submit-button {
+        padding: 11px 19px;
+        border-radius: 10px;
+        font-size: 11px;
+        font-weight: 800;
+        transition: 0.3s;
+    }
+
+    .cancel-button {
+        color: #475569;
+        border: 1px solid #dce3ed;
+        background: white;
+        text-decoration: none;
+    }
+
+    .submit-button {
+        color: white;
+        border: none;
+        background: linear-gradient(90deg, #2563eb, #059669);
+        box-shadow: 0 8px 20px rgba(37, 99, 235, 0.23);
+    }
+
+        .cancel-button:hover,
+        .submit-button:hover {
+            transform: translateY(-2px);
+        }
+
+    @@keyframes applyEntrance {
+        from {
+            opacity: 0;
+            transform: translateY(18px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    @@keyframes rocketFloat {
+        0%, 100% {
+            transform: translateY(0) rotate(-5deg);
+        }
+
+        50% {
+            transform: translateY(-9px) rotate(5deg);
+        }
+    }
+
+    @@media (max-width: 850px) {
+        .apply-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .opportunity-card {
+            position: static;
+        }
+    }
+
+    @@media (max-width: 600px) {
+        .apply-header {
+            padding: 30px 23px;
+        }
+
+        .header-icon {
+            display: none;
+        }
+
+        .apply-header h1 {
+            font-size: 26px;
+        }
+
+        .application-form-card {
+            padding: 25px 18px;
+        }
+
+        .form-heading {
+            align-items: flex-start;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .current-cv-card {
+            grid-template-columns: auto 1fr;
+        }
+
+        .ready-badge {
+            grid-column: 1 / 3;
+            width: fit-content;
+        }
+
+        .cv-upload-box {
+            align-items: flex-start;
+            flex-direction: column;
+        }
+    }
+</style>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

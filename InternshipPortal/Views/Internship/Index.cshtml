@@ -1,0 +1,1073 @@
+﻿@model List<InternshipPortal.Models.Internship>
+@using InternshipPortal.Models.Enums
+@using Microsoft.AspNetCore.Identity
+@using Microsoft.EntityFrameworkCore
+@using InternshipPortal.Data
+
+@inject UserManager<IdentityUser> UserManager
+@inject ApplicationDbContext DbContext
+
+@{
+    ViewData["Title"] = "Browse Internships";
+
+    var workModes = Html.GetEnumSelectList<WorkMode>();
+
+    foreach (var item in workModes)
+    {
+        item.Selected =
+            ViewBag.WorkMode != null &&
+            item.Value == ((int)ViewBag.WorkMode).ToString();
+    }
+
+    var savedInternshipIds = new HashSet<int>();
+    var currentReturnUrl =
+        $"{Context.Request.Path}{Context.Request.QueryString}";
+
+    if (User.Identity?.IsAuthenticated == true &&
+        User.IsInRole("Student"))
+    {
+        var currentUserId = UserManager.GetUserId(User);
+
+        var currentStudentId = await DbContext.Students
+            .Where(student => student.UserId == currentUserId)
+            .Select(student => (int?)student.Id)
+            .FirstOrDefaultAsync();
+
+        if (currentStudentId.HasValue)
+        {
+            var savedIds = await DbContext.SavedInternships
+                .Where(saved =>
+                    saved.StudentId == currentStudentId.Value)
+                .Select(saved => saved.InternshipId)
+                .ToListAsync();
+
+            savedInternshipIds = savedIds.ToHashSet();
+        }
+    }
+}
+
+<div class="browse-page">
+    <div class="browse-container">
+
+        @if (TempData["SuccessMessage"] != null)
+        {
+            <div class="alert alert-success alert-dismissible fade show shadow-sm">
+                <i class="bi bi-check-circle-fill me-2"></i>
+                @TempData["SuccessMessage"]
+
+                <button type="button"
+                        class="btn-close"
+                        data-bs-dismiss="alert">
+                </button>
+            </div>
+        }
+
+        @if (TempData["InfoMessage"] != null)
+        {
+            <div class="alert alert-info alert-dismissible fade show shadow-sm">
+                <i class="bi bi-info-circle-fill me-2"></i>
+                @TempData["InfoMessage"]
+
+                <button type="button"
+                        class="btn-close"
+                        data-bs-dismiss="alert">
+                </button>
+            </div>
+        }
+
+        <section class="browse-header">
+            <div class="header-content">
+                <span class="header-badge">
+                    <i class="bi bi-stars me-1"></i>
+                    Explore Opportunities
+                </span>
+
+                <h1>Find Your Perfect Internship</h1>
+
+                <p>
+                    Discover verified training opportunities,
+                    improve your skills, and start your career.
+                </p>
+            </div>
+
+            <div class="header-visual">
+                <div class="visual-circle"></div>
+
+                <div class="search-illustration">
+                    🔍
+                </div>
+
+                <div class="floating-item first-item">
+                    🎓 Students
+                </div>
+
+                <div class="floating-item second-item">
+                    💼 Opportunities
+                </div>
+            </div>
+        </section>
+
+        <section class="search-card">
+            <form asp-controller="Internship"
+                  asp-action="Index"
+                  method="get">
+
+                <div class="search-fields">
+                    <div class="search-field main-search">
+                        <label>Search</label>
+
+                        <div class="input-with-icon">
+                            <span>🔍</span>
+
+                            <input type="text"
+                                   name="search"
+                                   value="@ViewBag.Search"
+                                   placeholder="Title, company or skills..." />
+                        </div>
+                    </div>
+
+                    <div class="search-field">
+                        <label>Location</label>
+
+                        <div class="input-with-icon">
+                            <span>📍</span>
+
+                            <input type="text"
+                                   name="location"
+                                   value="@ViewBag.Location"
+                                   placeholder="City or country" />
+                        </div>
+                    </div>
+
+                    <div class="search-field">
+                        <label>Work Mode</label>
+
+                        <select name="workMode"
+                                asp-items="workModes">
+                            <option value="">
+                                All Work Modes
+                            </option>
+                        </select>
+                    </div>
+
+                    <button type="submit"
+                            class="search-button">
+                        <i class="bi bi-search me-1"></i>
+                        Search
+                    </button>
+                </div>
+
+                @if (ViewBag.Search != null ||
+                     ViewBag.Location != null ||
+                     ViewBag.WorkMode != null)
+                {
+                    <a asp-controller="Internship"
+                       asp-action="Index"
+                       class="clear-filters">
+                        × Clear all filters
+                    </a>
+                }
+            </form>
+        </section>
+
+        <section class="results-heading">
+            <div>
+                <h2>Available Internships</h2>
+
+                <p>
+                    @Model.Count verified opportunities found
+                </p>
+            </div>
+
+            <div class="heading-actions">
+                <span class="verified-label">
+                    <i class="bi bi-patch-check-fill"></i>
+                    Admin Verified
+                </span>
+
+                @if (User.IsInRole("Student"))
+                {
+                    <a asp-controller="SavedInternship"
+                       asp-action="Index"
+                       class="saved-page-link">
+
+                        <i class="bi bi-heart-fill"></i>
+
+                        Saved (@savedInternshipIds.Count)
+                    </a>
+                }
+            </div>
+        </section>
+
+        @if (Model.Any())
+        {
+            <section class="internship-cards-grid">
+                @{
+                    var cardNumber = 0;
+                }
+
+                @foreach (var internship in Model)
+                {
+                    var isSaved =
+                        savedInternshipIds.Contains(internship.Id);
+
+                    var animationDelay = cardNumber * 80;
+
+                    <article class="browse-card"
+                             style="animation-delay: @(animationDelay)ms">
+
+                        @if (User.IsInRole("Student"))
+                        {
+                            <form asp-controller="SavedInternship"
+                                  asp-action="@(isSaved ? "Remove" : "Save")"
+                                  asp-route-internshipId="@internship.Id"
+                                  asp-route-returnUrl="@currentReturnUrl"
+                                  method="post"
+                                  class="save-form">
+
+                                @Html.AntiForgeryToken()
+
+                                <button type="submit"
+                                        class="save-heart-button @(isSaved ? "internship-saved" : "")"
+                                        title="@(isSaved
+                                                                                ? "Remove from saved"
+                                                                                : "Save internship")">
+
+                                    <i class="bi @(isSaved
+                                                                               ? "bi-heart-fill"
+                                                                               : "bi-heart")">
+                                    </i>
+
+                                    <span>
+                                        @(isSaved ? "Saved" : "Save")
+                                    </span>
+                                </button>
+                            </form>
+                        }
+
+                        <div class="card-top">
+                            <div class="company-logo">
+                                @if (!string.IsNullOrWhiteSpace(
+                                    internship.Company.LogoPath))
+                                {
+                                    <img src="@internship.Company.LogoPath"
+                                         alt="@internship.Company.Name" />
+                                }
+                                else
+                                {
+                                    <span>
+                                        @(string.IsNullOrWhiteSpace(
+                                            internship.Company.Name)
+                                            ? "C"
+                                            : internship.Company.Name
+                                                .Substring(0, 1)
+                                                .ToUpper())
+                                    </span>
+                                }
+                            </div>
+
+                            <div class="card-badges">
+                                <span class="work-mode-badge">
+                                    <i class="bi bi-laptop me-1"></i>
+                                    @internship.WorkMode
+                                </span>
+
+                                @if (internship.IsPaid)
+                                {
+                                    <span class="paid-badge">
+                                        <i class="bi bi-cash-coin me-1"></i>
+                                        Paid
+                                    </span>
+                                }
+                            </div>
+                        </div>
+
+                        <div class="card-company">
+                            <i class="bi bi-building-fill me-1"></i>
+                            @internship.Company.Name
+                        </div>
+
+                        <h3>@internship.Title</h3>
+
+                        <p class="card-description">
+                            @internship.Description
+                        </p>
+
+                        <div class="card-information">
+                            <div>
+                                <span>📍</span>
+                                @internship.Location
+                            </div>
+
+                            <div>
+                                <span>👥</span>
+                                @internship.AvailablePositions positions
+                            </div>
+
+                            <div>
+                                <span>📅</span>
+                                Deadline:
+                                @internship.ApplicationDeadline.ToString("dd MMM")
+                            </div>
+
+                            <div>
+                                <span>💰</span>
+
+                                @if (internship.IsPaid)
+                                {
+                                    <text>
+                                        @internship.Salary?.ToString("N0")
+                                        EGP
+                                    </text>
+                                }
+                                else
+                                {
+                                    <text>Unpaid</text>
+                                }
+                            </div>
+                        </div>
+
+                        <div class="skills-preview">
+                            <strong>
+                                <i class="bi bi-lightning-charge-fill me-1"></i>
+                                Required Skills
+                            </strong>
+
+                            <span>
+                                @internship.RequiredSkills
+                            </span>
+                        </div>
+
+                        <div class="card-footer">
+                            <span class="posted-date">
+                                <i class="bi bi-clock me-1"></i>
+
+                                Posted
+                                @internship.CreatedAt.ToString("dd MMM yyyy")
+                            </span>
+
+                            <a asp-controller="Internship"
+                               asp-action="Details"
+                               asp-route-id="@internship.Id"
+                               class="details-button">
+
+                                View Details
+                                <i class="bi bi-arrow-right"></i>
+                            </a>
+                        </div>
+                    </article>
+
+                    cardNumber++;
+                }
+            </section>
+        }
+        else
+        {
+            <section class="empty-results">
+                <div class="empty-icon">🔍</div>
+
+                <h2>No Internships Found</h2>
+
+                <p>
+                    Try changing your search text,
+                    location, or work mode.
+                </p>
+
+                <a asp-controller="Internship"
+                   asp-action="Index">
+                    Clear Filters
+                </a>
+            </section>
+        }
+    </div>
+</div>
+
+<style>
+    .browse-page {
+        min-height: 100vh;
+        padding: 40px 20px 70px;
+        background: radial-gradient( circle at top left, rgba(37, 99, 235, 0.09), transparent 30%), radial-gradient( circle at bottom right, rgba(124, 58, 237, 0.08), transparent 35%), #f5f7fb;
+    }
+
+    .browse-container {
+        max-width: 1250px;
+        margin: auto;
+    }
+
+    .browse-header {
+        min-height: 270px;
+        display: grid;
+        grid-template-columns: 1.4fr 1fr;
+        align-items: center;
+        overflow: hidden;
+        padding: 42px 48px;
+        color: white;
+        border-radius: 27px;
+        background: linear-gradient( 135deg, #0f2b5b, #1d4ed8 57%, #6d28d9);
+        box-shadow: 0 21px 48px rgba(30, 64, 175, 0.21);
+        animation: browseEntrance 0.7s ease;
+    }
+
+    .header-badge {
+        display: inline-flex;
+        align-items: center;
+        padding: 7px 14px;
+        margin-bottom: 14px;
+        font-size: 11px;
+        font-weight: 700;
+        border: 1px solid rgba(255, 255, 255, 0.18);
+        border-radius: 25px;
+        background: rgba(255, 255, 255, 0.16);
+        backdrop-filter: blur(8px);
+    }
+
+    .browse-header h1 {
+        max-width: 650px;
+        margin: 0;
+        font-size: 38px;
+        font-weight: 800;
+    }
+
+    .browse-header p {
+        max-width: 650px;
+        margin: 14px 0 0;
+        color: #dbeafe;
+        font-size: 14px;
+        line-height: 1.7;
+    }
+
+    .header-visual {
+        position: relative;
+        min-height: 190px;
+    }
+
+    .visual-circle {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        width: 230px;
+        height: 230px;
+        border: 1px solid rgba(255, 255, 255, 0.19);
+        border-radius: 50%;
+        transform: translate(-50%, -50%);
+    }
+
+    .search-illustration {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        width: 125px;
+        height: 125px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 59px;
+        border-radius: 35px;
+        background: rgba(255, 255, 255, 0.17);
+        backdrop-filter: blur(10px);
+        transform: translate(-50%, -50%);
+        animation: searchFloat 4s ease-in-out infinite;
+    }
+
+    .floating-item {
+        position: absolute;
+        padding: 9px 13px;
+        color: #172554;
+        font-size: 10px;
+        font-weight: 800;
+        border-radius: 12px;
+        background: rgba(255, 255, 255, 0.94);
+        box-shadow: 0 12px 25px rgba(15, 23, 42, 0.17);
+        animation: floatingItem 5s ease-in-out infinite;
+    }
+
+    .first-item {
+        top: 15px;
+        left: 0;
+    }
+
+    .second-item {
+        right: 0;
+        bottom: 15px;
+        animation-delay: 1.3s;
+    }
+
+    .search-card {
+        position: relative;
+        z-index: 4;
+        padding: 23px;
+        margin: -25px 25px 0;
+        border: 1px solid #e2e8f0;
+        border-radius: 18px;
+        background: white;
+        box-shadow: 0 15px 35px rgba(15, 23, 42, 0.09);
+        animation: browseEntrance 0.8s ease;
+    }
+
+    .search-fields {
+        display: grid;
+        grid-template-columns: 1.4fr 1fr 0.8fr auto;
+        align-items: end;
+        gap: 13px;
+    }
+
+    .search-field label {
+        display: block;
+        margin-bottom: 6px;
+        color: #475569;
+        font-size: 10px;
+        font-weight: 800;
+    }
+
+    .input-with-icon {
+        position: relative;
+    }
+
+        .input-with-icon span {
+            position: absolute;
+            top: 13px;
+            left: 12px;
+            font-size: 16px;
+        }
+
+    .search-field input,
+    .search-field select {
+        width: 100%;
+        height: 46px;
+        color: #475569;
+        font-size: 11px;
+        outline: none;
+        border: 1px solid #dce3ed;
+        border-radius: 10px;
+        background: #fbfdff;
+        transition: 0.3s;
+    }
+
+    .search-field input {
+        padding: 0 13px 0 40px;
+    }
+
+    .search-field select {
+        padding: 0 11px;
+    }
+
+        .search-field input:focus,
+        .search-field select:focus {
+            border-color: #2563eb;
+            background: white;
+            box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.08);
+        }
+
+    .search-button {
+        height: 46px;
+        padding: 0 22px;
+        color: white;
+        font-size: 11px;
+        font-weight: 800;
+        border: none;
+        border-radius: 10px;
+        background: linear-gradient(90deg, #2563eb, #7c3aed);
+        box-shadow: 0 8px 19px rgba(79, 70, 229, 0.21);
+        transition: 0.3s;
+    }
+
+        .search-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 24px rgba(79, 70, 229, 0.3);
+        }
+
+    .clear-filters {
+        display: inline-block;
+        margin-top: 11px;
+        color: #dc2626;
+        font-size: 10px;
+        font-weight: 700;
+        text-decoration: none;
+    }
+
+    .results-heading {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        flex-wrap: wrap;
+        margin: 34px 4px 17px;
+    }
+
+        .results-heading h2 {
+            margin: 0;
+            color: #172554;
+            font-size: 22px;
+            font-weight: 800;
+        }
+
+        .results-heading p {
+            margin: 4px 0 0;
+            color: #94a3b8;
+            font-size: 11px;
+        }
+
+    .heading-actions {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .verified-label {
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        padding: 7px 11px;
+        color: #047857;
+        font-size: 10px;
+        font-weight: 800;
+        border-radius: 20px;
+        background: #d1fae5;
+    }
+
+    .saved-page-link {
+        display: inline-flex;
+        align-items: center;
+        gap: 7px;
+        padding: 8px 13px;
+        color: #be123c;
+        font-size: 10px;
+        font-weight: 800;
+        border: 1px solid #fecdd3;
+        border-radius: 20px;
+        background: #fff1f2;
+        text-decoration: none;
+        transition: 0.3s;
+    }
+
+        .saved-page-link:hover {
+            color: white;
+            background: linear-gradient(135deg, #f43f5e, #ec4899);
+            transform: translateY(-2px);
+            box-shadow: 0 9px 20px rgba(225, 29, 72, 0.22);
+        }
+
+        .saved-page-link i {
+            animation: heartPulse 1.6s ease-in-out infinite;
+        }
+
+    .internship-cards-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 19px;
+    }
+
+    .browse-card {
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        padding: 22px;
+        overflow: hidden;
+        opacity: 0;
+        border: 1px solid #e6ebf2;
+        border-radius: 19px;
+        background: white;
+        box-shadow: 0 9px 27px rgba(15, 23, 42, 0.05);
+        animation: browseEntrance 0.7s ease forwards;
+        transition: 0.35s;
+    }
+
+        .browse-card::before {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            content: "";
+            background: linear-gradient(90deg, #2563eb, #7c3aed);
+            transform: scaleX(0);
+            transform-origin: left;
+            transition: 0.4s;
+        }
+
+        .browse-card:hover::before {
+            transform: scaleX(1);
+        }
+
+        .browse-card:hover {
+            border-color: #bfdbfe;
+            transform: translateY(-7px);
+            box-shadow: 0 17px 38px rgba(30, 64, 175, 0.12);
+        }
+
+    .save-form {
+        position: absolute;
+        top: 14px;
+        right: 14px;
+        z-index: 5;
+    }
+
+    .save-heart-button {
+        min-width: 42px;
+        height: 42px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0;
+        overflow: hidden;
+        padding: 0 12px;
+        color: #e11d48;
+        border: 1px solid #fecdd3;
+        border-radius: 14px;
+        background: rgba(255, 255, 255, 0.96);
+        box-shadow: 0 8px 20px rgba(15, 23, 42, 0.12);
+        transition: 0.35s;
+    }
+
+        .save-heart-button i {
+            font-size: 18px;
+            transition: 0.3s;
+        }
+
+        .save-heart-button span {
+            max-width: 0;
+            overflow: hidden;
+            opacity: 0;
+            font-size: 10px;
+            font-weight: 800;
+            white-space: nowrap;
+            transition: 0.35s;
+        }
+
+        .save-heart-button:hover {
+            gap: 7px;
+            color: white;
+            border-color: #e11d48;
+            background: linear-gradient(135deg, #f43f5e, #ec4899);
+            transform: translateY(-3px) scale(1.04);
+            box-shadow: 0 12px 24px rgba(225, 29, 72, 0.25);
+        }
+
+            .save-heart-button:hover span {
+                max-width: 55px;
+                opacity: 1;
+            }
+
+            .save-heart-button:hover i {
+                animation: heartPulse 0.8s ease-in-out infinite;
+            }
+
+        .save-heart-button.internship-saved {
+            color: white;
+            border-color: #e11d48;
+            background: linear-gradient(135deg, #f43f5e, #ec4899);
+        }
+
+            .save-heart-button.internship-saved i {
+                animation: heartPulse 1.5s ease-in-out infinite;
+            }
+
+    .card-top {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        padding-top: 43px;
+    }
+
+    .company-logo {
+        width: 57px;
+        height: 57px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        overflow: hidden;
+        color: white;
+        font-size: 22px;
+        font-weight: 900;
+        border: 3px solid #e0f2fe;
+        border-radius: 16px;
+        background: linear-gradient(135deg, #2563eb, #7c3aed);
+    }
+
+        .company-logo img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .company-logo span {
+            font-size: 22px;
+        }
+
+    .card-badges {
+        display: flex;
+        gap: 6px;
+    }
+
+        .card-badges span {
+            padding: 5px 9px;
+            font-size: 8px;
+            font-weight: 800;
+            border-radius: 20px;
+        }
+
+    .work-mode-badge {
+        color: #6d28d9;
+        background: #ede9fe;
+    }
+
+    .paid-badge {
+        color: #047857;
+        background: #d1fae5;
+    }
+
+    .card-company {
+        margin-top: 17px;
+        color: #2563eb;
+        font-size: 10px;
+        font-weight: 800;
+    }
+
+    .browse-card h3 {
+        margin: 5px 0 8px;
+        color: #172554;
+        font-size: 17px;
+        font-weight: 800;
+    }
+
+    .card-description {
+        min-height: 51px;
+        display: -webkit-box;
+        overflow: hidden;
+        margin: 0;
+        color: #64748b;
+        font-size: 10px;
+        line-height: 1.6;
+        -webkit-line-clamp: 3;
+        -webkit-box-orient: vertical;
+    }
+
+    .card-information {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 11px;
+        padding: 15px 0;
+        margin-top: 15px;
+        border-top: 1px solid #eef2f7;
+        border-bottom: 1px solid #eef2f7;
+    }
+
+        .card-information > div {
+            color: #475569;
+            font-size: 9px;
+        }
+
+        .card-information span {
+            margin-right: 4px;
+        }
+
+    .skills-preview {
+        padding: 11px;
+        margin-top: 13px;
+        border-radius: 10px;
+        background: #f8fafc;
+    }
+
+        .skills-preview strong,
+        .skills-preview span {
+            display: block;
+        }
+
+        .skills-preview strong {
+            color: #334155;
+            font-size: 9px;
+        }
+
+        .skills-preview span {
+            overflow: hidden;
+            margin-top: 3px;
+            color: #64748b;
+            font-size: 9px;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+    .card-footer {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 10px;
+        padding-top: 16px;
+        margin-top: auto;
+    }
+
+    .posted-date {
+        color: #94a3b8;
+        font-size: 8px;
+    }
+
+    .details-button {
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        padding: 8px 12px;
+        color: white;
+        font-size: 9px;
+        font-weight: 800;
+        border-radius: 9px;
+        background: linear-gradient(90deg, #2563eb, #7c3aed);
+        text-decoration: none;
+        transition: 0.3s;
+    }
+
+        .details-button:hover {
+            color: white;
+            transform: translateX(3px);
+            box-shadow: 0 8px 18px rgba(79, 70, 229, 0.25);
+        }
+
+    .empty-results {
+        padding: 70px 20px;
+        text-align: center;
+        border: 2px dashed #cbd5e1;
+        border-radius: 22px;
+        background: white;
+        animation: browseEntrance 0.8s ease;
+    }
+
+    .empty-icon {
+        width: 82px;
+        height: 82px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: auto;
+        font-size: 39px;
+        border-radius: 24px;
+        background: #dbeafe;
+        animation: searchIconFloat 2.5s ease-in-out infinite;
+    }
+
+    .empty-results h2 {
+        margin: 18px 0 7px;
+        color: #172554;
+        font-size: 20px;
+        font-weight: 800;
+    }
+
+    .empty-results p {
+        color: #64748b;
+        font-size: 11px;
+    }
+
+    .empty-results a {
+        display: inline-block;
+        padding: 10px 16px;
+        margin-top: 10px;
+        color: white;
+        font-size: 10px;
+        font-weight: 800;
+        border-radius: 10px;
+        background: #2563eb;
+        text-decoration: none;
+        transition: 0.3s;
+    }
+
+        .empty-results a:hover {
+            color: white;
+            transform: translateY(-3px);
+            box-shadow: 0 10px 20px rgba(37, 99, 235, 0.25);
+        }
+
+    @@keyframes browseEntrance {
+        from {
+            opacity: 0;
+            transform: translateY(18px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    @@keyframes searchFloat {
+        0%, 100% {
+            transform: translate(-50%, -50%) rotate(-4deg) translateY(0);
+        }
+
+        50% {
+            transform: translate(-50%, -50%) rotate(4deg) translateY(-9px);
+        }
+    }
+
+    @@keyframes floatingItem {
+        0%, 100% {
+            transform: translateY(0);
+        }
+
+        50% {
+            transform: translateY(-8px);
+        }
+    }
+
+    @@keyframes heartPulse {
+        0%, 100% {
+            transform: scale(1);
+        }
+
+        50% {
+            transform: scale(1.2);
+        }
+    }
+
+    @@keyframes searchIconFloat {
+        0%, 100% {
+            transform: translateY(0) rotate(0deg);
+        }
+
+        50% {
+            transform: translateY(-7px) rotate(5deg);
+        }
+    }
+
+    @@media (max-width: 1050px) {
+        .internship-cards-grid {
+            grid-template-columns: repeat(2, 1fr);
+        }
+
+        .search-fields {
+            grid-template-columns: 1fr 1fr;
+        }
+    }
+
+    @@media (max-width: 750px) {
+        .browse-header {
+            grid-template-columns: 1fr;
+            padding: 35px 25px;
+        }
+
+        .header-visual {
+            display: none;
+        }
+
+        .browse-header h1 {
+            font-size: 30px;
+        }
+
+        .search-card {
+            margin: 20px 0 0;
+        }
+
+        .search-fields,
+        .internship-cards-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .results-heading {
+            align-items: flex-start;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .heading-actions {
+            width: 100%;
+            justify-content: space-between;
+        }
+    }
+</style>

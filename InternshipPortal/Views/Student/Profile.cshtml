@@ -1,0 +1,644 @@
+﻿@model InternshipPortal.Models.ViewModels.StudentProfileViewModel
+
+@{
+    ViewData["Title"] = "Student Profile";
+}
+
+<div class="profile-page">
+    <div class="profile-container">
+
+        @if (TempData["Success"] != null)
+        {
+            <div class="success-message">
+                ✓ @TempData["Success"]
+            </div>
+        }
+
+        <section class="profile-header">
+            <div class="profile-avatar">
+                🎓
+            </div>
+
+            <div>
+                <span class="profile-badge">
+                    Student Account
+                </span>
+
+                <h1>Complete Your Profile</h1>
+
+                <p>
+                    Add your academic information and CV
+                    to start applying for internship opportunities.
+                </p>
+            </div>
+
+            <a asp-controller="Dashboard"
+               asp-action="Index"
+               class="dashboard-link">
+                ← Dashboard
+            </a>
+        </section>
+
+        <div class="profile-content">
+            <aside class="profile-sidebar">
+                <div class="completion-icon">📋</div>
+
+                <h3>Profile Information</h3>
+
+                <p>
+                    Companies will use this information
+                    when reviewing your applications.
+                </p>
+
+                <div class="sidebar-feature">
+                    <span>✓</span>
+                    Academic information
+                </div>
+
+                <div class="sidebar-feature">
+                    <span>✓</span>
+                    Specialization details
+                </div>
+
+                <div class="sidebar-feature">
+                    <span>✓</span>
+                    Professional CV
+                </div>
+
+                @if (!string.IsNullOrEmpty(Model.CurrentCVPath))
+                {
+                    <div class="current-cv">
+                        <span>📄</span>
+
+                        <div>
+                            <strong>Current CV</strong>
+
+                            <a href="@Model.CurrentCVPath"
+                               target="_blank">
+                                View uploaded file
+                            </a>
+                        </div>
+                    </div>
+                }
+            </aside>
+
+            <section class="profile-form-card">
+                <div class="form-heading">
+                    <div>
+                        <h2>Personal & Academic Details</h2>
+                        <p>All fields marked with * are required</p>
+                    </div>
+
+                    <span class="secure-badge">
+                        🔒 Secure
+                    </span>
+                </div>
+
+                <form asp-controller="Student"
+                      asp-action="Profile"
+                      method="post"
+                      enctype="multipart/form-data">
+
+                    <input asp-for="Id" type="hidden" />
+
+                    <input asp-for="CurrentCVPath"
+                           type="hidden" />
+
+                    <div asp-validation-summary="ModelOnly"
+                         class="text-danger validation-summary">
+                    </div>
+
+                    <div class="form-group full-width">
+                        <label asp-for="FullName">
+                            Full Name *
+                        </label>
+
+                        <input asp-for="FullName"
+                               class="profile-input"
+                               placeholder="Enter your full name" />
+
+                        <span asp-validation-for="FullName"
+                              class="text-danger"></span>
+                    </div>
+
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label asp-for="University">
+                                University *
+                            </label>
+
+                            <input asp-for="University"
+                                   class="profile-input"
+                                   placeholder="University name" />
+
+                            <span asp-validation-for="University"
+                                  class="text-danger"></span>
+                        </div>
+
+                        <div class="form-group">
+                            <label asp-for="Faculty">
+                                Faculty *
+                            </label>
+
+                            <input asp-for="Faculty"
+                                   class="profile-input"
+                                   placeholder="Faculty name" />
+
+                            <span asp-validation-for="Faculty"
+                                  class="text-danger"></span>
+                        </div>
+
+                        <div class="form-group">
+                            <label asp-for="Specialization">
+                                Specialization *
+                            </label>
+
+                            <input asp-for="Specialization"
+                                   class="profile-input"
+                                   placeholder="Software Engineering" />
+
+                            <span asp-validation-for="Specialization"
+                                  class="text-danger"></span>
+                        </div>
+
+                        <div class="form-group">
+                            <label asp-for="GraduationYear">
+                                Graduation Year *
+                            </label>
+
+                            <input asp-for="GraduationYear"
+                                   type="number"
+                                   min="2020"
+                                   max="2040"
+                                   class="profile-input"
+                                   placeholder="2027" />
+
+                            <span asp-validation-for="GraduationYear"
+                                  class="text-danger"></span>
+                        </div>
+                    </div>
+
+                    <div class="cv-upload-section">
+                        <div class="upload-icon">☁</div>
+
+                        <div class="upload-content">
+                            <label asp-for="CVFile">
+                                Upload Your CV
+                            </label>
+
+                            <p>
+                                Upload a PDF file with a maximum
+                                size of 5 MB.
+                            </p>
+
+                            <input asp-for="CVFile"
+                                   type="file"
+                                   accept=".pdf,application/pdf"
+                                   class="file-input" />
+
+                            <span asp-validation-for="CVFile"
+                                  class="text-danger"></span>
+                        </div>
+                    </div>
+
+                    <div class="form-actions">
+                        <a asp-controller="Dashboard"
+                           asp-action="Index"
+                           class="cancel-button">
+                            Cancel
+                        </a>
+
+                        <button type="submit"
+                                class="save-button">
+                            Save Profile
+                        </button>
+                    </div>
+                </form>
+            </section>
+        </div>
+    </div>
+</div>
+
+<style>
+    .profile-page {
+        min-height: 100vh;
+        padding: 40px 20px 70px;
+        background: radial-gradient(circle at top left, rgba(37, 99, 235, 0.09), transparent 30%), radial-gradient(circle at bottom right, rgba(124, 58, 237, 0.08), transparent 35%), #f5f7fb;
+    }
+
+    .profile-container {
+        max-width: 1200px;
+        margin: auto;
+    }
+
+    .success-message {
+        padding: 14px 18px;
+        margin-bottom: 20px;
+        color: #047857;
+        border: 1px solid #a7f3d0;
+        border-radius: 14px;
+        background: #ecfdf5;
+        font-weight: 600;
+        animation: profileEntrance 0.6s ease;
+    }
+
+    .profile-header {
+        padding: 32px 38px;
+        display: grid;
+        grid-template-columns: auto 1fr auto;
+        align-items: center;
+        gap: 22px;
+        overflow: hidden;
+        color: white;
+        border-radius: 25px;
+        background: linear-gradient(135deg, #0f2b5b, #1d4ed8 60%, #6d28d9);
+        box-shadow: 0 20px 45px rgba(30, 64, 175, 0.2);
+        animation: profileEntrance 0.7s ease;
+    }
+
+    .profile-avatar {
+        width: 80px;
+        height: 80px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 23px;
+        background: rgba(255, 255, 255, 0.16);
+        font-size: 38px;
+        animation: avatarFloat 4s ease-in-out infinite;
+    }
+
+    .profile-badge {
+        display: inline-block;
+        padding: 5px 12px;
+        margin-bottom: 7px;
+        border-radius: 20px;
+        background: rgba(255, 255, 255, 0.15);
+        font-size: 11px;
+    }
+
+    .profile-header h1 {
+        margin: 0;
+        font-size: 28px;
+        font-weight: 800;
+    }
+
+    .profile-header p {
+        max-width: 650px;
+        margin: 8px 0 0;
+        color: #dbeafe;
+        font-size: 13px;
+    }
+
+    .dashboard-link {
+        padding: 10px 15px;
+        color: #1e3a8a;
+        border-radius: 11px;
+        background: white;
+        text-decoration: none;
+        font-weight: 700;
+        transition: 0.3s;
+    }
+
+        .dashboard-link:hover {
+            color: #1e3a8a;
+            transform: translateY(-3px);
+            box-shadow: 0 10px 22px rgba(15, 23, 42, 0.2);
+        }
+
+    .profile-content {
+        margin-top: 24px;
+        display: grid;
+        grid-template-columns: 310px 1fr;
+        gap: 22px;
+        align-items: start;
+    }
+
+    .profile-sidebar,
+    .profile-form-card {
+        border: 1px solid #e7ecf4;
+        border-radius: 21px;
+        background: white;
+        box-shadow: 0 10px 30px rgba(15, 23, 42, 0.05);
+        animation: profileEntrance 0.8s ease;
+    }
+
+    .profile-sidebar {
+        padding: 30px 25px;
+        position: sticky;
+        top: 20px;
+    }
+
+    .completion-icon {
+        width: 58px;
+        height: 58px;
+        margin-bottom: 20px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 17px;
+        background: #dbeafe;
+        font-size: 28px;
+    }
+
+    .profile-sidebar h3 {
+        color: #172554;
+        font-size: 18px;
+        font-weight: 800;
+    }
+
+    .profile-sidebar > p {
+        margin-bottom: 23px;
+        color: #64748b;
+        font-size: 12px;
+        line-height: 1.7;
+    }
+
+    .sidebar-feature {
+        margin-top: 14px;
+        display: flex;
+        align-items: center;
+        gap: 9px;
+        color: #475569;
+        font-size: 12px;
+    }
+
+        .sidebar-feature span {
+            width: 22px;
+            height: 22px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #047857;
+            border-radius: 50%;
+            background: #d1fae5;
+            font-size: 11px;
+            font-weight: 800;
+        }
+
+    .current-cv {
+        margin-top: 28px;
+        padding: 14px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        border-radius: 13px;
+        background: #f8fafc;
+        border: 1px solid #e2e8f0;
+    }
+
+        .current-cv > span {
+            font-size: 25px;
+        }
+
+        .current-cv strong,
+        .current-cv a {
+            display: block;
+        }
+
+        .current-cv strong {
+            color: #334155;
+            font-size: 12px;
+        }
+
+        .current-cv a {
+            margin-top: 3px;
+            color: #2563eb;
+            font-size: 11px;
+            text-decoration: none;
+        }
+
+    .profile-form-card {
+        padding: 32px;
+    }
+
+    .form-heading {
+        margin-bottom: 28px;
+        padding-bottom: 20px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        border-bottom: 1px solid #eef2f7;
+    }
+
+        .form-heading h2 {
+            margin: 0;
+            color: #172554;
+            font-size: 20px;
+            font-weight: 800;
+        }
+
+        .form-heading p {
+            margin: 5px 0 0;
+            color: #94a3b8;
+            font-size: 11px;
+        }
+
+    .secure-badge {
+        padding: 6px 11px;
+        color: #047857;
+        border-radius: 20px;
+        background: #ecfdf5;
+        font-size: 11px;
+        font-weight: 700;
+    }
+
+    .form-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 20px;
+    }
+
+    .form-group {
+        margin-bottom: 20px;
+    }
+
+        .form-group label,
+        .upload-content label {
+            display: block;
+            margin-bottom: 7px;
+            color: #334155;
+            font-size: 12px;
+            font-weight: 700;
+        }
+
+    .profile-input {
+        width: 100%;
+        height: 49px;
+        padding: 0 14px;
+        color: #334155;
+        outline: none;
+        border: 1px solid #dce3ed;
+        border-radius: 11px;
+        background: #fbfdff;
+        transition: 0.3s;
+    }
+
+        .profile-input:focus {
+            border-color: #2563eb;
+            background: white;
+            box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.09);
+        }
+
+    .text-danger {
+        display: block;
+        margin-top: 5px;
+        font-size: 11px;
+    }
+
+    .cv-upload-section {
+        padding: 22px;
+        display: flex;
+        align-items: center;
+        gap: 18px;
+        border: 2px dashed #bfdbfe;
+        border-radius: 16px;
+        background: #f8fbff;
+        transition: 0.3s;
+    }
+
+        .cv-upload-section:hover {
+            border-color: #2563eb;
+            background: #eff6ff;
+        }
+
+    .upload-icon {
+        width: 55px;
+        height: 55px;
+        flex-shrink: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #2563eb;
+        border-radius: 16px;
+        background: #dbeafe;
+        font-size: 27px;
+    }
+
+    .upload-content {
+        width: 100%;
+    }
+
+        .upload-content p {
+            margin: 0 0 11px;
+            color: #64748b;
+            font-size: 11px;
+        }
+
+    .file-input {
+        width: 100%;
+        color: #475569;
+        font-size: 12px;
+    }
+
+        .file-input::file-selector-button {
+            padding: 8px 13px;
+            margin-right: 10px;
+            color: #1d4ed8;
+            border: none;
+            border-radius: 8px;
+            background: #dbeafe;
+            font-weight: 700;
+            cursor: pointer;
+        }
+
+    .form-actions {
+        margin-top: 28px;
+        display: flex;
+        justify-content: flex-end;
+        gap: 12px;
+    }
+
+    .cancel-button,
+    .save-button {
+        padding: 11px 20px;
+        border-radius: 11px;
+        font-size: 13px;
+        font-weight: 700;
+        transition: 0.3s;
+    }
+
+    .cancel-button {
+        color: #475569;
+        border: 1px solid #dce3ed;
+        background: white;
+        text-decoration: none;
+    }
+
+    .save-button {
+        color: white;
+        border: none;
+        background: linear-gradient(90deg, #2563eb, #7c3aed);
+        box-shadow: 0 8px 20px rgba(79, 70, 229, 0.22);
+    }
+
+        .cancel-button:hover,
+        .save-button:hover {
+            transform: translateY(-2px);
+        }
+
+    @@keyframes profileEntrance {
+        from {
+            opacity: 0;
+            transform: translateY(18px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    @@keyframes avatarFloat {
+        0%, 100% {
+            transform: translateY(0) rotate(-3deg);
+        }
+
+        50% {
+            transform: translateY(-8px) rotate(3deg);
+        }
+    }
+
+    @@media (max-width: 900px) {
+        .profile-content {
+            grid-template-columns: 1fr;
+        }
+
+        .profile-sidebar {
+            position: static;
+        }
+    }
+
+    @@media (max-width: 700px) {
+        .profile-header {
+            grid-template-columns: 1fr;
+        }
+
+        .profile-avatar {
+            width: 65px;
+            height: 65px;
+        }
+
+        .dashboard-link {
+            width: fit-content;
+        }
+
+        .form-grid {
+            grid-template-columns: 1fr;
+            gap: 0;
+        }
+
+        .profile-form-card {
+            padding: 24px 18px;
+        }
+
+        .cv-upload-section {
+            align-items: flex-start;
+            flex-direction: column;
+        }
+    }
+</style>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

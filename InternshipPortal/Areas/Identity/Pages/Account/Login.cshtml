@@ -1,0 +1,741 @@
+@page
+@model LoginModel
+
+@{
+    ViewData["Title"] = "Login";
+}
+
+<style>
+    .login-page {
+        min-height: calc(100vh - 140px);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 45px 20px;
+        background: radial-gradient( circle at top left, rgba(99, 102, 241, 0.16), transparent 34%), radial-gradient( circle at bottom right, rgba(14, 165, 233, 0.14), transparent 36%), #f8fafc;
+    }
+
+    .login-container {
+        width: 100%;
+        max-width: 1120px;
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        overflow: hidden;
+        border: 1px solid #e2e8f0;
+        border-radius: 30px;
+        background: white;
+        box-shadow: 0 28px 70px rgba(15, 23, 42, 0.15);
+        animation: loginEntrance 0.75s ease;
+    }
+
+    .login-visual {
+        position: relative;
+        min-height: 680px;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        overflow: hidden;
+        padding: 45px;
+        color: white;
+        background: linear-gradient( 145deg, rgba(30, 27, 75, 0.98), rgba(79, 70, 229, 0.94), rgba(14, 165, 233, 0.88));
+    }
+
+        .login-visual::before {
+            position: absolute;
+            top: -120px;
+            right: -90px;
+            width: 300px;
+            height: 300px;
+            content: "";
+            border: 2px solid rgba(255, 255, 255, 0.12);
+            border-radius: 50%;
+        }
+
+        .login-visual::after {
+            position: absolute;
+            right: -100px;
+            bottom: -130px;
+            width: 330px;
+            height: 330px;
+            content: "";
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.08);
+        }
+
+    .visual-content {
+        position: relative;
+        z-index: 2;
+    }
+
+    .portal-logo {
+        display: inline-flex;
+        align-items: center;
+        gap: 11px;
+        margin-bottom: 55px;
+        color: white;
+        font-size: 18px;
+        font-weight: 900;
+    }
+
+    .portal-logo-icon {
+        width: 46px;
+        height: 46px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 21px;
+        border-radius: 14px;
+        background: rgba(255, 255, 255, 0.16);
+        backdrop-filter: blur(8px);
+    }
+
+    .visual-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 7px;
+        padding: 7px 13px;
+        margin-bottom: 17px;
+        font-size: 11px;
+        font-weight: 800;
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        border-radius: 30px;
+        background: rgba(255, 255, 255, 0.13);
+    }
+
+    .login-visual h1 {
+        max-width: 470px;
+        margin: 0;
+        font-size: 41px;
+        font-weight: 900;
+        line-height: 1.2;
+    }
+
+        .login-visual h1 span {
+            color: #bae6fd;
+        }
+
+    .login-visual p {
+        max-width: 470px;
+        margin: 17px 0 0;
+        color: rgba(255, 255, 255, 0.8);
+        font-size: 14px;
+        line-height: 1.8;
+    }
+
+    .visual-features {
+        position: relative;
+        z-index: 2;
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 12px;
+        margin-top: 35px;
+    }
+
+    .visual-feature {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 13px;
+        border: 1px solid rgba(255, 255, 255, 0.15);
+        border-radius: 15px;
+        background: rgba(255, 255, 255, 0.1);
+        backdrop-filter: blur(8px);
+        transition: 0.3s;
+    }
+
+        .visual-feature:hover {
+            background: rgba(255, 255, 255, 0.17);
+            transform: translateY(-4px);
+        }
+
+    .feature-icon {
+        min-width: 37px;
+        height: 37px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 17px;
+        border-radius: 11px;
+        background: rgba(255, 255, 255, 0.15);
+    }
+
+    .visual-feature strong,
+    .visual-feature small {
+        display: block;
+    }
+
+    .visual-feature strong {
+        font-size: 11px;
+    }
+
+    .visual-feature small {
+        margin-top: 2px;
+        color: rgba(255, 255, 255, 0.65);
+        font-size: 9px;
+    }
+
+    .visual-illustration {
+        position: relative;
+        z-index: 2;
+        width: 110px;
+        height: 110px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 35px auto 0;
+        font-size: 53px;
+        border-radius: 32px;
+        background: rgba(255, 255, 255, 0.14);
+        backdrop-filter: blur(9px);
+        animation: illustrationFloat 3.5s ease-in-out infinite;
+    }
+
+    .login-form-side {
+        display: flex;
+        align-items: center;
+        padding: 55px;
+    }
+
+    .login-form-wrapper {
+        width: 100%;
+        max-width: 430px;
+        margin: auto;
+    }
+
+    .mobile-logo {
+        display: none;
+        align-items: center;
+        gap: 9px;
+        margin-bottom: 30px;
+        color: #312e81;
+        font-weight: 900;
+    }
+
+    .login-small-title {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 6px 11px;
+        margin-bottom: 13px;
+        color: #4338ca;
+        font-size: 10px;
+        font-weight: 900;
+        border-radius: 20px;
+        background: #eef2ff;
+    }
+
+    .login-form-wrapper h2 {
+        margin: 0;
+        color: #0f172a;
+        font-size: 34px;
+        font-weight: 900;
+    }
+
+    .login-subtitle {
+        margin: 9px 0 28px;
+        color: #64748b;
+        font-size: 13px;
+        line-height: 1.6;
+    }
+
+    .validation-summary-errors {
+        padding: 13px 15px;
+        margin-bottom: 18px;
+        color: #b91c1c;
+        font-size: 11px;
+        border: 1px solid #fecaca;
+        border-radius: 13px;
+        background: #fef2f2;
+    }
+
+        .validation-summary-errors ul {
+            margin: 0;
+            padding-left: 18px;
+        }
+
+    .form-group {
+        margin-bottom: 18px;
+    }
+
+    .form-label {
+        display: block;
+        margin-bottom: 7px;
+        color: #334155;
+        font-size: 12px;
+        font-weight: 800;
+    }
+
+    .input-container {
+        position: relative;
+    }
+
+    .input-icon {
+        position: absolute;
+        top: 50%;
+        left: 15px;
+        z-index: 2;
+        color: #94a3b8;
+        font-size: 17px;
+        transform: translateY(-50%);
+        pointer-events: none;
+    }
+
+    .login-input {
+        width: 100%;
+        height: 52px;
+        padding: 0 48px 0 45px;
+        color: #334155;
+        outline: none;
+        border: 2px solid #e2e8f0;
+        border-radius: 14px;
+        background: #fbfdff;
+        transition: 0.3s;
+    }
+
+        .login-input:focus {
+            border-color: #6366f1;
+            background: white;
+            box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.1);
+        }
+
+    .password-toggle {
+        position: absolute;
+        top: 50%;
+        right: 11px;
+        width: 35px;
+        height: 35px;
+        color: #64748b;
+        border: none;
+        border-radius: 10px;
+        background: transparent;
+        transform: translateY(-50%);
+        transition: 0.3s;
+    }
+
+        .password-toggle:hover {
+            color: #4f46e5;
+            background: #eef2ff;
+        }
+
+    .field-validation-error {
+        display: block;
+        margin-top: 5px;
+        color: #dc2626;
+        font-size: 10px;
+        font-weight: 700;
+    }
+
+    .login-options {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 15px;
+        margin-bottom: 22px;
+    }
+
+    .remember-label {
+        display: flex;
+        align-items: center;
+        gap: 7px;
+        color: #475569;
+        font-size: 11px;
+        font-weight: 700;
+        cursor: pointer;
+    }
+
+        .remember-label input {
+            width: 17px;
+            height: 17px;
+            border-color: #cbd5e1;
+        }
+
+            .remember-label input:checked {
+                border-color: #4f46e5;
+                background-color: #4f46e5;
+            }
+
+    .forgot-link {
+        color: #4f46e5;
+        font-size: 11px;
+        font-weight: 800;
+        text-decoration: none;
+    }
+
+        .forgot-link:hover {
+            color: #7c3aed;
+        }
+
+    .login-button {
+        width: 100%;
+        height: 53px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        color: white;
+        font-weight: 900;
+        border: none;
+        border-radius: 14px;
+        background: linear-gradient( 135deg, #4f46e5, #7c3aed, #0ea5e9);
+        background-size: 200% 200%;
+        box-shadow: 0 10px 24px rgba(79, 70, 229, 0.25);
+        transition: 0.3s;
+        animation: gradientMove 5s ease infinite;
+    }
+
+        .login-button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 30px rgba(79, 70, 229, 0.34);
+        }
+
+    .register-section {
+        padding-top: 22px;
+        margin-top: 24px;
+        text-align: center;
+        border-top: 1px solid #e2e8f0;
+    }
+
+        .register-section p {
+            margin: 0 0 9px;
+            color: #64748b;
+            font-size: 12px;
+        }
+
+    .register-link {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        color: #4f46e5;
+        font-size: 12px;
+        font-weight: 900;
+        text-decoration: none;
+    }
+
+        .register-link:hover {
+            color: #7c3aed;
+        }
+
+    .secure-message {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 6px;
+        margin-top: 22px;
+        color: #94a3b8;
+        font-size: 9px;
+        font-weight: 700;
+    }
+
+        .secure-message i {
+            color: #10b981;
+        }
+
+    @@keyframes loginEntrance {
+        from {
+            opacity: 0;
+            transform: translateY(30px) scale(0.98);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+        }
+    }
+
+    @@keyframes illustrationFloat {
+        0%, 100% {
+            transform: translateY(0) rotate(-4deg);
+        }
+
+        50% {
+            transform: translateY(-10px) rotate(4deg);
+        }
+    }
+
+    @@keyframes gradientMove {
+        0%, 100% {
+            background-position: 0 50%;
+        }
+
+        50% {
+            background-position: 100% 50%;
+        }
+    }
+
+    @@media (max-width: 900px) {
+        .login-container {
+            max-width: 570px;
+            grid-template-columns: 1fr;
+        }
+
+        .login-visual {
+            display: none;
+        }
+
+        .mobile-logo {
+            display: flex;
+        }
+
+        .login-form-side {
+            padding: 45px 35px;
+        }
+    }
+
+    @@media (max-width: 500px) {
+        .login-page {
+            padding: 20px 12px;
+        }
+
+        .login-form-side {
+            padding: 35px 22px;
+        }
+
+        .login-form-wrapper h2 {
+            font-size: 29px;
+        }
+
+        .login-options {
+            align-items: flex-start;
+            flex-direction: column;
+        }
+    }
+</style>
+
+<div class="login-page">
+    <div class="login-container">
+        <section class="login-visual">
+            <div class="visual-content">
+                <div class="portal-logo">
+                    <span class="portal-logo-icon">
+                        <i class="bi bi-mortarboard-fill"></i>
+                    </span>
+
+                    Internship Portal
+                </div>
+
+                <span class="visual-badge">
+                    <i class="bi bi-stars"></i>
+                    BUILD YOUR FUTURE
+                </span>
+
+                <h1>
+                    Your career journey
+                    <span>starts here.</span>
+                </h1>
+
+                <p>
+                    Connect with verified companies, discover internship
+                    opportunities and manage the complete application
+                    and interview process from one place.
+                </p>
+
+                <div class="visual-features">
+                    <div class="visual-feature">
+                        <span class="feature-icon">
+                            <i class="bi bi-search"></i>
+                        </span>
+
+                        <span>
+                            <strong>Discover Opportunities</strong>
+                            <small>Verified internships</small>
+                        </span>
+                    </div>
+
+                    <div class="visual-feature">
+                        <span class="feature-icon">
+                            <i class="bi bi-file-earmark-check-fill"></i>
+                        </span>
+
+                        <span>
+                            <strong>Track Applications</strong>
+                            <small>Live status timeline</small>
+                        </span>
+                    </div>
+
+                    <div class="visual-feature">
+                        <span class="feature-icon">
+                            <i class="bi bi-calendar2-check-fill"></i>
+                        </span>
+
+                        <span>
+                            <strong>Manage Interviews</strong>
+                            <small>Accept and schedule</small>
+                        </span>
+                    </div>
+
+                    <div class="visual-feature">
+                        <span class="feature-icon">
+                            <i class="bi bi-award-fill"></i>
+                        </span>
+
+                        <span>
+                            <strong>Earn Certificates</strong>
+                            <small>Document achievements</small>
+                        </span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="visual-illustration">
+                🚀
+            </div>
+        </section>
+
+        <section class="login-form-side">
+            <div class="login-form-wrapper">
+                <div class="mobile-logo">
+                    <span class="portal-logo-icon">
+                        <i class="bi bi-mortarboard-fill"></i>
+                    </span>
+
+                    Internship Portal
+                </div>
+
+                <span class="login-small-title">
+                    <i class="bi bi-shield-check"></i>
+                    SECURE LOGIN
+                </span>
+
+                <h2>Welcome Back!</h2>
+
+                <p class="login-subtitle">
+                    Enter your account information to continue
+                    to your personalized dashboard.
+                </p>
+
+                <form id="account"
+                      method="post">
+
+                    <div asp-validation-summary="ModelOnly"
+                         role="alert">
+                    </div>
+
+                    <div class="form-group">
+                        <label asp-for="Input.Email"
+                               class="form-label">
+                            Email Address
+                        </label>
+
+                        <div class="input-container">
+                            <i class="bi bi-envelope-fill input-icon"></i>
+
+                            <input asp-for="Input.Email"
+                                   class="login-input"
+                                   autocomplete="username"
+                                   aria-required="true"
+                                   placeholder="name@example.com" />
+                        </div>
+
+                        <span asp-validation-for="Input.Email">
+                        </span>
+                    </div>
+
+                    <div class="form-group">
+                        <label asp-for="Input.Password"
+                               class="form-label">
+                            Password
+                        </label>
+
+                        <div class="input-container">
+                            <i class="bi bi-lock-fill input-icon"></i>
+
+                            <input asp-for="Input.Password"
+                                   class="login-input"
+                                   autocomplete="current-password"
+                                   aria-required="true"
+                                   placeholder="Enter your password"
+                                   id="passwordInput" />
+
+                            <button type="button"
+                                    class="password-toggle"
+                                    id="passwordToggle"
+                                    aria-label="Show or hide password">
+                                <i class="bi bi-eye-fill"
+                                   id="passwordIcon">
+                                </i>
+                            </button>
+                        </div>
+
+                        <span asp-validation-for="Input.Password">
+                        </span>
+                    </div>
+
+                    <div class="login-options">
+                        <label asp-for="Input.RememberMe"
+                               class="remember-label">
+
+                            <input asp-for="Input.RememberMe"
+                                   class="form-check-input" />
+
+                            Remember me
+                        </label>
+
+                        <a id="forgot-password"
+                           asp-page="./ForgotPassword"
+                           class="forgot-link">
+                            Forgot password?
+                        </a>
+                    </div>
+
+                    <button id="login-submit"
+                            type="submit"
+                            class="login-button">
+                        Login to Your Account
+                        <i class="bi bi-arrow-right"></i>
+                    </button>
+
+                    <div class="register-section">
+                        <p>Don't have an account yet?</p>
+
+                        <a asp-area=""
+                           asp-controller="Account"
+                           asp-action="Register"
+                           class="register-link">
+                            Create a New Account
+                            <i class="bi bi-person-plus-fill"></i>
+                        </a>
+                    </div>
+
+                    <div class="secure-message">
+                        <i class="bi bi-lock-fill"></i>
+                        Your account information is securely protected
+                    </div>
+                </form>
+            </div>
+        </section>
+    </div>
+</div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        const passwordInput =
+            document.getElementById("passwordInput");
+
+        const passwordToggle =
+            document.getElementById("passwordToggle");
+
+        const passwordIcon =
+            document.getElementById("passwordIcon");
+
+        passwordToggle.addEventListener(
+            "click",
+            function() {
+                const passwordIsHidden =
+                    passwordInput.type === "password";
+
+                passwordInput.type =
+                    passwordIsHidden
+                        ? "text"
+                        : "password";
+
+                passwordIcon.className =
+                    passwordIsHidden
+                        ? "bi bi-eye-slash-fill"
+                        : "bi bi-eye-fill";
+            });
+    });
+</script>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

@@ -1,0 +1,564 @@
+﻿@using Microsoft.AspNetCore.Identity
+@using Microsoft.EntityFrameworkCore
+@using InternshipPortal.Data
+@using InternshipPortal.Models.Enums
+
+@inject SignInManager<IdentityUser> SignInManager
+@inject UserManager<IdentityUser> UserManager
+@inject ApplicationDbContext DbContext
+
+@{
+    var unreadNotificationsCount = 0;
+    var savedInternshipsCount = 0;
+    var upcomingInterviewsCount = 0;
+
+    if (SignInManager.IsSignedIn(User))
+    {
+        var currentUserId = UserManager.GetUserId(User);
+
+        unreadNotificationsCount = await DbContext.Notifications
+            .CountAsync(notification =>
+                notification.UserId == currentUserId &&
+                !notification.IsRead);
+
+        if (User.IsInRole("Student"))
+        {
+            var studentId = await DbContext.Students
+                .Where(student =>
+                    student.UserId == currentUserId)
+                .Select(student => (int?)student.Id)
+                .FirstOrDefaultAsync();
+
+            if (studentId.HasValue)
+            {
+                savedInternshipsCount =
+                    await DbContext.SavedInternships
+                        .CountAsync(saved =>
+                            saved.StudentId == studentId.Value);
+
+                upcomingInterviewsCount =
+                    await DbContext.Interviews
+                        .CountAsync(interview =>
+                            interview.InternshipApplication.StudentId ==
+                                studentId.Value &&
+                            interview.ScheduledAt > DateTime.Now &&
+                            (interview.Status ==
+                                InterviewStatus.Pending ||
+                             interview.Status ==
+                                InterviewStatus.AcceptedByStudent));
+            }
+        }
+    }
+}
+
+<style>
+    .portal-nav-links {
+        display: flex;
+        align-items: center;
+        gap: 3px;
+    }
+
+    .portal-nav-link {
+        position: relative;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        padding: 9px 11px !important;
+        color: #475569 !important;
+        font-size: 13px;
+        font-weight: 700;
+        border-radius: 12px;
+        white-space: nowrap;
+        transition: 0.3s;
+    }
+
+        .portal-nav-link:hover {
+            color: #4f46e5 !important;
+            background: #eef2ff;
+            transform: translateY(-2px);
+        }
+
+    .nav-count {
+        min-width: 19px;
+        height: 19px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        padding: 0 5px;
+        color: white;
+        font-size: 9px;
+        font-weight: 900;
+        border-radius: 20px;
+    }
+
+    .saved-nav-link {
+        color: #be123c !important;
+    }
+
+        .saved-nav-link:hover {
+            color: #e11d48 !important;
+            background: #fff1f2;
+        }
+
+        .saved-nav-link > i {
+            color: #e11d48;
+            animation: savedHeartPulse 1.7s ease-in-out infinite;
+        }
+
+    .saved-nav-count {
+        background: linear-gradient(135deg, #f43f5e, #ec4899);
+        box-shadow: 0 4px 10px rgba(225, 29, 72, 0.2);
+    }
+
+    .interview-nav-link {
+        color: #0369a1 !important;
+    }
+
+        .interview-nav-link:hover {
+            color: #0284c7 !important;
+            background: #e0f2fe;
+        }
+
+        .interview-nav-link > i {
+            color: #0284c7;
+            animation: calendarPulse 1.8s ease-in-out infinite;
+        }
+
+    .interview-nav-count {
+        background: linear-gradient(135deg, #0ea5e9, #4f46e5);
+        box-shadow: 0 4px 10px rgba(14, 165, 233, 0.22);
+    }
+
+    .notification-nav-link {
+        position: relative;
+        width: 44px;
+        height: 44px;
+        display: flex !important;
+        align-items: center;
+        justify-content: center;
+        margin: 0 5px;
+        color: #4338ca !important;
+        font-size: 20px;
+        border-radius: 14px;
+        background: #eef2ff;
+        transition: 0.3s;
+    }
+
+        .notification-nav-link:hover {
+            color: white !important;
+            background: linear-gradient(135deg, #6366f1, #0ea5e9);
+            transform: translateY(-3px) rotate(-5deg);
+            box-shadow: 0 10px 22px rgba(99, 102, 241, 0.25);
+        }
+
+    .notification-count {
+        position: absolute;
+        top: -5px;
+        right: -6px;
+        min-width: 21px;
+        height: 21px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 0 5px;
+        color: white;
+        font-size: 11px;
+        font-weight: 800;
+        border: 2px solid white;
+        border-radius: 20px;
+        background: #ef4444;
+        animation: notificationPulse 1.8s infinite;
+    }
+
+    .user-area {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 6px 8px;
+        border: 1px solid #e2e8f0;
+        border-radius: 15px;
+        background: white;
+    }
+
+    .user-avatar {
+        width: 37px;
+        height: 37px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 15px;
+        font-weight: 800;
+        border-radius: 12px;
+        background: linear-gradient(135deg, #6366f1, #0ea5e9);
+    }
+
+    .user-information {
+        max-width: 125px;
+        line-height: 1.2;
+    }
+
+    .user-email {
+        display: block;
+        overflow: hidden;
+        color: #0f172a;
+        font-size: 12px;
+        font-weight: 700;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    .user-role {
+        color: #6366f1;
+        font-size: 10px;
+        font-weight: 800;
+        text-transform: uppercase;
+    }
+
+    .logout-button {
+        width: 39px;
+        height: 39px;
+        color: #dc2626;
+        border: none;
+        border-radius: 12px;
+        background: #fee2e2;
+        transition: 0.3s;
+    }
+
+        .logout-button:hover {
+            color: white;
+            background: #ef4444;
+            transform: translateY(-2px);
+        }
+
+    .login-nav-button {
+        padding: 9px 18px !important;
+        color: #4f46e5 !important;
+        font-weight: 700;
+        border: 1px solid #c7d2fe;
+        border-radius: 12px;
+        transition: 0.3s;
+    }
+
+        .login-nav-button:hover {
+            color: white !important;
+            background: #4f46e5;
+        }
+
+    .register-nav-button {
+        padding: 10px 19px !important;
+        margin-left: 8px;
+        color: white !important;
+        font-weight: 700;
+        border-radius: 12px;
+        background: linear-gradient(135deg, #6366f1, #0ea5e9);
+        box-shadow: 0 7px 18px rgba(99, 102, 241, 0.22);
+        transition: 0.3s;
+    }
+
+        .register-nav-button:hover {
+            color: white !important;
+            transform: translateY(-3px);
+            box-shadow: 0 12px 25px rgba(99, 102, 241, 0.3);
+        }
+
+    @@keyframes notificationPulse {
+        0%, 100% {
+            transform: scale(1);
+            box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.5);
+        }
+
+        50% {
+            transform: scale(1.08);
+            box-shadow: 0 0 0 7px rgba(239, 68, 68, 0);
+        }
+    }
+
+    @@keyframes savedHeartPulse {
+        0%, 100% {
+            transform: scale(1);
+        }
+
+        50% {
+            transform: scale(1.18);
+        }
+    }
+
+    @@keyframes calendarPulse {
+        0%, 100% {
+            transform: translateY(0) rotate(0deg);
+        }
+
+        50% {
+            transform: translateY(-2px) rotate(5deg);
+        }
+    }
+
+    @@media (max-width: 1200px) {
+        .portal-nav-links {
+            align-items: stretch;
+            flex-direction: column;
+            width: 100%;
+            margin-top: 15px;
+        }
+
+        .portal-nav-link {
+            width: 100%;
+        }
+
+        .notification-nav-link {
+            width: 100%;
+            justify-content: flex-start;
+            margin: 5px 0;
+            padding-left: 15px !important;
+        }
+
+        .notification-count {
+            top: 3px;
+            left: 33px;
+            right: auto;
+        }
+
+        .user-area {
+            margin-top: 8px;
+        }
+    }
+</style>
+
+@if (SignInManager.IsSignedIn(User))
+{
+    <ul class="navbar-nav portal-nav-links">
+        <li class="nav-item">
+            <a class="nav-link portal-nav-link"
+               asp-controller="Dashboard"
+               asp-action="Index">
+                <i class="bi bi-grid-fill"></i>
+                Dashboard
+            </a>
+        </li>
+
+        @if (User.IsInRole("Student"))
+        {
+            <li class="nav-item">
+                <a class="nav-link portal-nav-link"
+                   asp-controller="Internship"
+                   asp-action="Index">
+                    <i class="bi bi-search"></i>
+                    Browse Internships
+                </a>
+            </li>
+
+            <li class="nav-item">
+                <a class="nav-link portal-nav-link"
+                   asp-controller="Application"
+                   asp-action="MyApplications">
+                    <i class="bi bi-file-earmark-check-fill"></i>
+                    My Applications
+                </a>
+            </li>
+
+            <li class="nav-item">
+                <a class="nav-link portal-nav-link interview-nav-link"
+                   asp-controller="Interview"
+                   asp-action="MyInterviews">
+                    <i class="bi bi-calendar2-check-fill"></i>
+                    My Interviews
+
+                    @if (upcomingInterviewsCount > 0)
+                    {
+                        <span class="nav-count interview-nav-count">
+                            @(upcomingInterviewsCount > 99
+                                ? "99+"
+                                : upcomingInterviewsCount)
+                        </span>
+                    }
+                </a>
+            </li>
+
+            <li class="nav-item">
+                <a class="nav-link portal-nav-link saved-nav-link"
+                   asp-controller="SavedInternship"
+                   asp-action="Index">
+                    <i class="bi bi-heart-fill"></i>
+                    Saved Internships
+
+                    @if (savedInternshipsCount > 0)
+                    {
+                        <span class="nav-count saved-nav-count">
+                            @(savedInternshipsCount > 99
+                                ? "99+"
+                                : savedInternshipsCount)
+                        </span>
+                    }
+                </a>
+            </li>
+
+            <li class="nav-item">
+                <a class="nav-link portal-nav-link"
+                   asp-controller="Evaluation"
+                   asp-action="MyEvaluations">
+                    <i class="bi bi-trophy-fill"></i>
+                    My Evaluations
+                </a>
+            </li>
+
+            <li class="nav-item">
+                <a class="nav-link portal-nav-link"
+                   asp-controller="Student"
+                   asp-action="Profile">
+                    <i class="bi bi-person-circle"></i>
+                    My Profile
+                </a>
+            </li>
+        }
+
+        @if (User.IsInRole("Company"))
+        {
+            <li class="nav-item">
+                <a class="nav-link portal-nav-link"
+                   asp-controller="Internship"
+                   asp-action="MyInternships">
+                    <i class="bi bi-briefcase-fill"></i>
+                    My Internships
+                </a>
+            </li>
+
+            <li class="nav-item">
+                <a class="nav-link portal-nav-link"
+                   asp-controller="Internship"
+                   asp-action="Create">
+                    <i class="bi bi-plus-circle-fill"></i>
+                    Add Internship
+                </a>
+            </li>
+
+            <li class="nav-item">
+                <a class="nav-link portal-nav-link"
+                   asp-controller="Company"
+                   asp-action="Profile">
+                    <i class="bi bi-building-fill"></i>
+                    Company Profile
+                </a>
+            </li>
+        }
+
+        @if (User.IsInRole("Admin"))
+        {
+            <li class="nav-item">
+                <a class="nav-link portal-nav-link"
+                   asp-controller="Admin"
+                   asp-action="PendingInternships">
+                    <i class="bi bi-hourglass-split"></i>
+                    Review Internships
+                </a>
+            </li>
+
+            <li class="nav-item">
+                <a class="nav-link portal-nav-link"
+                   asp-controller="Admin"
+                   asp-action="AllInternships">
+                    <i class="bi bi-briefcase-fill"></i>
+                    All Internships
+                </a>
+            </li>
+
+            <li class="nav-item">
+                <a class="nav-link portal-nav-link"
+                   asp-controller="UserManagement"
+                   asp-action="Index">
+                    <i class="bi bi-people-fill"></i>
+                    Manage Users
+                </a>
+            </li>
+        }
+
+        <li class="nav-item">
+            <a class="nav-link notification-nav-link"
+               asp-controller="Notification"
+               asp-action="Index"
+               title="Notifications">
+
+                <i class="bi bi-bell-fill"></i>
+
+                @if (unreadNotificationsCount > 0)
+                {
+                    <span class="notification-count">
+                        @(unreadNotificationsCount > 99
+                            ? "99+"
+                            : unreadNotificationsCount)
+                    </span>
+                }
+            </a>
+        </li>
+
+        <li class="nav-item">
+            <div class="user-area">
+                <div class="user-avatar">
+                    @(string.IsNullOrWhiteSpace(User.Identity?.Name)
+                        ? "U"
+                        : User.Identity.Name
+                            .Substring(0, 1)
+                            .ToUpper())
+                </div>
+
+                <div class="user-information">
+                    <span class="user-email">
+                        @User.Identity?.Name
+                    </span>
+
+                    <span class="user-role">
+                        @if (User.IsInRole("Admin"))
+                        {
+                            <text>Administrator</text>
+                        }
+                        else if (User.IsInRole("Company"))
+                        {
+                            <text>Company</text>
+                        }
+                        else
+                        {
+                            <text>Student</text>
+                        }
+                    </span>
+                </div>
+
+                <form asp-area="Identity"
+                      asp-page="/Account/Logout"
+                      asp-route-returnUrl="@Url.Action(
+                                              "Index",
+                                              "Home",
+                                              new { area = "" })"
+                      method="post">
+
+                    <button type="submit"
+                            class="logout-button"
+                            title="Logout">
+                        <i class="bi bi-box-arrow-right"></i>
+                    </button>
+                </form>
+            </div>
+        </li>
+    </ul>
+}
+else
+{
+    <ul class="navbar-nav align-items-center">
+        <li class="nav-item">
+            <a class="nav-link login-nav-button"
+               asp-area="Identity"
+               asp-page="/Account/Login">
+                <i class="bi bi-box-arrow-in-right me-1"></i>
+                Login
+            </a>
+        </li>
+
+        <li class="nav-item">
+            <a class="nav-link register-nav-button"
+               asp-controller="Account"
+               asp-action="Register">
+                <i class="bi bi-person-plus-fill me-1"></i>
+                Create Account
+            </a>
+        </li>
+    </ul>
+}

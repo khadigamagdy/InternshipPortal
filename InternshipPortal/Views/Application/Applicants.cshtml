@@ -1,0 +1,1216 @@
+﻿@model IEnumerable<InternshipPortal.Models.InternshipApplication>
+@using InternshipPortal.Models
+@using InternshipPortal.Models.Enums
+
+@{
+    ViewData["Title"] = "Internship Applicants";
+
+    var applicants = Model.ToList();
+    var internship = ViewBag.Internship as Internship;
+
+    var pendingCount = applicants.Count(application =>
+        application.Status == ApplicationStatus.Pending);
+
+    var inProgressCount = applicants.Count(application =>
+        application.Status == ApplicationStatus.UnderReview ||
+        application.Status == ApplicationStatus.InterviewScheduled);
+
+    var acceptedCount = applicants.Count(application =>
+        application.Status == ApplicationStatus.Accepted);
+
+    var completedCount = applicants.Count(application =>
+        application.Status == ApplicationStatus.Completed);
+}
+
+<style>
+    .applicants-page {
+        min-height: 100vh;
+        padding: 45px 0 80px;
+        background: radial-gradient( circle at top left, rgba(99, 102, 241, 0.15), transparent 35%), radial-gradient( circle at bottom right, rgba(16, 185, 129, 0.13), transparent 35%), #f8fafc;
+    }
+
+    .applicants-header {
+        position: relative;
+        overflow: hidden;
+        padding: 35px;
+        margin-bottom: 25px;
+        color: white;
+        border-radius: 26px;
+        background: linear-gradient( 135deg, #312e81, #6366f1, #06b6d4);
+        box-shadow: 0 20px 45px rgba(49, 46, 129, 0.23);
+        animation: slideDown 0.7s ease;
+    }
+
+        .applicants-header::after {
+            position: absolute;
+            right: -70px;
+            bottom: -130px;
+            width: 220px;
+            height: 220px;
+            content: "";
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+    .header-content {
+        position: relative;
+        z-index: 2;
+    }
+
+    .header-icon {
+        width: 65px;
+        height: 65px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-right: 17px;
+        font-size: 29px;
+        border-radius: 20px;
+        background: rgba(255, 255, 255, 0.17);
+    }
+
+    .applicants-header h1 {
+        margin: 0;
+        font-weight: 900;
+    }
+
+    .applicants-header p {
+        margin: 7px 0 0;
+        color: rgba(255, 255, 255, 0.82);
+    }
+
+    .back-button {
+        padding: 11px 18px;
+        color: white;
+        font-weight: 700;
+        border: 1px solid rgba(255, 255, 255, 0.35);
+        border-radius: 13px;
+        background: rgba(255, 255, 255, 0.13);
+        transition: 0.3s;
+    }
+
+        .back-button:hover {
+            color: #312e81;
+            background: white;
+            transform: translateY(-3px);
+        }
+
+    .statistics-grid {
+        display: grid;
+        grid-template-columns: repeat(5, 1fr);
+        gap: 15px;
+        margin-bottom: 27px;
+    }
+
+    .statistic-card {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 17px;
+        border: 1px solid #e2e8f0;
+        border-radius: 18px;
+        background: white;
+        box-shadow: 0 9px 25px rgba(15, 23, 42, 0.06);
+        transition: 0.3s;
+    }
+
+        .statistic-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 16px 35px rgba(79, 70, 229, 0.13);
+        }
+
+    .statistic-icon {
+        min-width: 45px;
+        height: 45px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 19px;
+        border-radius: 14px;
+    }
+
+    .total-icon {
+        color: #4338ca;
+        background: #e0e7ff;
+    }
+
+    .pending-icon {
+        color: #b45309;
+        background: #fef3c7;
+    }
+
+    .progress-icon {
+        color: #6d28d9;
+        background: #ede9fe;
+    }
+
+    .accepted-icon {
+        color: #047857;
+        background: #d1fae5;
+    }
+
+    .completed-icon {
+        color: #0369a1;
+        background: #e0f2fe;
+    }
+
+    .statistic-number {
+        display: block;
+        color: #0f172a;
+        font-size: 23px;
+        font-weight: 900;
+    }
+
+    .statistic-label {
+        color: #64748b;
+        font-size: 10px;
+        font-weight: 700;
+    }
+
+    .applicant-card {
+        padding: 23px;
+        margin-bottom: 20px;
+        border: 1px solid #e2e8f0;
+        border-radius: 22px;
+        background: white;
+        box-shadow: 0 10px 28px rgba(15, 23, 42, 0.07);
+        transition: 0.3s;
+        animation: fadeUp 0.6s ease both;
+    }
+
+        .applicant-card:hover {
+            border-color: #c7d2fe;
+            transform: translateY(-5px);
+            box-shadow: 0 18px 38px rgba(79, 70, 229, 0.14);
+        }
+
+    .student-avatar {
+        min-width: 60px;
+        height: 60px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 24px;
+        font-weight: 900;
+        border-radius: 19px;
+        background: linear-gradient(135deg, #6366f1, #06b6d4);
+        box-shadow: 0 9px 20px rgba(99, 102, 241, 0.23);
+    }
+
+    .student-name {
+        margin-bottom: 5px;
+        color: #0f172a;
+        font-weight: 900;
+    }
+
+    .application-date {
+        color: #94a3b8;
+        font-size: 13px;
+    }
+
+    .student-details {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin-top: 13px;
+    }
+
+    .detail-chip {
+        padding: 6px 11px;
+        color: #475569;
+        font-size: 12px;
+        font-weight: 700;
+        border-radius: 20px;
+        background: #f1f5f9;
+    }
+
+    .status-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 7px 12px;
+        font-size: 12px;
+        font-weight: 800;
+        border-radius: 20px;
+    }
+
+    .status-pending {
+        color: #b45309;
+        background: #fef3c7;
+    }
+
+    .status-review {
+        color: #6d28d9;
+        background: #ede9fe;
+    }
+
+    .status-interview {
+        color: #0369a1;
+        background: #e0f2fe;
+        animation: interviewPulse 2s infinite;
+    }
+
+    .status-accepted {
+        color: #047857;
+        background: #d1fae5;
+    }
+
+    .status-rejected {
+        color: #b91c1c;
+        background: #fee2e2;
+    }
+
+    .status-completed {
+        color: #0369a1;
+        background: #e0f2fe;
+    }
+
+    .interview-section {
+        padding: 17px;
+        margin-top: 18px;
+        border: 1px solid #c7d2fe;
+        border-radius: 17px;
+        background: linear-gradient( 135deg, #f8faff, #f0f9ff);
+    }
+
+    .interview-heading {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        margin-bottom: 14px;
+    }
+
+        .interview-heading h6 {
+            margin: 0;
+            color: #312e81;
+            font-weight: 900;
+        }
+
+    .interview-count {
+        padding: 5px 10px;
+        color: #4338ca;
+        font-size: 10px;
+        font-weight: 800;
+        border-radius: 20px;
+        background: #e0e7ff;
+    }
+
+    .interview-card {
+        padding: 15px;
+        margin-top: 10px;
+        border: 1px solid #e2e8f0;
+        border-radius: 14px;
+        background: white;
+    }
+
+    .interview-main {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 15px;
+    }
+
+    .interview-date {
+        display: flex;
+        align-items: center;
+        gap: 11px;
+    }
+
+    .interview-calendar {
+        min-width: 43px;
+        height: 43px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 18px;
+        border-radius: 13px;
+        background: linear-gradient(135deg, #4f46e5, #0ea5e9);
+    }
+
+    .interview-date strong {
+        display: block;
+        color: #0f172a;
+        font-size: 13px;
+    }
+
+    .interview-date span {
+        color: #64748b;
+        font-size: 11px;
+    }
+
+    .interview-status {
+        padding: 6px 10px;
+        font-size: 10px;
+        font-weight: 800;
+        border-radius: 20px;
+    }
+
+    .interview-pending {
+        color: #b45309;
+        background: #fef3c7;
+    }
+
+    .interview-accepted {
+        color: #047857;
+        background: #d1fae5;
+    }
+
+    .interview-declined,
+    .interview-cancelled {
+        color: #b91c1c;
+        background: #fee2e2;
+    }
+
+    .interview-completed {
+        color: #0369a1;
+        background: #e0f2fe;
+    }
+
+    .interview-extra {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin-top: 12px;
+    }
+
+        .interview-extra span,
+        .interview-extra a {
+            padding: 6px 10px;
+            color: #475569;
+            font-size: 10px;
+            font-weight: 700;
+            border-radius: 9px;
+            background: #f1f5f9;
+            text-decoration: none;
+        }
+
+        .interview-extra a {
+            color: #4338ca;
+            background: #eef2ff;
+        }
+
+    .interview-management {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        padding-top: 12px;
+        margin-top: 12px;
+        border-top: 1px solid #eef2f7;
+    }
+
+    .timeline-details {
+        margin-top: 17px;
+        overflow: hidden;
+        border: 1px solid #e2e8f0;
+        border-radius: 15px;
+        background: #fbfdff;
+    }
+
+        .timeline-details summary {
+            padding: 13px 16px;
+            color: #4338ca;
+            font-size: 12px;
+            font-weight: 900;
+            cursor: pointer;
+            list-style: none;
+        }
+
+            .timeline-details summary::-webkit-details-marker {
+                display: none;
+            }
+
+    .timeline-content {
+        padding: 5px 18px 17px;
+    }
+
+    .timeline-item {
+        position: relative;
+        padding: 0 0 18px 28px;
+        border-left: 2px solid #c7d2fe;
+    }
+
+        .timeline-item:last-child {
+            padding-bottom: 0;
+        }
+
+    .timeline-dot {
+        position: absolute;
+        top: 2px;
+        left: -8px;
+        width: 14px;
+        height: 14px;
+        border: 3px solid white;
+        border-radius: 50%;
+        background: #6366f1;
+        box-shadow: 0 0 0 2px #c7d2fe;
+    }
+
+    .timeline-status {
+        display: block;
+        color: #0f172a;
+        font-size: 12px;
+        font-weight: 900;
+    }
+
+    .timeline-date {
+        color: #94a3b8;
+        font-size: 9px;
+    }
+
+    .timeline-note {
+        margin: 5px 0 0;
+        color: #64748b;
+        font-size: 10px;
+    }
+
+    .applicant-actions {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: flex-end;
+        gap: 9px;
+        padding-top: 17px;
+        margin-top: 17px;
+        border-top: 1px solid #f1f5f9;
+    }
+
+    .action-link,
+    .action-button {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 7px;
+        padding: 10px 15px;
+        font-size: 12px;
+        font-weight: 800;
+        border: none;
+        border-radius: 12px;
+        text-decoration: none;
+        transition: 0.3s;
+    }
+
+    .details-button {
+        color: #4338ca;
+        background: #eef2ff;
+    }
+
+    .review-button {
+        color: #6d28d9;
+        background: #ede9fe;
+    }
+
+    .schedule-button {
+        color: #0369a1;
+        background: #e0f2fe;
+    }
+
+    .accept-button {
+        color: #047857;
+        background: #d1fae5;
+    }
+
+    .reject-button,
+    .cancel-interview-button {
+        color: #b91c1c;
+        background: #fee2e2;
+    }
+
+    .complete-interview-button {
+        color: #047857;
+        background: #d1fae5;
+    }
+
+    .evaluate-button {
+        color: white;
+        background: linear-gradient(135deg, #f59e0b, #f97316);
+        box-shadow: 0 8px 20px rgba(245, 158, 11, 0.24);
+        animation: evaluatePulse 2s infinite;
+    }
+
+    .action-link:hover,
+    .action-button:hover {
+        color: white;
+        transform: translateY(-3px);
+    }
+
+    .details-button:hover,
+    .review-button:hover {
+        background: #4f46e5;
+    }
+
+    .schedule-button:hover {
+        background: #0284c7;
+    }
+
+    .accept-button:hover,
+    .complete-interview-button:hover {
+        background: #10b981;
+    }
+
+    .reject-button:hover,
+    .cancel-interview-button:hover {
+        background: #ef4444;
+    }
+
+    .evaluate-button:hover {
+        background: linear-gradient(135deg, #d97706, #ea580c);
+    }
+
+    .empty-state {
+        padding: 75px 25px;
+        text-align: center;
+        border: 2px dashed #cbd5e1;
+        border-radius: 25px;
+        background: white;
+    }
+
+    .empty-state-icon {
+        font-size: 75px;
+    }
+
+    .empty-state h3 {
+        margin-top: 18px;
+        color: #0f172a;
+        font-weight: 900;
+    }
+
+    .empty-state p {
+        color: #64748b;
+    }
+
+    @@keyframes slideDown {
+        from {
+            opacity: 0;
+            transform: translateY(-25px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    @@keyframes fadeUp {
+        from {
+            opacity: 0;
+            transform: translateY(25px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    @@keyframes interviewPulse {
+        0%, 100% {
+            box-shadow: 0 0 0 0 rgba(14, 165, 233, 0.3);
+        }
+
+        50% {
+            box-shadow: 0 0 0 7px rgba(14, 165, 233, 0);
+        }
+    }
+
+    @@keyframes evaluatePulse {
+        0%, 100% {
+            box-shadow: 0 8px 20px rgba(245, 158, 11, 0.24);
+        }
+
+        50% {
+            box-shadow: 0 8px 27px rgba(245, 158, 11, 0.5);
+        }
+    }
+
+    @@media (max-width: 1100px) {
+        .statistics-grid {
+            grid-template-columns: repeat(3, 1fr);
+        }
+    }
+
+    @@media (max-width: 768px) {
+        .statistics-grid {
+            grid-template-columns: repeat(2, 1fr);
+        }
+
+        .interview-main {
+            flex-direction: column;
+        }
+    }
+
+    @@media (max-width: 576px) {
+        .statistics-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .applicants-header {
+            padding: 25px 20px;
+        }
+
+        .applicant-actions {
+            justify-content: stretch;
+        }
+
+            .action-link,
+            .action-button,
+            .applicant-actions form,
+            .interview-management form {
+                width: 100%;
+            }
+    }
+</style>
+
+<div class="applicants-page">
+    <div class="container">
+        @if (TempData["SuccessMessage"] != null)
+        {
+            <div class="alert alert-success alert-dismissible fade show shadow-sm">
+                <i class="bi bi-check-circle-fill me-2"></i>
+                @TempData["SuccessMessage"]
+
+                <button type="button"
+                        class="btn-close"
+                        data-bs-dismiss="alert">
+                </button>
+            </div>
+        }
+
+        @if (TempData["ErrorMessage"] != null)
+        {
+            <div class="alert alert-danger alert-dismissible fade show shadow-sm">
+                <i class="bi bi-exclamation-circle-fill me-2"></i>
+                @TempData["ErrorMessage"]
+
+                <button type="button"
+                        class="btn-close"
+                        data-bs-dismiss="alert">
+                </button>
+            </div>
+        }
+
+        <div class="applicants-header">
+            <div class="header-content d-flex flex-wrap align-items-center justify-content-between gap-4">
+                <div class="d-flex align-items-center">
+                    <div class="header-icon">
+                        <i class="bi bi-people-fill"></i>
+                    </div>
+
+                    <div>
+                        <h1>Internship Applicants</h1>
+
+                        <p>
+                            @if (internship != null)
+                            {
+                                <span>
+                                    Manage applicants for @internship.Title
+                                </span>
+                            }
+                            else
+                            {
+                                <span>
+                                    Review and manage student applications.
+                                </span>
+                            }
+                        </p>
+                    </div>
+                </div>
+
+                <a asp-controller="Internship"
+                   asp-action="MyInternships"
+                   class="back-button text-decoration-none">
+                    <i class="bi bi-arrow-left me-1"></i>
+                    My Internships
+                </a>
+            </div>
+        </div>
+
+        <div class="statistics-grid">
+            <div class="statistic-card">
+                <div class="statistic-icon total-icon">
+                    <i class="bi bi-people-fill"></i>
+                </div>
+
+                <div>
+                    <span class="statistic-number">
+                        @applicants.Count
+                    </span>
+
+                    <span class="statistic-label">
+                        Total Applicants
+                    </span>
+                </div>
+            </div>
+
+            <div class="statistic-card">
+                <div class="statistic-icon pending-icon">
+                    <i class="bi bi-hourglass-split"></i>
+                </div>
+
+                <div>
+                    <span class="statistic-number">
+                        @pendingCount
+                    </span>
+
+                    <span class="statistic-label">
+                        Pending Review
+                    </span>
+                </div>
+            </div>
+
+            <div class="statistic-card">
+                <div class="statistic-icon progress-icon">
+                    <i class="bi bi-arrow-repeat"></i>
+                </div>
+
+                <div>
+                    <span class="statistic-number">
+                        @inProgressCount
+                    </span>
+
+                    <span class="statistic-label">
+                        Review and Interviews
+                    </span>
+                </div>
+            </div>
+
+            <div class="statistic-card">
+                <div class="statistic-icon accepted-icon">
+                    <i class="bi bi-person-check-fill"></i>
+                </div>
+
+                <div>
+                    <span class="statistic-number">
+                        @acceptedCount
+                    </span>
+
+                    <span class="statistic-label">
+                        Accepted Students
+                    </span>
+                </div>
+            </div>
+
+            <div class="statistic-card">
+                <div class="statistic-icon completed-icon">
+                    <i class="bi bi-award-fill"></i>
+                </div>
+
+                <div>
+                    <span class="statistic-number">
+                        @completedCount
+                    </span>
+
+                    <span class="statistic-label">
+                        Completed Training
+                    </span>
+                </div>
+            </div>
+        </div>
+
+        @if (!applicants.Any())
+        {
+            <div class="empty-state">
+                <div class="empty-state-icon">👥</div>
+
+                <h3>No Applicants Yet</h3>
+
+                <p>
+                    Student applications for this internship
+                    will appear here.
+                </p>
+
+                <a asp-controller="Internship"
+                   asp-action="MyInternships"
+                   class="btn btn-primary rounded-pill px-4">
+                    Back to My Internships
+                </a>
+            </div>
+        }
+        else
+        {
+            var animationDelay = 0;
+
+            foreach (var application in applicants)
+            {
+                var statusClass = application.Status switch
+                {
+                    ApplicationStatus.Accepted => "status-accepted",
+                    ApplicationStatus.Rejected => "status-rejected",
+                    ApplicationStatus.Completed => "status-completed",
+                    ApplicationStatus.UnderReview => "status-review",
+                    ApplicationStatus.InterviewScheduled => "status-interview",
+                    _ => "status-pending"
+                };
+
+                var statusIcon = application.Status switch
+                {
+                    ApplicationStatus.Accepted => "bi-check-circle-fill",
+                    ApplicationStatus.Rejected => "bi-x-circle-fill",
+                    ApplicationStatus.Completed => "bi-award-fill",
+                    ApplicationStatus.UnderReview => "bi-search",
+                    ApplicationStatus.InterviewScheduled => "bi-calendar2-check-fill",
+                    _ => "bi-hourglass-split"
+                };
+
+                var interviews = application.Interviews
+                    .OrderByDescending(item => item.ScheduledAt)
+                    .ToList();
+
+                var timeline = application.StatusHistory
+                    .OrderByDescending(item => item.ChangedAt)
+                    .ToList();
+
+                <div class="applicant-card"
+                     style="animation-delay: @(animationDelay)ms">
+
+                    <div class="d-flex flex-wrap align-items-start justify-content-between gap-3">
+                        <div class="d-flex align-items-start gap-3">
+                            <div class="student-avatar">
+                                @(string.IsNullOrWhiteSpace(
+                                    application.Student.FullName)
+                                    ? "S"
+                                    : application.Student.FullName
+                                        .Substring(0, 1)
+                                        .ToUpper())
+                            </div>
+
+                            <div>
+                                <h4 class="student-name">
+                                    @application.Student.FullName
+                                </h4>
+
+                                <span class="application-date">
+                                    <i class="bi bi-calendar3 me-1"></i>
+
+                                    Applied on
+                                    @application.AppliedAt
+                                    .ToString("dd MMM yyyy - hh:mm tt")
+                                </span>
+
+                                <div class="student-details">
+                                    @if (!string.IsNullOrWhiteSpace(
+                                        application.Student.University))
+                                    {
+                                        <span class="detail-chip">
+                                            <i class="bi bi-mortarboard-fill me-1"></i>
+                                            @application.Student.University
+                                        </span>
+                                    }
+
+                                    @if (!string.IsNullOrWhiteSpace(
+                                        application.Student.Specialization))
+                                    {
+                                        <span class="detail-chip">
+                                            <i class="bi bi-code-slash me-1"></i>
+                                            @application.Student.Specialization
+                                        </span>
+                                    }
+
+                                    @if (application.Student.GraduationYear > 0)
+                                    {
+                                        <span class="detail-chip">
+                                            <i class="bi bi-calendar-check me-1"></i>
+                                            Class of
+                                            @application.Student.GraduationYear
+                                        </span>
+                                    }
+                                </div>
+                            </div>
+                        </div>
+
+                        <span class="status-badge @statusClass">
+                            <i class="bi @statusIcon"></i>
+                            @application.Status
+                        </span>
+                    </div>
+
+                    @if (interviews.Any())
+                    {
+                        <div class="interview-section">
+                            <div class="interview-heading">
+                                <h6>
+                                    <i class="bi bi-calendar2-week-fill me-1"></i>
+                                    Interviews
+                                </h6>
+
+                                <span class="interview-count">
+                                    @interviews.Count scheduled
+                                </span>
+                            </div>
+
+                            @foreach (var interview in interviews)
+                            {
+                                var interviewStatusClass =
+                                    interview.Status switch
+                                    {
+                                        InterviewStatus.AcceptedByStudent =>
+                                            "interview-accepted",
+
+                                        InterviewStatus.DeclinedByStudent =>
+                                            "interview-declined",
+
+                                        InterviewStatus.Completed =>
+                                            "interview-completed",
+
+                                        InterviewStatus.Cancelled =>
+                                            "interview-cancelled",
+
+                                        _ => "interview-pending"
+                                    };
+
+                                <div class="interview-card">
+                                    <div class="interview-main">
+                                        <div class="interview-date">
+                                            <div class="interview-calendar">
+                                                <i class="bi bi-calendar-event-fill"></i>
+                                            </div>
+
+                                            <div>
+                                                <strong>
+                                                    @interview.ScheduledAt
+                                                    .ToString("dd MMM yyyy")
+                                                </strong>
+
+                                                <span>
+                                                    @interview.ScheduledAt
+                                                    .ToString("hh:mm tt")
+
+                                                    · @interview.DurationMinutes minutes
+                                                </span>
+                                            </div>
+                                        </div>
+
+                                        <span class="interview-status @interviewStatusClass">
+                                            @interview.Status
+                                        </span>
+                                    </div>
+
+                                    <div class="interview-extra">
+                                        <span>
+                                            <i class="bi bi-camera-video-fill me-1"></i>
+                                            @interview.Type
+                                        </span>
+
+                                        @if (!string.IsNullOrWhiteSpace(
+                                            interview.Location))
+                                        {
+                                            <span>
+                                                <i class="bi bi-geo-alt-fill me-1"></i>
+                                                @interview.Location
+                                            </span>
+                                        }
+
+                                        @if (!string.IsNullOrWhiteSpace(
+                                            interview.MeetingLink))
+                                        {
+                                            <a href="@interview.MeetingLink"
+                                               target="_blank"
+                                               rel="noopener noreferrer">
+                                                <i class="bi bi-link-45deg me-1"></i>
+                                                Open Meeting
+                                            </a>
+                                        }
+                                    </div>
+
+                                    @if (!string.IsNullOrWhiteSpace(
+                                        interview.Notes))
+                                    {
+                                        <div class="alert alert-light mt-3 mb-0 small">
+                                            <i class="bi bi-info-circle-fill me-1"></i>
+                                            @interview.Notes
+                                        </div>
+                                    }
+
+                                    @if (interview.Status ==
+                                            InterviewStatus.Pending ||
+                                         interview.Status ==
+                                            InterviewStatus.AcceptedByStudent)
+                                    {
+                                        <div class="interview-management">
+                                            @if (interview.Status ==
+                                                InterviewStatus.AcceptedByStudent)
+                                            {
+                                                <form asp-controller="Interview"
+                                                      asp-action="MarkCompleted"
+                                                      asp-route-id="@interview.Id"
+                                                      method="post">
+
+                                                    @Html.AntiForgeryToken()
+
+                                                    <button type="submit"
+                                                            class="action-button complete-interview-button"
+                                                            onclick="return confirm('Mark this interview as completed?');">
+                                                        <i class="bi bi-check2-all"></i>
+                                                        Mark Completed
+                                                    </button>
+                                                </form>
+                                            }
+
+                                            <form asp-controller="Interview"
+                                                  asp-action="Cancel"
+                                                  asp-route-id="@interview.Id"
+                                                  method="post">
+
+                                                @Html.AntiForgeryToken()
+
+                                                <button type="submit"
+                                                        class="action-button cancel-interview-button"
+                                                        onclick="return confirm('Cancel this interview?');">
+                                                    <i class="bi bi-calendar-x-fill"></i>
+                                                    Cancel Interview
+                                                </button>
+                                            </form>
+                                        </div>
+                                    }
+                                </div>
+                            }
+                        </div>
+                    }
+
+                    @if (timeline.Any())
+                    {
+                        <details class="timeline-details">
+                            <summary>
+                                <i class="bi bi-clock-history me-1"></i>
+                                View Application Timeline
+                                (@timeline.Count updates)
+                            </summary>
+
+                            <div class="timeline-content">
+                                @foreach (var history in timeline)
+                                {
+                                    <div class="timeline-item">
+                                        <span class="timeline-dot"></span>
+
+                                        <span class="timeline-status">
+                                            @history.NewStatus
+                                        </span>
+
+                                        <span class="timeline-date">
+                                            @history.ChangedAt
+                                            .ToString("dd MMM yyyy - hh:mm tt")
+
+                                            @if (history.ChangedByUser != null)
+                                            {
+                                                <text>
+                                                    · by
+                                                    @history.ChangedByUser.Email
+                                                </text>
+                                            }
+                                        </span>
+
+                                        @if (!string.IsNullOrWhiteSpace(
+                                            history.Note))
+                                        {
+                                            <p class="timeline-note">
+                                                @history.Note
+                                            </p>
+                                        }
+                                    </div>
+                                }
+                            </div>
+                        </details>
+                    }
+
+                    <div class="applicant-actions">
+                        <a asp-controller="Applicant"
+                           asp-action="Details"
+                           asp-route-applicationId="@application.Id"
+                           class="action-link details-button">
+                            <i class="bi bi-person-vcard-fill"></i>
+                            Student Information
+                        </a>
+
+                        @if (application.Status ==
+                            ApplicationStatus.Pending)
+                        {
+                            <form asp-controller="Application"
+                                  asp-action="StartReview"
+                                  asp-route-id="@application.Id"
+                                  method="post">
+
+                                @Html.AntiForgeryToken()
+
+                                <button type="submit"
+                                        class="action-button review-button">
+                                    <i class="bi bi-search"></i>
+                                    Start Review
+                                </button>
+                            </form>
+                        }
+
+                        @if (application.Status ==
+                                ApplicationStatus.Pending ||
+                             application.Status ==
+                                ApplicationStatus.UnderReview ||
+                             application.Status ==
+                                ApplicationStatus.InterviewScheduled)
+                        {
+                            <a asp-controller="Interview"
+                               asp-action="Schedule"
+                               asp-route-applicationId="@application.Id"
+                               class="action-link schedule-button">
+                                <i class="bi bi-calendar2-plus-fill"></i>
+                                Schedule Interview
+                            </a>
+
+                            <form asp-controller="Application"
+                                  asp-action="Accept"
+                                  asp-route-id="@application.Id"
+                                  method="post">
+
+                                @Html.AntiForgeryToken()
+
+                                <button type="submit"
+                                        class="action-button accept-button"
+                                        onclick="return confirm('Accept this student?');">
+                                    <i class="bi bi-check-circle-fill"></i>
+                                    Accept
+                                </button>
+                            </form>
+
+                            <form asp-controller="Application"
+                                  asp-action="Reject"
+                                  asp-route-id="@application.Id"
+                                  method="post">
+
+                                @Html.AntiForgeryToken()
+
+                                <button type="submit"
+                                        class="action-button reject-button"
+                                        onclick="return confirm('Reject this application?');">
+                                    <i class="bi bi-x-circle-fill"></i>
+                                    Reject
+                                </button>
+                            </form>
+                        }
+
+                        @if (application.Status ==
+                            ApplicationStatus.Accepted)
+                        {
+                            <a asp-controller="Evaluation"
+                               asp-action="Create"
+                               asp-route-applicationId="@application.Id"
+                               class="action-link evaluate-button">
+                                <i class="bi bi-star-fill"></i>
+                                Evaluate Student
+                            </a>
+                        }
+
+                        @if (application.Status ==
+                            ApplicationStatus.Completed)
+                        {
+                            <span class="status-badge status-completed">
+                                <i class="bi bi-patch-check-fill"></i>
+                                Evaluated Successfully
+                            </span>
+                        }
+                    </div>
+                </div>
+
+                animationDelay += 80;
+            }
+        }
+    </div>
+</div>
