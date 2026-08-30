@@ -11,14 +11,12 @@
 
     if (SignInManager.IsSignedIn(User))
     {
-        var currentUserId =
-            UserManager.GetUserId(User);
+        var currentUserId = UserManager.GetUserId(User);
 
         unreadNotificationsCount =
-            await DbContext.Notifications
-                .CountAsync(notification =>
-                    notification.UserId == currentUserId &&
-                    !notification.IsRead);
+            await DbContext.Notifications.CountAsync(notification =>
+                notification.UserId == currentUserId &&
+                !notification.IsRead);
     }
 }
 
@@ -70,7 +68,7 @@
         }
 
     .portal-dropdown-menu {
-        min-width: 235px;
+        min-width: 245px;
         padding: 9px;
         border: 1px solid #e2e8f0;
         border-radius: 16px;
@@ -107,36 +105,37 @@
             transform: translateX(3px);
         }
 
-    .smart-career-button {
-        color: #4f46e5 !important;
-        background: linear-gradient( 135deg, rgba(99, 102, 241, 0.09), rgba(14, 165, 233, 0.09));
+    .talent-nav-link {
+        color: #047857 !important;
+        background: #ecfdf5;
     }
 
-        .smart-career-button i {
-            color: #7c3aed;
-            animation: smartSparkle 2.2s ease-in-out infinite;
-        }
-
-        .smart-career-button:hover,
-        .smart-career-button:focus {
+        .talent-nav-link:hover {
             color: white !important;
-            background: linear-gradient(135deg, #6366f1, #0284c7);
-            box-shadow: 0 8px 19px rgba(99, 102, 241, 0.23);
+            background: linear-gradient(135deg, #10b981, #0ea5e9);
+            box-shadow: 0 9px 20px rgba(16, 185, 129, 0.2);
         }
 
-            .smart-career-button:hover i,
-            .smart-career-button:focus i {
-                color: white;
-            }
-
-    .smart-match-item {
-        color: #4338ca;
-        background: linear-gradient(135deg, #eef2ff, #f0f9ff);
+    .analytics-nav-link {
+        color: #6d28d9 !important;
+        background: #f5f3ff;
     }
 
-        .smart-match-item i {
-            color: white;
-            background: linear-gradient(135deg, #6366f1, #0284c7);
+        .analytics-nav-link:hover {
+            color: white !important;
+            background: linear-gradient(135deg, #7c3aed, #2563eb);
+            box-shadow: 0 9px 20px rgba(124, 58, 237, 0.23);
+        }
+
+    .reports-nav-link {
+        color: #b45309 !important;
+        background: #fffbeb;
+    }
+
+        .reports-nav-link:hover {
+            color: white !important;
+            background: linear-gradient(135deg, #f59e0b, #f97316);
+            box-shadow: 0 9px 20px rgba(245, 158, 11, 0.23);
         }
 
     .notification-nav-link {
@@ -283,16 +282,6 @@
         }
     }
 
-    @@keyframes smartSparkle {
-        0%, 100% {
-            transform: rotate(0deg) scale(1);
-        }
-
-        50% {
-            transform: rotate(12deg) scale(1.15);
-        }
-    }
-
     @@media (max-width: 1200px) {
         .portal-nav-links {
             align-items: stretch;
@@ -331,10 +320,12 @@
 @if (SignInManager.IsSignedIn(User))
 {
     <ul class="navbar-nav portal-nav-links">
+
         <li class="nav-item">
             <a class="nav-link portal-nav-link"
                asp-controller="Dashboard"
                asp-action="Index">
+
                 <i class="bi bi-grid-fill"></i>
                 Dashboard
             </a>
@@ -346,45 +337,60 @@
                 <a class="nav-link portal-nav-link"
                    asp-controller="Internship"
                    asp-action="Index">
+
                     <i class="bi bi-search"></i>
                     Browse Internships
                 </a>
             </li>
 
             <li class="nav-item dropdown">
-                <button class="nav-link dropdown-toggle portal-dropdown-button smart-career-button"
+                <button class="nav-link dropdown-toggle portal-dropdown-button"
                         type="button"
                         data-bs-toggle="dropdown"
                         aria-expanded="false">
-                    <i class="bi bi-stars"></i>
-                    Smart Career
+
+                    <i class="bi bi-mortarboard-fill"></i>
+                    My Training
                 </button>
 
                 <ul class="dropdown-menu portal-dropdown-menu">
                     <li>
-                        <a class="dropdown-item portal-dropdown-item smart-match-item"
-                           asp-controller="Matching"
-                           asp-action="Index">
-                            <i class="bi bi-lightning-charge-fill"></i>
-                            Smart Matches
+                        <a class="dropdown-item portal-dropdown-item"
+                           asp-controller="Application"
+                           asp-action="MyApplications">
+
+                            <i class="bi bi-file-earmark-check-fill"></i>
+                            My Applications
                         </a>
                     </li>
 
                     <li>
                         <a class="dropdown-item portal-dropdown-item"
-                           asp-controller="StudentPreference"
+                           asp-controller="TrainingLogbook"
                            asp-action="Index">
-                            <i class="bi bi-sliders"></i>
-                            Career Preferences
+
+                            <i class="bi bi-journal-check"></i>
+                            Training Logbook
                         </a>
                     </li>
 
                     <li>
                         <a class="dropdown-item portal-dropdown-item"
-                           asp-controller="SkillRoadmap"
+                           asp-controller="WeeklyReport"
                            asp-action="Index">
-                            <i class="bi bi-signpost-split-fill"></i>
-                            My Skill Roadmaps
+
+                            <i class="bi bi-journal-text"></i>
+                            Weekly Reports
+                        </a>
+                    </li>
+
+                    <li>
+                        <a class="dropdown-item portal-dropdown-item"
+                           asp-controller="Evaluation"
+                           asp-action="MyEvaluations">
+
+                            <i class="bi bi-trophy-fill"></i>
+                            Evaluations & Certificates
                         </a>
                     </li>
                 </ul>
@@ -395,44 +401,49 @@
                         type="button"
                         data-bs-toggle="dropdown"
                         aria-expanded="false">
-                    <i class="bi bi-mortarboard-fill"></i>
-                    My Training
+
+                    <i class="bi bi-stars"></i>
+                    Smart Career
                 </button>
 
                 <ul class="dropdown-menu portal-dropdown-menu">
                     <li>
                         <a class="dropdown-item portal-dropdown-item"
-                           asp-controller="Application"
-                           asp-action="MyApplications">
-                            <i class="bi bi-file-earmark-check-fill"></i>
-                            My Applications
-                        </a>
-                    </li>
-
-                    <li>
-                        <a class="dropdown-item portal-dropdown-item"
-                           asp-controller="TrainingLogbook"
+                           asp-controller="StudentPreference"
                            asp-action="Index">
-                            <i class="bi bi-journal-check"></i>
-                            Training Logbook
+
+                            <i class="bi bi-sliders"></i>
+                            Career Preferences
                         </a>
                     </li>
 
                     <li>
                         <a class="dropdown-item portal-dropdown-item"
-                           asp-controller="WeeklyReport"
+                           asp-controller="InternshipMatch"
                            asp-action="Index">
-                            <i class="bi bi-journal-text"></i>
-                            Weekly Reports
+
+                            <i class="bi bi-lightning-charge-fill"></i>
+                            Smart Matches
                         </a>
                     </li>
 
                     <li>
                         <a class="dropdown-item portal-dropdown-item"
-                           asp-controller="Evaluation"
-                           asp-action="MyEvaluations">
-                            <i class="bi bi-trophy-fill"></i>
-                            Evaluations & Certificates
+                           asp-controller="SkillRoadmap"
+                           asp-action="Index">
+
+                            <i class="bi bi-signpost-split-fill"></i>
+                            My Skill Roadmaps
+                        </a>
+                    </li>
+
+                    <li>
+                        <a class="dropdown-item portal-dropdown-item"
+                           asp-controller="Portfolio"
+                           asp-action="Index">
+
+                            <i class="bi bi-patch-check-fill"></i>
+                            My Verified Portfolio
                         </a>
                     </li>
                 </ul>
@@ -442,6 +453,7 @@
                 <a class="nav-link portal-nav-link"
                    asp-controller="Student"
                    asp-action="Profile">
+
                     <i class="bi bi-person-circle"></i>
                     My Profile
                 </a>
@@ -454,6 +466,7 @@
                 <a class="nav-link portal-nav-link"
                    asp-controller="Internship"
                    asp-action="MyInternships">
+
                     <i class="bi bi-briefcase-fill"></i>
                     My Internships
                 </a>
@@ -463,8 +476,29 @@
                 <a class="nav-link portal-nav-link"
                    asp-controller="Internship"
                    asp-action="Create">
+
                     <i class="bi bi-plus-circle-fill"></i>
                     Add Internship
+                </a>
+            </li>
+
+            <li class="nav-item">
+                <a class="nav-link portal-nav-link talent-nav-link"
+                   asp-controller="TalentSearch"
+                   asp-action="Index">
+
+                    <i class="bi bi-person-lines-fill"></i>
+                    Find Talent
+                </a>
+            </li>
+
+            <li class="nav-item">
+                <a class="nav-link portal-nav-link analytics-nav-link"
+                   asp-controller="InternshipAnalytics"
+                   asp-action="Index">
+
+                    <i class="bi bi-graph-up-arrow"></i>
+                    Analytics
                 </a>
             </li>
 
@@ -473,6 +507,7 @@
                         type="button"
                         data-bs-toggle="dropdown"
                         aria-expanded="false">
+
                     <i class="bi bi-clipboard-check-fill"></i>
                     Training Review
                 </button>
@@ -482,6 +517,7 @@
                         <a class="dropdown-item portal-dropdown-item"
                            asp-controller="TrainingHoursReview"
                            asp-action="Index">
+
                             <i class="bi bi-clock-history"></i>
                             Review Training Hours
                         </a>
@@ -491,6 +527,7 @@
                         <a class="dropdown-item portal-dropdown-item"
                            asp-controller="WeeklyReportReview"
                            asp-action="Index">
+
                             <i class="bi bi-journal-check"></i>
                             Review Weekly Reports
                         </a>
@@ -502,6 +539,7 @@
                 <a class="nav-link portal-nav-link"
                    asp-controller="Company"
                    asp-action="Profile">
+
                     <i class="bi bi-building-fill"></i>
                     Company Profile
                 </a>
@@ -514,6 +552,7 @@
                 <a class="nav-link portal-nav-link"
                    asp-controller="Admin"
                    asp-action="PendingInternships">
+
                     <i class="bi bi-hourglass-split"></i>
                     Review Internships
                 </a>
@@ -523,8 +562,29 @@
                 <a class="nav-link portal-nav-link"
                    asp-controller="Admin"
                    asp-action="AllInternships">
+
                     <i class="bi bi-briefcase-fill"></i>
                     All Internships
+                </a>
+            </li>
+
+            <li class="nav-item">
+                <a class="nav-link portal-nav-link analytics-nav-link"
+                   asp-controller="InternshipAnalytics"
+                   asp-action="Index">
+
+                    <i class="bi bi-bar-chart-line-fill"></i>
+                    Analytics
+                </a>
+            </li>
+
+            <li class="nav-item">
+                <a class="nav-link portal-nav-link reports-nav-link"
+                   asp-controller="ComplianceReport"
+                   asp-action="Index">
+
+                    <i class="bi bi-file-earmark-bar-graph-fill"></i>
+                    Official Reports
                 </a>
             </li>
 
@@ -532,6 +592,7 @@
                 <a class="nav-link portal-nav-link"
                    asp-controller="UserManagement"
                    asp-action="Index">
+
                     <i class="bi bi-people-fill"></i>
                     Manage Users
                 </a>
@@ -544,6 +605,7 @@
                 <a class="nav-link portal-nav-link"
                    asp-controller="TrainingApproval"
                    asp-action="Index">
+
                     <i class="bi bi-shield-check"></i>
                     Training Approvals
                 </a>
@@ -553,8 +615,19 @@
                 <a class="nav-link portal-nav-link"
                    asp-controller="WeeklyReportReview"
                    asp-action="Index">
+
                     <i class="bi bi-journal-check"></i>
                     Report Approvals
+                </a>
+            </li>
+
+            <li class="nav-item">
+                <a class="nav-link portal-nav-link reports-nav-link"
+                   asp-controller="ComplianceReport"
+                   asp-action="Index">
+
+                    <i class="bi bi-file-earmark-check-fill"></i>
+                    Official Reports
                 </a>
             </li>
         }
@@ -564,6 +637,7 @@
                asp-controller="Notification"
                asp-action="Index"
                title="Notifications">
+
                 <i class="bi bi-bell-fill"></i>
 
                 @if (unreadNotificationsCount > 0)
@@ -582,9 +656,7 @@
             <div class="navbar-user-avatar">
                 @(string.IsNullOrWhiteSpace(User.Identity?.Name)
                                 ? "U"
-                                : User.Identity.Name
-                                .Substring(0, 1)
-                                .ToUpper())
+                                : User.Identity.Name.Substring(0, 1).ToUpper())
             </div>
 
                 <div class="user-information">
@@ -623,6 +695,7 @@
                     <button type="submit"
                             class="logout-button"
                             title="Logout">
+
                         <i class="bi bi-box-arrow-right"></i>
                     </button>
                 </form>
@@ -637,6 +710,7 @@ else
             <a class="nav-link login-nav-button"
                asp-area="Identity"
                asp-page="/Account/Login">
+
                 <i class="bi bi-box-arrow-in-right me-1"></i>
                 Login
             </a>
@@ -646,6 +720,7 @@ else
             <a class="nav-link register-nav-button"
                asp-controller="Account"
                asp-action="Register">
+
                 <i class="bi bi-person-plus-fill me-1"></i>
                 Create Account
             </a>

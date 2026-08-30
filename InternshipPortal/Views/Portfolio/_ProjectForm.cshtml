@@ -1,0 +1,632 @@
+﻿@model InternshipPortal.Models.ViewModels.PortfolioProjectViewModel
+
+<style>
+    .project-form-page {
+        min-height: 100vh;
+        padding: 45px 0 70px;
+        background: radial-gradient(circle at top left, rgba(99, 102, 241, 0.14), transparent 34%), radial-gradient(circle at bottom right, rgba(6, 182, 212, 0.12), transparent 35%), #f8fafc;
+    }
+
+    .project-form-header {
+        position: relative;
+        overflow: hidden;
+        padding: 34px;
+        margin-bottom: 22px;
+        color: white;
+        border-radius: 27px;
+        background: linear-gradient(135deg, #172554, #4338ca, #0891b2);
+        box-shadow: 0 20px 45px rgba(49, 46, 129, 0.22);
+        animation: projectFormEntrance 0.7s ease;
+    }
+
+        .project-form-header::after {
+            position: absolute;
+            width: 230px;
+            height: 230px;
+            right: -80px;
+            bottom: -150px;
+            content: "";
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 50%;
+        }
+
+    .header-content {
+        position: relative;
+        z-index: 2;
+        display: flex;
+        align-items: center;
+        gap: 16px;
+    }
+
+    .header-icon {
+        min-width: 61px;
+        height: 61px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 27px;
+        border-radius: 19px;
+        background: rgba(255, 255, 255, 0.16);
+    }
+
+    .project-form-header h1 {
+        margin: 0;
+        font-weight: 900;
+    }
+
+    .project-form-header p {
+        margin: 6px 0 0;
+        color: rgba(255, 255, 255, 0.78);
+    }
+
+    .project-form-layout {
+        display: grid;
+        grid-template-columns: 1.5fr 0.7fr;
+        gap: 22px;
+        align-items: start;
+    }
+
+    .project-form-card,
+    .project-guide-card {
+        padding: 29px;
+        border: 1px solid #e2e8f0;
+        border-radius: 23px;
+        background: white;
+        box-shadow: 0 13px 34px rgba(15, 23, 42, 0.065);
+        animation: projectFormEntrance 0.7s ease both;
+    }
+
+    .form-section {
+        padding-bottom: 24px;
+        margin-bottom: 24px;
+        border-bottom: 1px solid #eef2f7;
+    }
+
+        .form-section:last-of-type {
+            border-bottom: none;
+        }
+
+    .section-title {
+        margin-bottom: 17px;
+        color: #172554;
+        font-size: 17px;
+        font-weight: 900;
+    }
+
+    .project-label {
+        margin-bottom: 7px;
+        color: #334155;
+        font-size: 13px;
+        font-weight: 800;
+    }
+
+    .project-input {
+        min-height: 51px;
+        padding: 12px 15px;
+        color: #334155;
+        border: 1px solid #dbe3ee;
+        border-radius: 13px;
+        background: #fbfdff;
+        transition: 0.3s;
+    }
+
+    textarea.project-input {
+        min-height: 130px;
+        resize: vertical;
+    }
+
+    .project-input:focus {
+        border-color: #818cf8;
+        background: white;
+        box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.11);
+    }
+
+    .input-help {
+        display: block;
+        margin-top: 6px;
+        color: #94a3b8;
+        font-size: 11px;
+    }
+
+    .image-upload-box {
+        position: relative;
+        overflow: hidden;
+        padding: 25px;
+        text-align: center;
+        border: 2px dashed #c7d2fe;
+        border-radius: 17px;
+        background: #f8faff;
+        transition: 0.3s;
+    }
+
+        .image-upload-box:hover {
+            border-color: #6366f1;
+            background: #eef2ff;
+        }
+
+    .upload-icon {
+        width: 58px;
+        height: 58px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 11px;
+        color: #4338ca;
+        font-size: 25px;
+        border-radius: 18px;
+        background: #e0e7ff;
+    }
+
+    .image-upload-box strong,
+    .image-upload-box small {
+        display: block;
+    }
+
+    .image-upload-box strong {
+        color: #172554;
+        font-size: 13px;
+    }
+
+    .image-upload-box small {
+        margin: 4px 0 14px;
+        color: #64748b;
+        font-size: 11px;
+    }
+
+    .image-preview {
+        width: 100%;
+        max-height: 260px;
+        display: none;
+        margin-top: 16px;
+        object-fit: cover;
+        border: 1px solid #e2e8f0;
+        border-radius: 15px;
+    }
+
+        .image-preview.visible {
+            display: block;
+        }
+
+    .featured-box {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 15px;
+        padding: 16px;
+        border: 1px solid #fde68a;
+        border-radius: 15px;
+        background: #fffbeb;
+    }
+
+        .featured-box strong,
+        .featured-box small {
+            display: block;
+        }
+
+        .featured-box strong {
+            color: #92400e;
+            font-size: 13px;
+        }
+
+        .featured-box small {
+            margin-top: 3px;
+            color: #a16207;
+            font-size: 11px;
+        }
+
+    .form-check-input {
+        width: 46px;
+        height: 24px;
+        cursor: pointer;
+    }
+
+    .form-actions {
+        display: flex;
+        justify-content: flex-end;
+        gap: 10px;
+    }
+
+    .form-button {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 7px;
+        padding: 12px 20px;
+        font-size: 13px;
+        font-weight: 800;
+        border: none;
+        border-radius: 12px;
+        text-decoration: none;
+        transition: 0.3s;
+    }
+
+    .cancel-button {
+        color: #475569;
+        background: #f1f5f9;
+    }
+
+    .save-button {
+        color: white;
+        background: linear-gradient(135deg, #6366f1, #0ea5e9);
+        box-shadow: 0 9px 21px rgba(99, 102, 241, 0.25);
+    }
+
+    .form-button:hover {
+        transform: translateY(-3px);
+    }
+
+    .cancel-button:hover {
+        color: #0f172a;
+        background: #e2e8f0;
+    }
+
+    .save-button:hover {
+        color: white;
+        box-shadow: 0 13px 27px rgba(99, 102, 241, 0.34);
+    }
+
+    .project-guide-card {
+        position: sticky;
+        top: 90px;
+    }
+
+    .guide-visual {
+        height: 150px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-bottom: 20px;
+        color: white;
+        font-size: 62px;
+        border-radius: 20px;
+        background: linear-gradient(135deg, #312e81, #6366f1, #06b6d4);
+    }
+
+    .project-guide-card h3 {
+        color: #172554;
+        font-size: 18px;
+        font-weight: 900;
+    }
+
+    .project-guide-card > p {
+        color: #64748b;
+        font-size: 12px;
+        line-height: 1.7;
+    }
+
+    .guide-list {
+        display: grid;
+        gap: 11px;
+        margin-top: 20px;
+    }
+
+    .guide-item {
+        display: flex;
+        align-items: flex-start;
+        gap: 10px;
+        padding: 11px;
+        color: #475569;
+        font-size: 11px;
+        font-weight: 700;
+        border-radius: 12px;
+        background: #f8fafc;
+    }
+
+        .guide-item i {
+            color: #10b981;
+            font-size: 15px;
+        }
+
+    @@keyframes projectFormEntrance {
+        from {
+            opacity: 0;
+            transform: translateY(22px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    @@media (max-width: 992px) {
+        .project-form-layout {
+            grid-template-columns: 1fr;
+        }
+
+        .project-guide-card {
+            position: static;
+        }
+    }
+
+    @@media (max-width: 576px) {
+        .project-form-header {
+            padding: 26px 20px;
+        }
+
+        .project-form-card,
+        .project-guide-card {
+            padding: 22px 18px;
+        }
+
+        .form-actions {
+            flex-direction: column-reverse;
+        }
+
+        .form-button {
+            width: 100%;
+        }
+    }
+</style>
+
+<div class="project-form-page">
+    <div class="container">
+        <div class="project-form-header">
+            <div class="header-content">
+                <div class="header-icon">
+                    <i class="bi bi-kanban-fill"></i>
+                </div>
+
+                <div>
+                    <h1>@ViewData["ProjectPageTitle"]</h1>
+
+                    <p>
+                        Showcase your practical work, technologies
+                        and development experience.
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <div class="project-form-layout">
+            <form asp-action="@ViewData["ProjectFormAction"]"
+                  method="post"
+                  enctype="multipart/form-data"
+                  class="project-form-card">
+
+                @Html.AntiForgeryToken()
+
+                @if (Model.Id.HasValue)
+                {
+                    <input asp-for="Id" type="hidden" />
+                }
+
+                <input asp-for="CurrentImagePath" type="hidden" />
+
+                <div asp-validation-summary="ModelOnly"
+                     class="alert alert-danger">
+                </div>
+
+                <section class="form-section">
+                    <h2 class="section-title">
+                        <i class="bi bi-info-circle-fill me-2"></i>
+                        Project Information
+                    </h2>
+
+                    <div class="mb-4">
+                        <label asp-for="Title"
+                               class="project-label">
+                        </label>
+
+                        <input asp-for="Title"
+                               class="form-control project-input"
+                               placeholder="Example: Internship Management Platform" />
+
+                        <span asp-validation-for="Title"
+                              class="text-danger small">
+                        </span>
+                    </div>
+
+                    <div class="mb-4">
+                        <label asp-for="Description"
+                               class="project-label">
+                        </label>
+
+                        <textarea asp-for="Description"
+                                  class="form-control project-input"
+                                  placeholder="Explain the project idea, your role and the problem it solves...">
+                        </textarea>
+
+                        <span asp-validation-for="Description"
+                              class="text-danger small">
+                        </span>
+                    </div>
+
+                    <div>
+                        <label asp-for="Technologies"
+                               class="project-label">
+                        </label>
+
+                        <input asp-for="Technologies"
+                               class="form-control project-input"
+                               placeholder="ASP.NET Core MVC, EF Core, SQL Server, Bootstrap" />
+
+                        <span class="input-help">
+                            Separate technologies using commas.
+                        </span>
+
+                        <span asp-validation-for="Technologies"
+                              class="text-danger small">
+                        </span>
+                    </div>
+                </section>
+
+                <section class="form-section">
+                    <h2 class="section-title">
+                        <i class="bi bi-link-45deg me-2"></i>
+                        Project Links
+                    </h2>
+
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label asp-for="ProjectUrl"
+                                   class="project-label">
+                            </label>
+
+                            <input asp-for="ProjectUrl"
+                                   class="form-control project-input"
+                                   placeholder="https://project-demo.com" />
+
+                            <span asp-validation-for="ProjectUrl"
+                                  class="text-danger small">
+                            </span>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label asp-for="RepositoryUrl"
+                                   class="project-label">
+                            </label>
+
+                            <input asp-for="RepositoryUrl"
+                                   class="form-control project-input"
+                                   placeholder="https://github.com/user/project" />
+
+                            <span asp-validation-for="RepositoryUrl"
+                                  class="text-danger small">
+                            </span>
+                        </div>
+                    </div>
+                </section>
+
+                <section class="form-section">
+                    <h2 class="section-title">
+                        <i class="bi bi-image-fill me-2"></i>
+                        Project Image
+                    </h2>
+
+                    <div class="image-upload-box">
+                        <div class="upload-icon">
+                            <i class="bi bi-cloud-arrow-up-fill"></i>
+                        </div>
+
+                        <strong>Upload a project screenshot</strong>
+
+                        <small>
+                            JPG, PNG or WEBP — maximum size 4 MB
+                        </small>
+
+                        <input asp-for="ImageFile"
+                               type="file"
+                               accept=".jpg,.jpeg,.png,.webp"
+                               class="form-control"
+                               onchange="previewProjectImage(this)" />
+
+                        <span asp-validation-for="ImageFile"
+                              class="text-danger small">
+                        </span>
+
+                        <img id="projectImagePreview"
+                             src="@Model.CurrentImagePath"
+                             class="image-preview
+                                @(string.IsNullOrWhiteSpace(
+                                                                 Model.CurrentImagePath)
+                                                                 ? ""
+                                                                 : "visible")"
+                             alt="Project preview" />
+                    </div>
+                </section>
+
+                <section class="form-section">
+                    <div class="featured-box">
+                        <div>
+                            <strong>
+                                <i class="bi bi-star-fill me-1"></i>
+                                Featured Project
+                            </strong>
+
+                            <small>
+                                Display this project first in your portfolio.
+                            </small>
+                        </div>
+
+                        <div class="form-check form-switch">
+                            <input asp-for="IsFeatured"
+                                   class="form-check-input"
+                                   role="switch" />
+                        </div>
+                    </div>
+                </section>
+
+                <div class="form-actions">
+                    <a asp-action="Index"
+                       class="form-button cancel-button">
+                        <i class="bi bi-arrow-left"></i>
+                        Cancel
+                    </a>
+
+                    <button type="submit"
+                            class="form-button save-button">
+                        <i class="bi bi-check-circle-fill"></i>
+                        @ViewData["ProjectSubmitText"]
+                    </button>
+                </div>
+            </form>
+
+            <aside class="project-guide-card">
+                <div class="guide-visual">
+                    <i class="bi bi-window-stack"></i>
+                </div>
+
+                <h3>Build a Strong Showcase</h3>
+
+                <p>
+                    Companies understand your abilities better when
+                    they can see real projects and working results.
+                </p>
+
+                <div class="guide-list">
+                    <div class="guide-item">
+                        <i class="bi bi-check-circle-fill"></i>
+
+                        <span>
+                            Use a clear screenshot showing the
+                            actual project interface.
+                        </span>
+                    </div>
+
+                    <div class="guide-item">
+                        <i class="bi bi-check-circle-fill"></i>
+
+                        <span>
+                            Explain the problem your project solves.
+                        </span>
+                    </div>
+
+                    <div class="guide-item">
+                        <i class="bi bi-check-circle-fill"></i>
+
+                        <span>
+                            Add GitHub and live demo links when available.
+                        </span>
+                    </div>
+
+                    <div class="guide-item">
+                        <i class="bi bi-check-circle-fill"></i>
+
+                        <span>
+                            Mention the technologies you personally used.
+                        </span>
+                    </div>
+                </div>
+            </aside>
+        </div>
+    </div>
+</div>
+
+<script>
+    function previewProjectImage(input) {
+        const preview =
+            document.getElementById("projectImagePreview");
+
+        if (input.files && input.files[0]) {
+            const reader = new FileReader();
+
+            reader.onload = function (event) {
+                preview.src = event.target.result;
+                preview.classList.add("visible");
+            };
+
+            reader.readAsDataURL(input.files[0]);
+        }
+    }
+</script>

@@ -1,0 +1,1058 @@
+﻿@model InternshipPortal.Models.ViewModels.StudentPortfolioDetailsViewModel
+
+@{
+    ViewData["Title"] = "My Portfolio";
+
+    var publicUrl = Url.Action(
+        "Public",
+        "Portfolio",
+        new { slug = Model.Portfolio.PortfolioSlug },
+        Context.Request.Scheme);
+
+    var profileCompletion = 25;
+
+    if (!string.IsNullOrWhiteSpace(Model.Portfolio.Bio))
+    {
+        profileCompletion += 20;
+    }
+
+    if (!string.IsNullOrWhiteSpace(Model.Portfolio.SkillsSummary))
+    {
+        profileCompletion += 15;
+    }
+
+    if (!string.IsNullOrWhiteSpace(Model.Portfolio.GitHubUrl))
+    {
+        profileCompletion += 10;
+    }
+
+    if (!string.IsNullOrWhiteSpace(Model.Portfolio.LinkedInUrl))
+    {
+        profileCompletion += 10;
+    }
+
+    if (Model.Projects.Any())
+    {
+        profileCompletion += 20;
+    }
+
+    if (profileCompletion > 100)
+    {
+        profileCompletion = 100;
+    }
+}
+
+<style>
+    .portfolio-page {
+        min-height: 100vh;
+        padding: 42px 0 70px;
+        background: radial-gradient(circle at top left, rgba(99, 102, 241, 0.14), transparent 33%), radial-gradient(circle at bottom right, rgba(14, 165, 233, 0.12), transparent 34%), #f8fafc;
+    }
+
+    .portfolio-hero {
+        position: relative;
+        overflow: hidden;
+        padding: 42px;
+        color: white;
+        border-radius: 30px;
+        background: linear-gradient(135deg, #172554, #4338ca 55%, #0891b2);
+        box-shadow: 0 24px 55px rgba(30, 41, 59, 0.22);
+        animation: portfolioEntrance 0.7s ease;
+    }
+
+        .portfolio-hero::before,
+        .portfolio-hero::after {
+            position: absolute;
+            content: "";
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            border-radius: 50%;
+        }
+
+        .portfolio-hero::before {
+            width: 330px;
+            height: 330px;
+            top: -155px;
+            right: -80px;
+        }
+
+        .portfolio-hero::after {
+            width: 220px;
+            height: 220px;
+            right: 35px;
+            bottom: -150px;
+        }
+
+    .hero-content {
+        position: relative;
+        z-index: 2;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 25px;
+    }
+
+    .student-overview {
+        display: flex;
+        align-items: center;
+        gap: 20px;
+    }
+
+    .portfolio-avatar {
+        min-width: 86px;
+        height: 86px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #312e81;
+        font-size: 34px;
+        font-weight: 900;
+        border: 5px solid rgba(255, 255, 255, 0.24);
+        border-radius: 27px;
+        background: white;
+        box-shadow: 0 15px 35px rgba(15, 23, 42, 0.25);
+    }
+
+    .verified-label {
+        display: inline-flex;
+        align-items: center;
+        gap: 7px;
+        padding: 7px 13px;
+        margin-bottom: 10px;
+        color: #d1fae5;
+        font-size: 12px;
+        font-weight: 800;
+        border: 1px solid rgba(167, 243, 208, 0.28);
+        border-radius: 30px;
+        background: rgba(16, 185, 129, 0.18);
+    }
+
+    .student-overview h1 {
+        margin: 0 0 6px;
+        font-size: 34px;
+        font-weight: 900;
+    }
+
+    .portfolio-headline {
+        margin: 0;
+        color: #dbeafe;
+        font-size: 16px;
+    }
+
+    .portfolio-education {
+        display: block;
+        margin-top: 8px;
+        color: rgba(255, 255, 255, 0.72);
+        font-size: 13px;
+    }
+
+    .hero-actions {
+        position: relative;
+        z-index: 3;
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: flex-end;
+        gap: 10px;
+    }
+
+    .hero-button {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        padding: 12px 17px;
+        font-size: 13px;
+        font-weight: 800;
+        border: none;
+        border-radius: 13px;
+        text-decoration: none;
+        transition: 0.3s;
+    }
+
+    .edit-button {
+        color: #312e81;
+        background: white;
+    }
+
+    .preview-button {
+        color: white;
+        border: 1px solid rgba(255, 255, 255, 0.35);
+        background: rgba(255, 255, 255, 0.13);
+    }
+
+    .hero-button:hover {
+        color: #312e81;
+        background: white;
+        transform: translateY(-3px);
+        box-shadow: 0 12px 25px rgba(15, 23, 42, 0.2);
+    }
+
+    .portfolio-statistics {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 17px;
+        margin: 24px 0;
+    }
+
+    .portfolio-stat-card {
+        display: flex;
+        align-items: center;
+        gap: 13px;
+        padding: 20px;
+        border: 1px solid #e2e8f0;
+        border-radius: 20px;
+        background: white;
+        box-shadow: 0 10px 28px rgba(15, 23, 42, 0.06);
+        transition: 0.3s;
+    }
+
+        .portfolio-stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 17px 35px rgba(79, 70, 229, 0.12);
+        }
+
+    .stat-icon {
+        min-width: 49px;
+        height: 49px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 21px;
+        border-radius: 15px;
+    }
+
+    .project-icon {
+        color: #4338ca;
+        background: #e0e7ff;
+    }
+
+    .training-icon {
+        color: #047857;
+        background: #d1fae5;
+    }
+
+    .hour-icon {
+        color: #0369a1;
+        background: #e0f2fe;
+    }
+
+    .rating-icon {
+        color: #c2410c;
+        background: #ffedd5;
+    }
+
+    .stat-value {
+        display: block;
+        color: #0f172a;
+        font-size: 24px;
+        font-weight: 900;
+    }
+
+    .stat-name {
+        color: #64748b;
+        font-size: 11px;
+        font-weight: 700;
+    }
+
+    .portfolio-layout {
+        display: grid;
+        grid-template-columns: 1fr 2fr;
+        gap: 22px;
+    }
+
+    .portfolio-card {
+        padding: 25px;
+        margin-bottom: 20px;
+        border: 1px solid #e2e8f0;
+        border-radius: 22px;
+        background: white;
+        box-shadow: 0 10px 28px rgba(15, 23, 42, 0.055);
+        animation: portfolioEntrance 0.7s ease both;
+    }
+
+    .card-heading {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        margin-bottom: 20px;
+    }
+
+        .card-heading h3 {
+            margin: 0;
+            color: #172554;
+            font-size: 18px;
+            font-weight: 900;
+        }
+
+        .card-heading p {
+            margin: 4px 0 0;
+            color: #94a3b8;
+            font-size: 12px;
+        }
+
+    .completion-ring {
+        width: 58px;
+        height: 58px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #4338ca;
+        font-size: 13px;
+        font-weight: 900;
+        border-radius: 50%;
+        background: radial-gradient(closest-side, white 78%, transparent 80%), conic-gradient(#6366f1 @profileCompletion %, #e2e8f0 0);
+    }
+
+    .bio-text {
+        color: #475569;
+        line-height: 1.8;
+        white-space: pre-line;
+    }
+
+    .skill-list {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+    }
+
+    .skill-chip {
+        padding: 7px 11px;
+        color: #4338ca;
+        font-size: 11px;
+        font-weight: 800;
+        border: 1px solid #c7d2fe;
+        border-radius: 20px;
+        background: #eef2ff;
+    }
+
+    .portfolio-link-box {
+        padding: 15px;
+        border: 1px solid #c7d2fe;
+        border-radius: 15px;
+        background: #f8faff;
+    }
+
+        .portfolio-link-box label {
+            display: block;
+            margin-bottom: 7px;
+            color: #4338ca;
+            font-size: 11px;
+            font-weight: 800;
+        }
+
+    .public-link-row {
+        display: flex;
+        gap: 8px;
+    }
+
+    .public-link {
+        min-width: 0;
+        flex: 1;
+        overflow: hidden;
+        padding: 9px 10px;
+        color: #64748b;
+        font-size: 11px;
+        border-radius: 9px;
+        background: white;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    .copy-button {
+        min-width: 39px;
+        color: white;
+        border: none;
+        border-radius: 10px;
+        background: #4f46e5;
+        transition: 0.3s;
+    }
+
+        .copy-button:hover {
+            background: #312e81;
+            transform: translateY(-2px);
+        }
+
+    .visibility-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        margin-top: 12px;
+        padding: 6px 10px;
+        font-size: 11px;
+        font-weight: 800;
+        border-radius: 20px;
+    }
+
+    .public-status {
+        color: #047857;
+        background: #d1fae5;
+    }
+
+    .private-status {
+        color: #b45309;
+        background: #fef3c7;
+    }
+
+    .social-links {
+        display: grid;
+        gap: 9px;
+    }
+
+    .social-link {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 11px;
+        color: #475569;
+        font-size: 12px;
+        font-weight: 700;
+        border-radius: 12px;
+        background: #f8fafc;
+        text-decoration: none;
+        transition: 0.3s;
+    }
+
+        .social-link:hover {
+            color: #4338ca;
+            background: #eef2ff;
+            transform: translateX(4px);
+        }
+
+    .add-project-button {
+        display: inline-flex;
+        align-items: center;
+        gap: 7px;
+        padding: 10px 14px;
+        color: white;
+        font-size: 12px;
+        font-weight: 800;
+        border-radius: 11px;
+        background: linear-gradient(135deg, #6366f1, #0ea5e9);
+        text-decoration: none;
+        transition: 0.3s;
+    }
+
+        .add-project-button:hover {
+            color: white;
+            transform: translateY(-3px);
+            box-shadow: 0 10px 22px rgba(99, 102, 241, 0.25);
+        }
+
+    .projects-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 15px;
+    }
+
+    .project-card {
+        position: relative;
+        overflow: hidden;
+        border: 1px solid #e2e8f0;
+        border-radius: 18px;
+        background: white;
+        transition: 0.3s;
+    }
+
+        .project-card:hover {
+            border-color: #c7d2fe;
+            transform: translateY(-5px);
+            box-shadow: 0 15px 30px rgba(79, 70, 229, 0.12);
+        }
+
+    .project-image {
+        width: 100%;
+        height: 160px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        overflow: hidden;
+        color: white;
+        font-size: 47px;
+        background: linear-gradient(135deg, #312e81, #6366f1, #06b6d4);
+    }
+
+        .project-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: 0.5s;
+        }
+
+    .project-card:hover .project-image img {
+        transform: scale(1.07);
+    }
+
+    .featured-badge {
+        position: absolute;
+        top: 12px;
+        right: 12px;
+        padding: 6px 9px;
+        color: #92400e;
+        font-size: 10px;
+        font-weight: 900;
+        border-radius: 20px;
+        background: #fef3c7;
+        box-shadow: 0 6px 15px rgba(15, 23, 42, 0.12);
+    }
+
+    .project-content {
+        padding: 17px;
+    }
+
+        .project-content h4 {
+            margin: 0 0 7px;
+            color: #172554;
+            font-size: 16px;
+            font-weight: 900;
+        }
+
+        .project-content p {
+            height: 42px;
+            overflow: hidden;
+            margin-bottom: 12px;
+            color: #64748b;
+            font-size: 12px;
+            line-height: 1.7;
+        }
+
+    .technology-text {
+        display: block;
+        margin-bottom: 13px;
+        color: #4f46e5;
+        font-size: 11px;
+        font-weight: 800;
+    }
+
+    .project-actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 7px;
+        padding-top: 12px;
+        border-top: 1px solid #f1f5f9;
+    }
+
+    .project-action {
+        padding: 7px 10px;
+        color: #4338ca;
+        font-size: 11px;
+        font-weight: 800;
+        border: none;
+        border-radius: 9px;
+        background: #eef2ff;
+        text-decoration: none;
+        transition: 0.3s;
+    }
+
+        .project-action:hover {
+            color: white;
+            background: #4f46e5;
+        }
+
+    .delete-project {
+        color: #b91c1c;
+        background: #fee2e2;
+    }
+
+        .delete-project:hover {
+            color: white;
+            background: #ef4444;
+        }
+
+    .empty-projects {
+        padding: 45px 20px;
+        text-align: center;
+        border: 2px dashed #cbd5e1;
+        border-radius: 18px;
+        background: #f8fafc;
+    }
+
+        .empty-projects span {
+            font-size: 55px;
+        }
+
+        .empty-projects h4 {
+            margin: 13px 0 5px;
+            color: #172554;
+            font-weight: 900;
+        }
+
+        .empty-projects p {
+            color: #64748b;
+            font-size: 12px;
+        }
+
+    @@keyframes portfolioEntrance {
+        from {
+            opacity: 0;
+            transform: translateY(22px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    @@media (max-width: 992px) {
+        .portfolio-statistics {
+            grid-template-columns: repeat(2, 1fr);
+        }
+
+        .portfolio-layout {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    @@media (max-width: 768px) {
+        .hero-content,
+        .student-overview {
+            align-items: flex-start;
+            flex-direction: column;
+        }
+
+        .hero-actions {
+            width: 100%;
+            justify-content: flex-start;
+        }
+
+        .portfolio-hero {
+            padding: 29px 23px;
+        }
+
+        .student-overview h1 {
+            font-size: 27px;
+        }
+    }
+
+    @@media (max-width: 576px) {
+        .portfolio-statistics,
+        .projects-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .hero-button {
+            width: 100%;
+        }
+    }
+</style>
+
+<div class="portfolio-page">
+    <div class="container">
+        @if (TempData["Success"] != null)
+        {
+            <div class="alert alert-success alert-dismissible fade show shadow-sm">
+                <i class="bi bi-check-circle-fill me-2"></i>
+                @TempData["Success"]
+
+                <button type="button"
+                        class="btn-close"
+                        data-bs-dismiss="alert">
+                </button>
+            </div>
+        }
+
+        <section class="portfolio-hero">
+            <div class="hero-content">
+                <div class="student-overview">
+                    <div class="portfolio-avatar">
+                        @(string.IsNullOrWhiteSpace(Model.Student.FullName)
+                                                ? "S"
+                                                : Model.Student.FullName.Substring(0, 1).ToUpper())
+                    </div>
+
+                    <div>
+                        <span class="verified-label">
+                            <i class="bi bi-patch-check-fill"></i>
+                            Verified Training Portfolio
+                        </span>
+
+                        <h1>@Model.Student.FullName</h1>
+
+                        <p class="portfolio-headline">
+                            @Model.Portfolio.Headline
+                        </p>
+
+                        <span class="portfolio-education">
+                            <i class="bi bi-mortarboard-fill me-1"></i>
+                            @Model.Student.University
+                            · @Model.Student.Specialization
+                        </span>
+                    </div>
+                </div>
+
+                <div class="hero-actions">
+                    <a asp-action="Edit"
+                       class="hero-button edit-button">
+                        <i class="bi bi-pencil-square"></i>
+                        Edit Portfolio
+                    </a>
+
+                    @if (Model.Portfolio.IsPublic)
+                    {
+                        <a asp-action="Public"
+                           asp-route-slug="@Model.Portfolio.PortfolioSlug"
+                           target="_blank"
+                           class="hero-button preview-button">
+                            <i class="bi bi-eye-fill"></i>
+                            Public Preview
+                        </a>
+                    }
+                </div>
+            </div>
+        </section>
+
+        <section class="portfolio-statistics">
+            <div class="portfolio-stat-card">
+                <div class="stat-icon project-icon">
+                    <i class="bi bi-kanban-fill"></i>
+                </div>
+
+                <div>
+                    <span class="stat-value">@Model.ProjectsCount</span>
+                    <span class="stat-name">Portfolio Projects</span>
+                </div>
+            </div>
+
+            <div class="portfolio-stat-card">
+                <div class="stat-icon training-icon">
+                    <i class="bi bi-briefcase-fill"></i>
+                </div>
+
+                <div>
+                    <span class="stat-value">
+                        @Model.CompletedTrainingsCount
+                    </span>
+                    <span class="stat-name">Completed Trainings</span>
+                </div>
+            </div>
+
+            <div class="portfolio-stat-card">
+                <div class="stat-icon hour-icon">
+                    <i class="bi bi-clock-history"></i>
+                </div>
+
+                <div>
+                    <span class="stat-value">
+                        @Model.ApprovedTrainingHours
+                    </span>
+                    <span class="stat-name">Verified Training Hours</span>
+                </div>
+            </div>
+
+            <div class="portfolio-stat-card">
+                <div class="stat-icon rating-icon">
+                    <i class="bi bi-star-fill"></i>
+                </div>
+
+                <div>
+                    <span class="stat-value">
+                        @Model.AverageRating.ToString("0.0")
+                    </span>
+                    <span class="stat-name">Company Rating</span>
+                </div>
+            </div>
+        </section>
+
+        <section class="portfolio-layout">
+            <aside>
+                <div class="portfolio-card">
+                    <div class="card-heading">
+                        <div>
+                            <h3>Profile Strength</h3>
+                            <p>Complete your professional portfolio</p>
+                        </div>
+
+                        <div class="completion-ring">
+                            @profileCompletion%
+                        </div>
+                    </div>
+
+                    <div class="portfolio-link-box">
+                        <label>
+                            <i class="bi bi-link-45deg me-1"></i>
+                            Shareable Portfolio Link
+                        </label>
+
+                        <div class="public-link-row">
+                            <span class="public-link"
+                                  id="portfolioPublicUrl">
+                                @publicUrl
+                            </span>
+
+                            <button type="button"
+                                    class="copy-button"
+                                    onclick="copyPortfolioUrl()"
+                                    title="Copy link">
+                                <i class="bi bi-copy"></i>
+                            </button>
+                        </div>
+
+                        @if (Model.Portfolio.IsPublic)
+                        {
+                            <span class="visibility-badge public-status">
+                                <i class="bi bi-globe2"></i>
+                                Public Portfolio
+                            </span>
+                        }
+                        else
+                        {
+                            <span class="visibility-badge private-status">
+                                <i class="bi bi-lock-fill"></i>
+                                Private Portfolio
+                            </span>
+                        }
+                    </div>
+                </div>
+
+                <div class="portfolio-card">
+                    <div class="card-heading">
+                        <div>
+                            <h3>Skills</h3>
+                            <p>Your professional capabilities</p>
+                        </div>
+                    </div>
+
+                    @if (!string.IsNullOrWhiteSpace(
+                                        Model.Portfolio.SkillsSummary))
+                    {
+                        <div class="skill-list">
+                            @foreach (var skill in
+                                                    Model.Portfolio.SkillsSummary.Split(
+                                                    ',',
+                                                    StringSplitOptions.RemoveEmptyEntries))
+                            {
+                                <span class="skill-chip">
+                                    @skill.Trim()
+                                </span>
+                            }
+                        </div>
+                    }
+                    else
+                    {
+                        <p class="text-muted small mb-0">
+                            Add your skills to improve your portfolio.
+                        </p>
+                    }
+                </div>
+
+                <div class="portfolio-card">
+                    <div class="card-heading">
+                        <div>
+                            <h3>Professional Links</h3>
+                            <p>Connect with your other profiles</p>
+                        </div>
+                    </div>
+
+                    <div class="social-links">
+                        @if (!string.IsNullOrWhiteSpace(
+                                                Model.Portfolio.GitHubUrl))
+                        {
+                            <a href="@Model.Portfolio.GitHubUrl"
+                               target="_blank"
+                               rel="noopener noreferrer"
+                               class="social-link">
+                                <i class="bi bi-github"></i>
+                                GitHub Profile
+                            </a>
+                        }
+
+                        @if (!string.IsNullOrWhiteSpace(
+                                                Model.Portfolio.LinkedInUrl))
+                        {
+                            <a href="@Model.Portfolio.LinkedInUrl"
+                               target="_blank"
+                               rel="noopener noreferrer"
+                               class="social-link">
+                                <i class="bi bi-linkedin"></i>
+                                LinkedIn Profile
+                            </a>
+                        }
+
+                        @if (!string.IsNullOrWhiteSpace(
+                                                Model.Portfolio.PersonalWebsiteUrl))
+                        {
+                            <a href="@Model.Portfolio.PersonalWebsiteUrl"
+                               target="_blank"
+                               rel="noopener noreferrer"
+                               class="social-link">
+                                <i class="bi bi-globe2"></i>
+                                Personal Website
+                            </a>
+                        }
+
+                        @if (string.IsNullOrWhiteSpace(
+                                                Model.Portfolio.GitHubUrl) &&
+                                                string.IsNullOrWhiteSpace(
+                                                Model.Portfolio.LinkedInUrl) &&
+                                                string.IsNullOrWhiteSpace(
+                                                Model.Portfolio.PersonalWebsiteUrl))
+                        {
+                            <p class="text-muted small mb-0">
+                                No professional links added yet.
+                            </p>
+                        }
+                    </div>
+                </div>
+            </aside>
+
+            <main>
+                <div class="portfolio-card">
+                    <div class="card-heading">
+                        <div>
+                            <h3>About Me</h3>
+                            <p>Your professional introduction</p>
+                        </div>
+                    </div>
+
+                    <div class="bio-text">
+                        @Model.Portfolio.Bio
+                    </div>
+                </div>
+
+                <div class="portfolio-card">
+                    <div class="card-heading">
+                        <div>
+                            <h3>Projects Showcase</h3>
+                            <p>Projects demonstrating your practical skills</p>
+                        </div>
+
+                        <a asp-action="AddProject"
+                           class="add-project-button">
+                            <i class="bi bi-plus-circle-fill"></i>
+                            Add Project
+                        </a>
+                    </div>
+
+                    @if (Model.Projects.Any())
+                    {
+                        <div class="projects-grid">
+                            @foreach (var project in Model.Projects)
+                            {
+                                <article class="project-card">
+                                    @if (project.IsFeatured)
+                                    {
+                                        <span class="featured-badge">
+                                            <i class="bi bi-star-fill me-1"></i>
+                                            Featured
+                                        </span>
+                                    }
+
+                                    <div class="project-image">
+                                        @if (!string.IsNullOrWhiteSpace(
+                                                                        project.ImagePath))
+                                        {
+                                            <img src="@project.ImagePath"
+                                                 alt="@project.Title" />
+                                        }
+                                        else
+                                        {
+                                            <i class="bi bi-code-square"></i>
+                                        }
+                                    </div>
+
+                                    <div class="project-content">
+                                        <h4>@project.Title</h4>
+
+                                        <p>@project.Description</p>
+
+                                        <span class="technology-text">
+                                            <i class="bi bi-tools me-1"></i>
+                                            @project.Technologies
+                                        </span>
+
+                                        <div class="project-actions">
+                                            <a asp-action="EditProject"
+                                               asp-route-id="@project.Id"
+                                               class="project-action">
+                                                <i class="bi bi-pencil-fill"></i>
+                                                Edit
+                                            </a>
+
+                                            @if (!string.IsNullOrWhiteSpace(
+                                                                                project.ProjectUrl))
+                                            {
+                                                <a href="@project.ProjectUrl"
+                                                   target="_blank"
+                                                   rel="noopener noreferrer"
+                                                   class="project-action">
+                                                    <i class="bi bi-box-arrow-up-right"></i>
+                                                    Live
+                                                </a>
+                                            }
+
+                                            @if (!string.IsNullOrWhiteSpace(
+                                                                                project.RepositoryUrl))
+                                            {
+                                                <a href="@project.RepositoryUrl"
+                                                   target="_blank"
+                                                   rel="noopener noreferrer"
+                                                   class="project-action">
+                                                    <i class="bi bi-github"></i>
+                                                    Code
+                                                </a>
+                                            }
+
+                                            <form asp-action="DeleteProject"
+                                                  asp-route-id="@project.Id"
+                                                  method="post">
+                                                @Html.AntiForgeryToken()
+
+                                                <button type="submit"
+                                                        class="project-action delete-project"
+                                                        onclick="return confirm('Delete this project?');">
+                                                    <i class="bi bi-trash3-fill"></i>
+                                                    Delete
+                                                </button>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </article>
+                            }
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="empty-projects">
+                            <span>🚀</span>
+
+                            <h4>Show the world what you can build</h4>
+
+                            <p>
+                                Add your first project with an image,
+                                technologies and working links.
+                            </p>
+
+                            <a asp-action="AddProject"
+                               class="add-project-button mt-2">
+                                <i class="bi bi-plus-circle-fill"></i>
+                                Add First Project
+                            </a>
+                        </div>
+                    }
+                </div>
+            </main>
+        </section>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function copyPortfolioUrl() {
+            const value =
+                document.getElementById("portfolioPublicUrl")
+                    .textContent.trim();
+
+            navigator.clipboard.writeText(value).then(function () {
+                const button = document.querySelector(".copy-button");
+
+                button.innerHTML =
+                    '<i class="bi bi-check-lg"></i>';
+
+                setTimeout(function () {
+                    button.innerHTML =
+                        '<i class="bi bi-copy"></i>';
+                }, 1800);
+            });
+        }
+    </script>
+}

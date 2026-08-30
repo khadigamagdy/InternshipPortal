@@ -9,23 +9,19 @@ namespace InternshipPortal.Models
 
         [Required]
         [StringLength(100)]
-        public string FullName { get; set; }
-            = string.Empty;
+        public string FullName { get; set; } = string.Empty;
 
         [Required]
         [StringLength(100)]
-        public string University { get; set; }
-            = string.Empty;
+        public string University { get; set; } = string.Empty;
 
         [Required]
         [StringLength(100)]
-        public string Faculty { get; set; }
-            = string.Empty;
+        public string Faculty { get; set; } = string.Empty;
 
         [Required]
         [StringLength(100)]
-        public string Specialization { get; set; }
-            = string.Empty;
+        public string Specialization { get; set; } = string.Empty;
 
         [Range(2020, 2040)]
         public int GraduationYear { get; set; }
@@ -33,18 +29,21 @@ namespace InternshipPortal.Models
         public string? CVPath { get; set; }
 
         [Required]
-        public string UserId { get; set; }
-            = string.Empty;
+        public string UserId { get; set; } = string.Empty;
 
-        public IdentityUser User { get; set; }
-            = null!;
+        public IdentityUser User { get; set; } = null!;
 
         public StudentPreference? Preference { get; set; }
 
-        public ICollection<InternshipApplication> Applications
-        {
-            get;
-            set;
-        } = new List<InternshipApplication>();
+        public StudentPortfolio? Portfolio { get; set; }
+
+        public ICollection<InternshipApplication> Applications { get; set; }
+            = new List<InternshipApplication>();
+
+        public ICollection<SavedInternship> SavedInternships { get; set; }
+            = new List<SavedInternship>();
+
+        public ICollection<SkillDevelopmentPlan> SkillDevelopmentPlans { get; set; }
+            = new List<SkillDevelopmentPlan>();
     }
 }

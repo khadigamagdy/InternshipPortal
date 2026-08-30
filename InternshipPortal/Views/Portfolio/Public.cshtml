@@ -1,0 +1,1140 @@
+﻿@model InternshipPortal.Models.ViewModels.StudentPortfolioDetailsViewModel
+
+@{
+    ViewData["Title"] = $"{Model.Student.FullName} Portfolio";
+
+    var portfolioUrl = Url.Action(
+        "Public",
+        "Portfolio",
+        new { slug = Model.Portfolio.PortfolioSlug },
+        Context.Request.Scheme);
+}
+
+<style>
+    .public-portfolio-page {
+        min-height: 100vh;
+        padding: 42px 0 75px;
+        background: radial-gradient(circle at top left, rgba(99, 102, 241, 0.15), transparent 34%), radial-gradient(circle at bottom right, rgba(14, 165, 233, 0.13), transparent 35%), #f8fafc;
+    }
+
+    .public-hero {
+        position: relative;
+        overflow: hidden;
+        padding: 48px;
+        color: white;
+        border-radius: 32px;
+        background: linear-gradient(135deg, #0f172a, #312e81 48%, #0891b2);
+        box-shadow: 0 25px 60px rgba(30, 41, 59, 0.25);
+        animation: publicEntrance 0.7s ease;
+    }
+
+        .public-hero::before,
+        .public-hero::after {
+            position: absolute;
+            content: "";
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            border-radius: 50%;
+        }
+
+        .public-hero::before {
+            width: 370px;
+            height: 370px;
+            top: -190px;
+            right: -80px;
+        }
+
+        .public-hero::after {
+            width: 250px;
+            height: 250px;
+            right: 60px;
+            bottom: -175px;
+        }
+
+    .hero-layout {
+        position: relative;
+        z-index: 2;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 30px;
+    }
+
+    .student-identity {
+        display: flex;
+        align-items: center;
+        gap: 23px;
+    }
+
+    .public-avatar {
+        min-width: 105px;
+        height: 105px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #312e81;
+        font-size: 42px;
+        font-weight: 900;
+        border: 6px solid rgba(255, 255, 255, 0.25);
+        border-radius: 31px;
+        background: white;
+        box-shadow: 0 17px 37px rgba(15, 23, 42, 0.28);
+    }
+
+    .verified-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 7px;
+        padding: 7px 13px;
+        margin-bottom: 11px;
+        color: #d1fae5;
+        font-size: 12px;
+        font-weight: 900;
+        border: 1px solid rgba(167, 243, 208, 0.3);
+        border-radius: 30px;
+        background: rgba(16, 185, 129, 0.18);
+    }
+
+    .student-identity h1 {
+        margin: 0;
+        font-size: 38px;
+        font-weight: 900;
+    }
+
+    .professional-headline {
+        margin: 8px 0 0;
+        color: #dbeafe;
+        font-size: 17px;
+    }
+
+    .education-line {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 14px;
+        margin-top: 13px;
+        color: rgba(255, 255, 255, 0.75);
+        font-size: 12px;
+    }
+
+    .hero-links {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: flex-end;
+        gap: 9px;
+    }
+
+    .hero-link {
+        width: 44px;
+        height: 44px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 18px;
+        border: 1px solid rgba(255, 255, 255, 0.3);
+        border-radius: 13px;
+        background: rgba(255, 255, 255, 0.12);
+        text-decoration: none;
+        transition: 0.3s;
+    }
+
+        .hero-link:hover {
+            color: #312e81;
+            background: white;
+            transform: translateY(-4px);
+        }
+
+    .share-button {
+        width: auto;
+        padding: 0 16px;
+        gap: 7px;
+        font-size: 12px;
+        font-weight: 800;
+    }
+
+    .portfolio-statistics {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 17px;
+        margin: 24px 0;
+    }
+
+    .stat-card {
+        display: flex;
+        align-items: center;
+        gap: 13px;
+        padding: 20px;
+        border: 1px solid #e2e8f0;
+        border-radius: 20px;
+        background: white;
+        box-shadow: 0 10px 28px rgba(15, 23, 42, 0.06);
+        transition: 0.3s;
+    }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 17px 35px rgba(79, 70, 229, 0.12);
+        }
+
+    .stat-icon {
+        min-width: 50px;
+        height: 50px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 21px;
+        border-radius: 15px;
+    }
+
+    .project-stat {
+        color: #4338ca;
+        background: #e0e7ff;
+    }
+
+    .training-stat {
+        color: #047857;
+        background: #d1fae5;
+    }
+
+    .hour-stat {
+        color: #0369a1;
+        background: #e0f2fe;
+    }
+
+    .rating-stat {
+        color: #c2410c;
+        background: #ffedd5;
+    }
+
+    .stat-number {
+        display: block;
+        color: #0f172a;
+        font-size: 25px;
+        font-weight: 900;
+    }
+
+    .stat-label {
+        color: #64748b;
+        font-size: 11px;
+        font-weight: 700;
+    }
+
+    .portfolio-section {
+        padding: 29px;
+        margin-bottom: 22px;
+        border: 1px solid #e2e8f0;
+        border-radius: 24px;
+        background: white;
+        box-shadow: 0 11px 30px rgba(15, 23, 42, 0.055);
+        animation: publicEntrance 0.7s ease both;
+    }
+
+    .section-heading {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 15px;
+        margin-bottom: 23px;
+    }
+
+        .section-heading h2 {
+            margin: 0;
+            color: #172554;
+            font-size: 21px;
+            font-weight: 900;
+        }
+
+        .section-heading p {
+            margin: 5px 0 0;
+            color: #94a3b8;
+            font-size: 12px;
+        }
+
+    .section-icon {
+        min-width: 47px;
+        height: 47px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #4338ca;
+        font-size: 20px;
+        border-radius: 14px;
+        background: #eef2ff;
+    }
+
+    .about-text {
+        margin: 0;
+        color: #475569;
+        font-size: 14px;
+        line-height: 1.9;
+        white-space: pre-line;
+    }
+
+    .skill-list {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 9px;
+    }
+
+    .skill-chip {
+        padding: 8px 13px;
+        color: #4338ca;
+        font-size: 12px;
+        font-weight: 800;
+        border: 1px solid #c7d2fe;
+        border-radius: 25px;
+        background: #eef2ff;
+        transition: 0.3s;
+    }
+
+        .skill-chip:hover {
+            color: white;
+            border-color: #4f46e5;
+            background: #4f46e5;
+            transform: translateY(-3px);
+        }
+
+    .projects-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 17px;
+    }
+
+    .project-card {
+        position: relative;
+        overflow: hidden;
+        border: 1px solid #e2e8f0;
+        border-radius: 19px;
+        background: white;
+        transition: 0.35s;
+    }
+
+        .project-card:hover {
+            border-color: #c7d2fe;
+            transform: translateY(-7px);
+            box-shadow: 0 17px 35px rgba(79, 70, 229, 0.13);
+        }
+
+    .project-image {
+        height: 180px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        overflow: hidden;
+        color: white;
+        font-size: 52px;
+        background: linear-gradient(135deg, #312e81, #6366f1, #06b6d4);
+    }
+
+        .project-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: 0.5s;
+        }
+
+    .project-card:hover .project-image img {
+        transform: scale(1.08);
+    }
+
+    .featured-label {
+        position: absolute;
+        top: 13px;
+        right: 13px;
+        padding: 6px 10px;
+        color: #92400e;
+        font-size: 10px;
+        font-weight: 900;
+        border-radius: 20px;
+        background: #fef3c7;
+        box-shadow: 0 7px 18px rgba(15, 23, 42, 0.13);
+    }
+
+    .project-content {
+        padding: 18px;
+    }
+
+        .project-content h3 {
+            margin: 0 0 8px;
+            color: #172554;
+            font-size: 17px;
+            font-weight: 900;
+        }
+
+    .project-description {
+        height: 61px;
+        overflow: hidden;
+        margin-bottom: 13px;
+        color: #64748b;
+        font-size: 12px;
+        line-height: 1.7;
+    }
+
+    .technology-list {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+        margin-bottom: 15px;
+    }
+
+    .technology-chip {
+        padding: 5px 8px;
+        color: #0369a1;
+        font-size: 9px;
+        font-weight: 800;
+        border-radius: 15px;
+        background: #e0f2fe;
+    }
+
+    .project-links {
+        display: flex;
+        gap: 8px;
+        padding-top: 13px;
+        border-top: 1px solid #f1f5f9;
+    }
+
+    .project-link {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 8px 11px;
+        color: #4338ca;
+        font-size: 10px;
+        font-weight: 800;
+        border-radius: 9px;
+        background: #eef2ff;
+        text-decoration: none;
+        transition: 0.3s;
+    }
+
+        .project-link:hover {
+            color: white;
+            background: #4f46e5;
+        }
+
+    .training-timeline {
+        position: relative;
+        display: grid;
+        gap: 16px;
+    }
+
+    .training-card {
+        display: grid;
+        grid-template-columns: auto 1fr auto;
+        align-items: center;
+        gap: 16px;
+        padding: 19px;
+        border: 1px solid #e2e8f0;
+        border-radius: 17px;
+        background: #fbfdff;
+        transition: 0.3s;
+    }
+
+        .training-card:hover {
+            border-color: #a7f3d0;
+            background: #f0fdf4;
+            transform: translateX(5px);
+        }
+
+    .company-icon {
+        min-width: 53px;
+        height: 53px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 22px;
+        border-radius: 16px;
+        background: linear-gradient(135deg, #059669, #06b6d4);
+    }
+
+    .training-title {
+        margin: 0 0 5px;
+        color: #172554;
+        font-size: 15px;
+        font-weight: 900;
+    }
+
+    .company-name {
+        display: block;
+        color: #64748b;
+        font-size: 12px;
+    }
+
+    .training-meta {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        margin-top: 8px;
+        color: #94a3b8;
+        font-size: 10px;
+    }
+
+    .verified-training {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 7px 11px;
+        color: #047857;
+        font-size: 10px;
+        font-weight: 900;
+        border-radius: 20px;
+        background: #d1fae5;
+    }
+
+    .evaluation-box {
+        padding: 15px;
+        margin-top: 14px;
+        border-left: 4px solid #f59e0b;
+        border-radius: 0 13px 13px 0;
+        background: #fffbeb;
+    }
+
+    .evaluation-stars {
+        display: flex;
+        gap: 3px;
+        margin-bottom: 7px;
+        color: #f59e0b;
+    }
+
+    .evaluation-feedback {
+        margin: 0;
+        color: #78350f;
+        font-size: 11px;
+        font-style: italic;
+        line-height: 1.7;
+    }
+
+    .certificate-link {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        margin-top: 10px;
+        color: #b45309;
+        font-size: 10px;
+        font-weight: 900;
+        text-decoration: none;
+    }
+
+        .certificate-link:hover {
+            color: #92400e;
+        }
+
+    .empty-section {
+        padding: 45px 20px;
+        text-align: center;
+        border: 2px dashed #cbd5e1;
+        border-radius: 18px;
+        background: #f8fafc;
+    }
+
+        .empty-section span {
+            display: block;
+            font-size: 50px;
+        }
+
+        .empty-section h3 {
+            margin: 13px 0 5px;
+            color: #172554;
+            font-size: 17px;
+            font-weight: 900;
+        }
+
+        .empty-section p {
+            margin: 0;
+            color: #94a3b8;
+            font-size: 12px;
+        }
+
+    .verification-footer {
+        padding: 25px;
+        text-align: center;
+        color: #64748b;
+        border: 1px solid #e2e8f0;
+        border-radius: 21px;
+        background: white;
+    }
+
+        .verification-footer i {
+            color: #10b981;
+            font-size: 24px;
+        }
+
+        .verification-footer strong {
+            display: block;
+            margin: 8px 0 4px;
+            color: #172554;
+            font-size: 14px;
+        }
+
+        .verification-footer p {
+            margin: 0;
+            font-size: 11px;
+        }
+
+    .copy-message {
+        position: fixed;
+        right: 25px;
+        bottom: 25px;
+        z-index: 1000;
+        display: none;
+        padding: 12px 17px;
+        color: white;
+        font-size: 12px;
+        font-weight: 800;
+        border-radius: 12px;
+        background: #059669;
+        box-shadow: 0 12px 25px rgba(5, 150, 105, 0.3);
+    }
+
+        .copy-message.visible {
+            display: block;
+            animation: messageEntrance 0.4s ease;
+        }
+
+    @@keyframes publicEntrance {
+        from {
+            opacity: 0;
+            transform: translateY(24px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    @@keyframes messageEntrance {
+        from {
+            opacity: 0;
+            transform: translateY(15px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    @@media (max-width: 1100px) {
+        .projects-grid {
+            grid-template-columns: repeat(2, 1fr);
+        }
+    }
+
+    @@media (max-width: 992px) {
+        .portfolio-statistics {
+            grid-template-columns: repeat(2, 1fr);
+        }
+
+        .hero-layout,
+        .student-identity {
+            align-items: flex-start;
+            flex-direction: column;
+        }
+
+        .hero-links {
+            justify-content: flex-start;
+        }
+    }
+
+    @@media (max-width: 700px) {
+        .public-hero {
+            padding: 31px 23px;
+        }
+
+        .student-identity h1 {
+            font-size: 29px;
+        }
+
+        .projects-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .training-card {
+            grid-template-columns: auto 1fr;
+        }
+
+        .verified-training {
+            grid-column: 1 / -1;
+            width: fit-content;
+        }
+    }
+
+    @@media (max-width: 576px) {
+        .portfolio-statistics {
+            grid-template-columns: 1fr;
+        }
+
+        .portfolio-section {
+            padding: 22px 18px;
+        }
+
+        .share-button {
+            width: 100%;
+        }
+    }
+</style>
+
+<div class="public-portfolio-page">
+    <div class="container">
+        <section class="public-hero">
+            <div class="hero-layout">
+                <div class="student-identity">
+                    <div class="public-avatar">
+                        @(string.IsNullOrWhiteSpace(Model.Student.FullName)
+                                                ? "S"
+                                                : Model.Student.FullName.Substring(0, 1).ToUpper())
+                    </div>
+
+                    <div>
+                        <span class="verified-badge">
+                            <i class="bi bi-patch-check-fill"></i>
+                            Verified Student Portfolio
+                        </span>
+
+                        <h1>@Model.Student.FullName</h1>
+
+                        <p class="professional-headline">
+                            @Model.Portfolio.Headline
+                        </p>
+
+                        <div class="education-line">
+                            <span>
+                                <i class="bi bi-mortarboard-fill me-1"></i>
+                                @Model.Student.University
+                            </span>
+
+                            <span>
+                                <i class="bi bi-book-fill me-1"></i>
+                                @Model.Student.Specialization
+                            </span>
+
+                            <span>
+                                <i class="bi bi-calendar-check-fill me-1"></i>
+                                Class of @Model.Student.GraduationYear
+                            </span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="hero-links">
+                    @if (!string.IsNullOrWhiteSpace(
+                                        Model.Portfolio.GitHubUrl))
+                    {
+                        <a href="@Model.Portfolio.GitHubUrl"
+                           target="_blank"
+                           rel="noopener noreferrer"
+                           class="hero-link"
+                           title="GitHub">
+                            <i class="bi bi-github"></i>
+                        </a>
+                    }
+
+                    @if (!string.IsNullOrWhiteSpace(
+                                        Model.Portfolio.LinkedInUrl))
+                    {
+                        <a href="@Model.Portfolio.LinkedInUrl"
+                           target="_blank"
+                           rel="noopener noreferrer"
+                           class="hero-link"
+                           title="LinkedIn">
+                            <i class="bi bi-linkedin"></i>
+                        </a>
+                    }
+
+                    @if (!string.IsNullOrWhiteSpace(
+                                        Model.Portfolio.PersonalWebsiteUrl))
+                    {
+                        <a href="@Model.Portfolio.PersonalWebsiteUrl"
+                           target="_blank"
+                           rel="noopener noreferrer"
+                           class="hero-link"
+                           title="Personal Website">
+                            <i class="bi bi-globe2"></i>
+                        </a>
+                    }
+
+                    <button type="button"
+                            class="hero-link share-button"
+                            onclick="copyPublicPortfolioUrl()">
+                        <i class="bi bi-share-fill"></i>
+                        Share Portfolio
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <section class="portfolio-statistics">
+            <div class="stat-card">
+                <div class="stat-icon project-stat">
+                    <i class="bi bi-kanban-fill"></i>
+                </div>
+
+                <div>
+                    <span class="stat-number">
+                        @Model.ProjectsCount
+                    </span>
+
+                    <span class="stat-label">
+                        Completed Projects
+                    </span>
+                </div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-icon training-stat">
+                    <i class="bi bi-briefcase-fill"></i>
+                </div>
+
+                <div>
+                    <span class="stat-number">
+                        @Model.CompletedTrainingsCount
+                    </span>
+
+                    <span class="stat-label">
+                        Verified Internships
+                    </span>
+                </div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-icon hour-stat">
+                    <i class="bi bi-clock-history"></i>
+                </div>
+
+                <div>
+                    <span class="stat-number">
+                        @Model.ApprovedTrainingHours
+                    </span>
+
+                    <span class="stat-label">
+                        Approved Training Hours
+                    </span>
+                </div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-icon rating-stat">
+                    <i class="bi bi-star-fill"></i>
+                </div>
+
+                <div>
+                    <span class="stat-number">
+                        @Model.AverageRating.ToString("0.0")
+                    </span>
+
+                    <span class="stat-label">
+                        Average Company Rating
+                    </span>
+                </div>
+            </div>
+        </section>
+
+        <section class="portfolio-section">
+            <div class="section-heading">
+                <div>
+                    <h2>About Me</h2>
+                    <p>Professional background and career interests</p>
+                </div>
+
+                <div class="section-icon">
+                    <i class="bi bi-person-lines-fill"></i>
+                </div>
+            </div>
+
+            <p class="about-text">@Model.Portfolio.Bio</p>
+        </section>
+
+        @if (!string.IsNullOrWhiteSpace(
+                Model.Portfolio.SkillsSummary))
+        {
+            <section class="portfolio-section">
+                <div class="section-heading">
+                    <div>
+                        <h2>Technical Skills</h2>
+                        <p>Tools and technologies used by the student</p>
+                    </div>
+
+                    <div class="section-icon">
+                        <i class="bi bi-tools"></i>
+                    </div>
+                </div>
+
+                <div class="skill-list">
+                    @foreach (var skill in
+                                    Model.Portfolio.SkillsSummary.Split(
+                                    ',',
+                                    StringSplitOptions.RemoveEmptyEntries))
+                    {
+                        <span class="skill-chip">
+                            @skill.Trim()
+                        </span>
+                    }
+                </div>
+            </section>
+        }
+
+        <section class="portfolio-section">
+            <div class="section-heading">
+                <div>
+                    <h2>Projects Showcase</h2>
+                    <p>Practical projects completed by the student</p>
+                </div>
+
+                <div class="section-icon">
+                    <i class="bi bi-window-stack"></i>
+                </div>
+            </div>
+
+            @if (Model.Projects.Any())
+            {
+                <div class="projects-grid">
+                    @foreach (var project in Model.Projects)
+                    {
+                        <article class="project-card">
+                            @if (project.IsFeatured)
+                            {
+                                <span class="featured-label">
+                                    <i class="bi bi-star-fill me-1"></i>
+                                    Featured
+                                </span>
+                            }
+
+                            <div class="project-image">
+                                @if (!string.IsNullOrWhiteSpace(
+                                                        project.ImagePath))
+                                {
+                                    <img src="@project.ImagePath"
+                                         alt="@project.Title" />
+                                }
+                                else
+                                {
+                                    <i class="bi bi-code-square"></i>
+                                }
+                            </div>
+
+                            <div class="project-content">
+                                <h3>@project.Title</h3>
+
+                                <p class="project-description">
+                                    @project.Description
+                                </p>
+
+                                <div class="technology-list">
+                                    @foreach (var technology in
+                                                                project.Technologies.Split(
+                                                                ',',
+                                                                StringSplitOptions.RemoveEmptyEntries))
+                                    {
+                                        <span class="technology-chip">
+                                            @technology.Trim()
+                                        </span>
+                                    }
+                                </div>
+
+                                @if (!string.IsNullOrWhiteSpace(
+                                                        project.ProjectUrl) ||
+                                                        !string.IsNullOrWhiteSpace(
+                                                        project.RepositoryUrl))
+                                {
+                                    <div class="project-links">
+                                        @if (!string.IsNullOrWhiteSpace(
+                                                                    project.ProjectUrl))
+                                        {
+                                            <a href="@project.ProjectUrl"
+                                               target="_blank"
+                                               rel="noopener noreferrer"
+                                               class="project-link">
+                                                <i class="bi bi-box-arrow-up-right"></i>
+                                                Live Project
+                                            </a>
+                                        }
+
+                                        @if (!string.IsNullOrWhiteSpace(
+                                                                    project.RepositoryUrl))
+                                        {
+                                            <a href="@project.RepositoryUrl"
+                                               target="_blank"
+                                               rel="noopener noreferrer"
+                                               class="project-link">
+                                                <i class="bi bi-github"></i>
+                                                Source Code
+                                            </a>
+                                        }
+                                    </div>
+                                }
+                            </div>
+                        </article>
+                    }
+                </div>
+            }
+            else
+            {
+                <div class="empty-section">
+                    <span>🚀</span>
+                    <h3>No projects published yet</h3>
+                    <p>Student projects will appear here.</p>
+                </div>
+            }
+        </section>
+
+        <section class="portfolio-section">
+            <div class="section-heading">
+                <div>
+                    <h2>Verified Training Experience</h2>
+
+                    <p>
+                        Completed internships verified through
+                        the Internship Portal
+                    </p>
+                </div>
+
+                <div class="section-icon">
+                    <i class="bi bi-patch-check-fill"></i>
+                </div>
+            </div>
+
+            @if (Model.CompletedTrainings.Any())
+            {
+                <div class="training-timeline">
+                    @foreach (var application in
+                                    Model.CompletedTrainings)
+                    {
+                        <article class="training-card">
+                            <div class="company-icon">
+                                <i class="bi bi-building-fill"></i>
+                            </div>
+
+                            <div>
+                                <h3 class="training-title">
+                                    @application.Internship.Title
+                                </h3>
+
+                                <span class="company-name">
+                                    <i class="bi bi-building me-1"></i>
+                                    @application.Internship.Company.Name
+                                </span>
+
+                                <div class="training-meta">
+                                    <span>
+                                        <i class="bi bi-geo-alt-fill me-1"></i>
+                                        @application.Internship.Location
+                                    </span>
+
+                                    <span>
+                                        <i class="bi bi-calendar-check me-1"></i>
+                                        @application.Internship.StartDate
+                                        .ToString("MMM yyyy")
+                                        -
+                                        @application.Internship.EndDate
+                                        .ToString("MMM yyyy")
+                                    </span>
+
+                                    @if (application.TrainingEnrollment != null)
+                                    {
+                                        <span>
+                                            <i class="bi bi-clock-fill me-1"></i>
+                                            @application.TrainingEnrollment
+                                            .RequiredHours
+                                            required hours
+                                        </span>
+                                    }
+                                </div>
+
+                                @if (application.Evaluation != null)
+                                {
+                                    <div class="evaluation-box">
+                                        <div class="evaluation-stars">
+                                            @for (var star = 1;
+                                                                            star <= 5;
+                                                                            star++)
+                                            {
+                                                if (star <=
+                                                application.Evaluation.Rating)
+                                                {
+                                                    <i class="bi bi-star-fill"></i>
+                                                }
+                                                else
+                                                {
+                                                    <i class="bi bi-star"></i>
+                                                }
+                                            }
+                                        </div>
+
+                                        <p class="evaluation-feedback">
+                                            “@application.Evaluation.Feedback”
+                                        </p>
+
+                                        <a asp-controller="Certificate"
+                                           asp-action="Index"
+                                           asp-route-evaluationId="@application.Evaluation.Id"
+                                           target="_blank"
+                                           class="certificate-link">
+                                            <i class="bi bi-award-fill"></i>
+                                            View Verified Certificate
+                                        </a>
+                                    </div>
+                                }
+                            </div>
+
+                            <span class="verified-training">
+                                <i class="bi bi-patch-check-fill"></i>
+                                Verified
+                            </span>
+                        </article>
+                    }
+                </div>
+            }
+            else
+            {
+                <div class="empty-section">
+                    <span>🎓</span>
+                    <h3>No completed training yet</h3>
+
+                    <p>
+                        Verified internships will appear after
+                        training completion.
+                    </p>
+                </div>
+            }
+        </section>
+
+        <footer class="verification-footer">
+            <i class="bi bi-shield-check"></i>
+
+            <strong>Verified by Internship Portal</strong>
+
+            <p>
+                Training records, approved hours, company evaluations
+                and certificates displayed here are generated from
+                verified platform activity.
+            </p>
+        </footer>
+    </div>
+</div>
+
+<div class="copy-message" id="copyMessage">
+    <i class="bi bi-check-circle-fill me-1"></i>
+    Portfolio link copied successfully
+</div>
+
+@section Scripts {
+    <script>
+        function copyPublicPortfolioUrl() {
+            const portfolioUrl = "@portfolioUrl";
+
+            navigator.clipboard
+                .writeText(portfolioUrl)
+                .then(function () {
+                    const message =
+                        document.getElementById("copyMessage");
+
+                    message.classList.add("visible");
+
+                    setTimeout(function () {
+                        message.classList.remove("visible");
+                    }, 2200);
+                });
+        }
+    </script>
+}

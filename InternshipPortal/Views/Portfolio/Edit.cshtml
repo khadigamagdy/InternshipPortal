@@ -1,0 +1,419 @@
+﻿@model InternshipPortal.Models.ViewModels.StudentPortfolioEditViewModel
+
+@{
+    ViewData["Title"] = "Edit Portfolio";
+}
+
+<style>
+    .portfolio-form-page {
+        min-height: 100vh;
+        padding: 45px 0 70px;
+        background: radial-gradient(circle at top left, rgba(99, 102, 241, 0.13), transparent 35%), radial-gradient(circle at bottom right, rgba(14, 165, 233, 0.11), transparent 35%), #f8fafc;
+    }
+
+    .form-header {
+        position: relative;
+        overflow: hidden;
+        padding: 34px;
+        margin-bottom: 22px;
+        color: white;
+        border-radius: 26px;
+        background: linear-gradient(135deg, #172554, #4f46e5, #0891b2);
+        box-shadow: 0 20px 45px rgba(49, 46, 129, 0.2);
+    }
+
+        .form-header::after {
+            position: absolute;
+            width: 210px;
+            height: 210px;
+            right: -80px;
+            bottom: -135px;
+            content: "";
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 50%;
+        }
+
+    .form-header-content {
+        position: relative;
+        z-index: 2;
+        display: flex;
+        align-items: center;
+        gap: 16px;
+    }
+
+    .form-header-icon {
+        min-width: 60px;
+        height: 60px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 26px;
+        border-radius: 19px;
+        background: rgba(255, 255, 255, 0.16);
+    }
+
+    .form-header h1 {
+        margin: 0;
+        font-weight: 900;
+    }
+
+    .form-header p {
+        margin: 5px 0 0;
+        color: rgba(255, 255, 255, 0.78);
+    }
+
+    .portfolio-form-card {
+        padding: 32px;
+        border: 1px solid #e2e8f0;
+        border-radius: 24px;
+        background: white;
+        box-shadow: 0 14px 35px rgba(15, 23, 42, 0.07);
+    }
+
+    .form-section {
+        padding-bottom: 25px;
+        margin-bottom: 25px;
+        border-bottom: 1px solid #eef2f7;
+    }
+
+        .form-section:last-of-type {
+            border-bottom: none;
+        }
+
+    .section-title {
+        margin-bottom: 18px;
+        color: #172554;
+        font-size: 17px;
+        font-weight: 900;
+    }
+
+    .section-description {
+        margin: -12px 0 18px;
+        color: #94a3b8;
+        font-size: 12px;
+    }
+
+    .form-label {
+        margin-bottom: 7px;
+        color: #334155;
+        font-size: 13px;
+        font-weight: 800;
+    }
+
+    .portfolio-input {
+        min-height: 50px;
+        padding: 12px 15px;
+        color: #334155;
+        border: 1px solid #dbe3ee;
+        border-radius: 13px;
+        background: #fbfdff;
+        transition: 0.3s;
+    }
+
+    textarea.portfolio-input {
+        min-height: 130px;
+        resize: vertical;
+    }
+
+    .portfolio-input:focus {
+        border-color: #818cf8;
+        background: white;
+        box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.11);
+    }
+
+    .input-help {
+        display: block;
+        margin-top: 6px;
+        color: #94a3b8;
+        font-size: 11px;
+    }
+
+    .visibility-box {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 15px;
+        padding: 17px;
+        border: 1px solid #c7d2fe;
+        border-radius: 15px;
+        background: #f8faff;
+    }
+
+        .visibility-box strong,
+        .visibility-box small {
+            display: block;
+        }
+
+        .visibility-box strong {
+            color: #312e81;
+            font-size: 13px;
+        }
+
+        .visibility-box small {
+            margin-top: 3px;
+            color: #64748b;
+            font-size: 11px;
+        }
+
+    .form-check-input {
+        width: 46px;
+        height: 24px;
+        cursor: pointer;
+    }
+
+    .form-actions {
+        display: flex;
+        justify-content: flex-end;
+        gap: 10px;
+    }
+
+    .form-button {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 7px;
+        padding: 12px 19px;
+        font-size: 13px;
+        font-weight: 800;
+        border: none;
+        border-radius: 12px;
+        text-decoration: none;
+        transition: 0.3s;
+    }
+
+    .cancel-button {
+        color: #475569;
+        background: #f1f5f9;
+    }
+
+    .save-button {
+        color: white;
+        background: linear-gradient(135deg, #6366f1, #0ea5e9);
+        box-shadow: 0 9px 20px rgba(99, 102, 241, 0.24);
+    }
+
+    .form-button:hover {
+        transform: translateY(-3px);
+    }
+
+    .cancel-button:hover {
+        color: #0f172a;
+        background: #e2e8f0;
+    }
+
+    .save-button:hover {
+        color: white;
+        box-shadow: 0 13px 27px rgba(99, 102, 241, 0.32);
+    }
+
+    @@media (max-width: 576px) {
+        .portfolio-form-card {
+            padding: 23px 18px;
+        }
+
+        .form-header {
+            padding: 26px 20px;
+        }
+
+        .form-actions {
+            flex-direction: column-reverse;
+        }
+
+        .form-button {
+            width: 100%;
+        }
+    }
+</style>
+
+<div class="portfolio-form-page">
+    <div class="container">
+        <div class="form-header">
+            <div class="form-header-content">
+                <div class="form-header-icon">
+                    <i class="bi bi-person-badge-fill"></i>
+                </div>
+
+                <div>
+                    <h1>Edit Your Portfolio</h1>
+                    <p>
+                        Build a professional profile supported by
+                        verified training achievements.
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <form asp-action="Edit"
+              method="post"
+              class="portfolio-form-card">
+
+            @Html.AntiForgeryToken()
+
+            <div asp-validation-summary="ModelOnly"
+                 class="alert alert-danger">
+            </div>
+
+            <section class="form-section">
+                <h2 class="section-title">
+                    <i class="bi bi-person-lines-fill me-2"></i>
+                    Professional Introduction
+                </h2>
+
+                <p class="section-description">
+                    Introduce yourself clearly to companies and recruiters.
+                </p>
+
+                <div class="mb-4">
+                    <label asp-for="Headline"
+                           class="form-label">
+                    </label>
+
+                    <input asp-for="Headline"
+                           class="form-control portfolio-input"
+                           placeholder="Example: Backend .NET Developer and Cloud Enthusiast" />
+
+                    <span asp-validation-for="Headline"
+                          class="text-danger small">
+                    </span>
+                </div>
+
+                <div>
+                    <label asp-for="Bio"
+                           class="form-label">
+                    </label>
+
+                    <textarea asp-for="Bio"
+                              class="form-control portfolio-input"
+                              placeholder="Write a short professional introduction about your experience, goals and interests...">
+                    </textarea>
+
+                    <span class="input-help">
+                        Maximum 1500 characters.
+                    </span>
+
+                    <span asp-validation-for="Bio"
+                          class="text-danger small">
+                    </span>
+                </div>
+            </section>
+
+            <section class="form-section">
+                <h2 class="section-title">
+                    <i class="bi bi-tools me-2"></i>
+                    Skills
+                </h2>
+
+                <p class="section-description">
+                    Separate each skill using a comma.
+                </p>
+
+                <label asp-for="SkillsSummary"
+                       class="form-label">
+                </label>
+
+                <textarea asp-for="SkillsSummary"
+                          class="form-control portfolio-input"
+                          placeholder="C#, ASP.NET Core, SQL Server, EF Core, Azure">
+                </textarea>
+
+                <span asp-validation-for="SkillsSummary"
+                      class="text-danger small">
+                </span>
+            </section>
+
+            <section class="form-section">
+                <h2 class="section-title">
+                    <i class="bi bi-link-45deg me-2"></i>
+                    Professional Links
+                </h2>
+
+                <p class="section-description">
+                    Add complete links beginning with https://
+                </p>
+
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label asp-for="GitHubUrl"
+                               class="form-label">
+                        </label>
+
+                        <input asp-for="GitHubUrl"
+                               class="form-control portfolio-input"
+                               placeholder="https://github.com/username" />
+
+                        <span asp-validation-for="GitHubUrl"
+                              class="text-danger small">
+                        </span>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label asp-for="LinkedInUrl"
+                               class="form-label">
+                        </label>
+
+                        <input asp-for="LinkedInUrl"
+                               class="form-control portfolio-input"
+                               placeholder="https://linkedin.com/in/username" />
+
+                        <span asp-validation-for="LinkedInUrl"
+                              class="text-danger small">
+                        </span>
+                    </div>
+
+                    <div class="col-12">
+                        <label asp-for="PersonalWebsiteUrl"
+                               class="form-label">
+                        </label>
+
+                        <input asp-for="PersonalWebsiteUrl"
+                               class="form-control portfolio-input"
+                               placeholder="https://yourportfolio.com" />
+
+                        <span asp-validation-for="PersonalWebsiteUrl"
+                              class="text-danger small">
+                        </span>
+                    </div>
+                </div>
+            </section>
+
+            <section class="form-section">
+                <div class="visibility-box">
+                    <div>
+                        <strong>
+                            <i class="bi bi-globe2 me-1"></i>
+                            Public Portfolio
+                        </strong>
+
+                        <small>
+                            Allow companies to view your verified portfolio.
+                        </small>
+                    </div>
+
+                    <div class="form-check form-switch">
+                        <input asp-for="IsPublic"
+                               class="form-check-input"
+                               role="switch" />
+                    </div>
+                </div>
+            </section>
+
+            <div class="form-actions">
+                <a asp-action="Index"
+                   class="form-button cancel-button">
+                    <i class="bi bi-arrow-left"></i>
+                    Cancel
+                </a>
+
+                <button type="submit"
+                        class="form-button save-button">
+                    <i class="bi bi-check-circle-fill"></i>
+                    Save Portfolio
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

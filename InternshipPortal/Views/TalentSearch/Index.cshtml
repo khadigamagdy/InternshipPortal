@@ -1,0 +1,1039 @@
+﻿@model InternshipPortal.Models.ViewModels.TalentSearchViewModel
+
+@{
+    ViewData["Title"] = "Talent Search";
+}
+
+<style>
+    .talent-page {
+        min-height: 100vh;
+        padding: 42px 0 70px;
+        background: radial-gradient(circle at top left, rgba(79, 70, 229, 0.14), transparent 34%), radial-gradient(circle at bottom right, rgba(16, 185, 129, 0.12), transparent 35%), #f8fafc;
+    }
+
+    .talent-hero {
+        position: relative;
+        overflow: hidden;
+        padding: 40px;
+        margin-bottom: 23px;
+        color: white;
+        border-radius: 29px;
+        background: linear-gradient(135deg, #172554, #4338ca 52%, #059669);
+        box-shadow: 0 23px 52px rgba(30, 41, 59, 0.22);
+        animation: talentEntrance 0.7s ease;
+    }
+
+        .talent-hero::before,
+        .talent-hero::after {
+            position: absolute;
+            content: "";
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            border-radius: 50%;
+        }
+
+        .talent-hero::before {
+            width: 310px;
+            height: 310px;
+            top: -175px;
+            right: -60px;
+        }
+
+        .talent-hero::after {
+            width: 190px;
+            height: 190px;
+            right: 75px;
+            bottom: -135px;
+        }
+
+    .hero-content {
+        position: relative;
+        z-index: 2;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 25px;
+    }
+
+    .hero-title-box {
+        display: flex;
+        align-items: center;
+        gap: 18px;
+    }
+
+    .hero-icon {
+        min-width: 68px;
+        height: 68px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 30px;
+        border-radius: 21px;
+        background: rgba(255, 255, 255, 0.16);
+    }
+
+    .talent-hero h1 {
+        margin: 0;
+        font-size: 34px;
+        font-weight: 900;
+    }
+
+    .talent-hero p {
+        max-width: 650px;
+        margin: 7px 0 0;
+        color: rgba(255, 255, 255, 0.78);
+    }
+
+    .hero-badge {
+        position: relative;
+        z-index: 2;
+        display: inline-flex;
+        align-items: center;
+        gap: 7px;
+        padding: 10px 15px;
+        color: #d1fae5;
+        font-size: 12px;
+        font-weight: 900;
+        border: 1px solid rgba(167, 243, 208, 0.28);
+        border-radius: 25px;
+        background: rgba(16, 185, 129, 0.17);
+    }
+
+    .statistics-grid {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 17px;
+        margin-bottom: 23px;
+    }
+
+    .stat-card {
+        display: flex;
+        align-items: center;
+        gap: 13px;
+        padding: 19px;
+        border: 1px solid #e2e8f0;
+        border-radius: 19px;
+        background: white;
+        box-shadow: 0 9px 27px rgba(15, 23, 42, 0.055);
+        transition: 0.3s;
+    }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 16px 34px rgba(79, 70, 229, 0.12);
+        }
+
+    .stat-icon {
+        min-width: 48px;
+        height: 48px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 20px;
+        border-radius: 15px;
+    }
+
+    .profiles-icon {
+        color: #4338ca;
+        background: #e0e7ff;
+    }
+
+    .verified-icon {
+        color: #047857;
+        background: #d1fae5;
+    }
+
+    .projects-icon {
+        color: #0369a1;
+        background: #e0f2fe;
+    }
+
+    .rating-icon {
+        color: #c2410c;
+        background: #ffedd5;
+    }
+
+    .stat-number {
+        display: block;
+        color: #0f172a;
+        font-size: 24px;
+        font-weight: 900;
+    }
+
+    .stat-label {
+        color: #64748b;
+        font-size: 11px;
+        font-weight: 700;
+    }
+
+    .search-panel {
+        padding: 25px;
+        margin-bottom: 24px;
+        border: 1px solid #e2e8f0;
+        border-radius: 22px;
+        background: white;
+        box-shadow: 0 11px 31px rgba(15, 23, 42, 0.06);
+    }
+
+    .panel-heading {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 15px;
+        margin-bottom: 20px;
+    }
+
+        .panel-heading h2 {
+            margin: 0;
+            color: #172554;
+            font-size: 19px;
+            font-weight: 900;
+        }
+
+        .panel-heading p {
+            margin: 4px 0 0;
+            color: #94a3b8;
+            font-size: 12px;
+        }
+
+    .filter-grid {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 14px;
+    }
+
+    .search-field {
+        grid-column: span 2;
+    }
+
+    .filter-label {
+        margin-bottom: 7px;
+        color: #475569;
+        font-size: 11px;
+        font-weight: 800;
+    }
+
+    .filter-input {
+        min-height: 48px;
+        padding: 10px 13px;
+        color: #334155;
+        font-size: 12px;
+        border: 1px solid #dbe3ee;
+        border-radius: 12px;
+        background: #fbfdff;
+        transition: 0.3s;
+    }
+
+        .filter-input:focus {
+            border-color: #818cf8;
+            background: white;
+            box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.1);
+        }
+
+    .filter-actions {
+        display: flex;
+        align-items: flex-end;
+        gap: 9px;
+        grid-column: span 2;
+    }
+
+    .filter-button {
+        min-height: 48px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 7px;
+        padding: 10px 17px;
+        font-size: 12px;
+        font-weight: 800;
+        border: none;
+        border-radius: 12px;
+        text-decoration: none;
+        transition: 0.3s;
+    }
+
+    .search-button {
+        flex: 1;
+        color: white;
+        background: linear-gradient(135deg, #6366f1, #0ea5e9);
+        box-shadow: 0 8px 19px rgba(99, 102, 241, 0.22);
+    }
+
+    .reset-button {
+        color: #475569;
+        background: #f1f5f9;
+    }
+
+    .filter-button:hover {
+        transform: translateY(-3px);
+    }
+
+    .search-button:hover {
+        color: white;
+        box-shadow: 0 12px 24px rgba(99, 102, 241, 0.3);
+    }
+
+    .reset-button:hover {
+        color: #0f172a;
+        background: #e2e8f0;
+    }
+
+    .results-heading {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 15px;
+        margin-bottom: 17px;
+    }
+
+        .results-heading h2 {
+            margin: 0;
+            color: #172554;
+            font-size: 21px;
+            font-weight: 900;
+        }
+
+    .results-count {
+        padding: 7px 12px;
+        color: #4338ca;
+        font-size: 11px;
+        font-weight: 900;
+        border-radius: 20px;
+        background: #eef2ff;
+    }
+
+    .candidates-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 18px;
+    }
+
+    .candidate-card {
+        position: relative;
+        overflow: hidden;
+        padding: 23px;
+        border: 1px solid #e2e8f0;
+        border-radius: 22px;
+        background: white;
+        box-shadow: 0 10px 29px rgba(15, 23, 42, 0.06);
+        transition: 0.35s;
+        animation: talentEntrance 0.65s ease both;
+    }
+
+        .candidate-card::before {
+            position: absolute;
+            width: 115px;
+            height: 115px;
+            top: -70px;
+            right: -70px;
+            content: "";
+            border-radius: 50%;
+            background: rgba(99, 102, 241, 0.07);
+        }
+
+        .candidate-card:hover {
+            border-color: #c7d2fe;
+            transform: translateY(-7px);
+            box-shadow: 0 19px 40px rgba(79, 70, 229, 0.13);
+        }
+
+    .candidate-header {
+        position: relative;
+        z-index: 2;
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 15px;
+    }
+
+    .candidate-identity {
+        display: flex;
+        align-items: center;
+        gap: 13px;
+    }
+
+    .candidate-avatar {
+        min-width: 61px;
+        height: 61px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 24px;
+        font-weight: 900;
+        border-radius: 19px;
+        background: linear-gradient(135deg, #6366f1, #06b6d4);
+        box-shadow: 0 9px 21px rgba(99, 102, 241, 0.23);
+    }
+
+    .candidate-name {
+        margin: 0 0 4px;
+        color: #172554;
+        font-size: 17px;
+        font-weight: 900;
+    }
+
+    .candidate-headline {
+        display: block;
+        max-width: 280px;
+        overflow: hidden;
+        color: #64748b;
+        font-size: 11px;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    .verified-label {
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        margin-top: 7px;
+        padding: 5px 9px;
+        color: #047857;
+        font-size: 9px;
+        font-weight: 900;
+        border-radius: 18px;
+        background: #d1fae5;
+    }
+
+    .talent-score {
+        --score: 0;
+        min-width: 67px;
+        height: 67px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #4338ca;
+        font-size: 15px;
+        font-weight: 900;
+        border-radius: 50%;
+        background: radial-gradient(closest-side, white 74%, transparent 77%), conic-gradient( #6366f1 calc(var(--score) * 1%), #e2e8f0 0);
+    }
+
+    .candidate-information {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin: 17px 0;
+    }
+
+    .information-chip {
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        padding: 6px 9px;
+        color: #475569;
+        font-size: 10px;
+        font-weight: 700;
+        border-radius: 18px;
+        background: #f1f5f9;
+    }
+
+    .candidate-skills {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+        min-height: 29px;
+        margin-bottom: 17px;
+    }
+
+    .skill-chip {
+        padding: 6px 9px;
+        color: #4338ca;
+        font-size: 9px;
+        font-weight: 800;
+        border: 1px solid #c7d2fe;
+        border-radius: 17px;
+        background: #eef2ff;
+    }
+
+    .more-skills {
+        color: #64748b;
+        border-color: #e2e8f0;
+        background: #f8fafc;
+    }
+
+    .candidate-metrics {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        overflow: hidden;
+        margin-bottom: 17px;
+        border: 1px solid #eef2f7;
+        border-radius: 14px;
+    }
+
+    .metric {
+        padding: 11px 7px;
+        text-align: center;
+        border-right: 1px solid #eef2f7;
+    }
+
+        .metric:last-child {
+            border-right: none;
+        }
+
+        .metric strong,
+        .metric span {
+            display: block;
+        }
+
+        .metric strong {
+            color: #172554;
+            font-size: 15px;
+            font-weight: 900;
+        }
+
+        .metric span {
+            margin-top: 2px;
+            color: #94a3b8;
+            font-size: 8px;
+            font-weight: 700;
+        }
+
+    .candidate-footer {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 10px;
+        padding-top: 16px;
+        border-top: 1px solid #f1f5f9;
+    }
+
+    .graduation-text {
+        color: #64748b;
+        font-size: 10px;
+        font-weight: 700;
+    }
+
+    .portfolio-button {
+        display: inline-flex;
+        align-items: center;
+        gap: 7px;
+        padding: 10px 14px;
+        color: white;
+        font-size: 11px;
+        font-weight: 900;
+        border-radius: 11px;
+        background: linear-gradient(135deg, #6366f1, #0ea5e9);
+        text-decoration: none;
+        transition: 0.3s;
+    }
+
+        .portfolio-button:hover {
+            color: white;
+            transform: translateY(-3px);
+            box-shadow: 0 10px 22px rgba(99, 102, 241, 0.28);
+        }
+
+    .empty-results {
+        padding: 75px 25px;
+        text-align: center;
+        border: 2px dashed #cbd5e1;
+        border-radius: 24px;
+        background: white;
+    }
+
+        .empty-results span {
+            display: block;
+            font-size: 72px;
+        }
+
+        .empty-results h3 {
+            margin: 17px 0 6px;
+            color: #172554;
+            font-weight: 900;
+        }
+
+        .empty-results p {
+            color: #64748b;
+        }
+
+    @@keyframes talentEntrance {
+        from {
+            opacity: 0;
+            transform: translateY(23px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    @@media (max-width: 1100px) {
+        .filter-grid {
+            grid-template-columns: repeat(2, 1fr);
+        }
+
+        .search-field {
+            grid-column: span 2;
+        }
+    }
+
+    @@media (max-width: 992px) {
+        .statistics-grid {
+            grid-template-columns: repeat(2, 1fr);
+        }
+
+        .candidates-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    @@media (max-width: 700px) {
+        .hero-content,
+        .hero-title-box {
+            align-items: flex-start;
+            flex-direction: column;
+        }
+
+        .talent-hero {
+            padding: 29px 22px;
+        }
+
+            .talent-hero h1 {
+                font-size: 27px;
+            }
+    }
+
+    @@media (max-width: 576px) {
+        .statistics-grid,
+        .filter-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .search-field,
+        .filter-actions {
+            grid-column: span 1;
+        }
+
+        .filter-actions,
+        .candidate-footer {
+            align-items: stretch;
+            flex-direction: column;
+        }
+
+        .candidate-header {
+            flex-direction: column;
+        }
+
+        .candidate-metrics {
+            grid-template-columns: repeat(2, 1fr);
+        }
+
+        .metric:nth-child(2) {
+            border-right: none;
+        }
+
+        .metric:nth-child(-n+2) {
+            border-bottom: 1px solid #eef2f7;
+        }
+
+        .portfolio-button {
+            justify-content: center;
+        }
+    }
+</style>
+
+<div class="talent-page">
+    <div class="container">
+        <section class="talent-hero">
+            <div class="hero-content">
+                <div class="hero-title-box">
+                    <div class="hero-icon">
+                        <i class="bi bi-person-workspace"></i>
+                    </div>
+
+                    <div>
+                        <h1>Discover Verified Talent</h1>
+
+                        <p>
+                            Find students using verified training experience,
+                            projects, skills and company evaluations.
+                        </p>
+                    </div>
+                </div>
+
+                <span class="hero-badge">
+                    <i class="bi bi-stars"></i>
+                    Evidence-Based Talent Search
+                </span>
+            </div>
+        </section>
+
+        <section class="statistics-grid">
+            <div class="stat-card">
+                <div class="stat-icon profiles-icon">
+                    <i class="bi bi-people-fill"></i>
+                </div>
+
+                <div>
+                    <span class="stat-number">
+                        @Model.TotalPublicProfiles
+                    </span>
+
+                    <span class="stat-label">
+                        Public Talent Profiles
+                    </span>
+                </div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-icon verified-icon">
+                    <i class="bi bi-patch-check-fill"></i>
+                </div>
+
+                <div>
+                    <span class="stat-number">
+                        @Model.VerifiedCandidates
+                    </span>
+
+                    <span class="stat-label">
+                        Verified Candidates
+                    </span>
+                </div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-icon projects-icon">
+                    <i class="bi bi-kanban-fill"></i>
+                </div>
+
+                <div>
+                    <span class="stat-number">
+                        @Model.TotalProjects
+                    </span>
+
+                    <span class="stat-label">
+                        Published Projects
+                    </span>
+                </div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-icon rating-icon">
+                    <i class="bi bi-star-fill"></i>
+                </div>
+
+                <div>
+                    <span class="stat-number">
+                        @Model.PlatformAverageRating.ToString("0.0")
+                    </span>
+
+                    <span class="stat-label">
+                        Average Talent Rating
+                    </span>
+                </div>
+            </div>
+        </section>
+
+        <section class="search-panel">
+            <div class="panel-heading">
+                <div>
+                    <h2>Talent Filters</h2>
+
+                    <p>
+                        Search using skills, education and verified experience.
+                    </p>
+                </div>
+
+                <i class="bi bi-funnel-fill text-primary fs-4"></i>
+            </div>
+
+            <form asp-action="Index"
+                  method="get"
+                  class="filter-grid">
+
+                <div class="search-field">
+                    <label asp-for="Search"
+                           class="filter-label">
+                    </label>
+
+                    <input asp-for="Search"
+                           class="form-control filter-input"
+                           placeholder="Search by student name, headline, skill or university..." />
+                </div>
+
+                <div>
+                    <label asp-for="Skill"
+                           class="filter-label">
+                    </label>
+
+                    <input asp-for="Skill"
+                           class="form-control filter-input"
+                           placeholder="Example: ASP.NET Core" />
+                </div>
+
+                <div>
+                    <label asp-for="Specialization"
+                           class="filter-label">
+                    </label>
+
+                    <select asp-for="Specialization"
+                            class="form-select filter-input">
+                        <option value="">All Specializations</option>
+
+                        @foreach (var specialization in
+                                                Model.AvailableSpecializations)
+                        {
+                            <option value="@specialization">
+                                @specialization
+                            </option>
+                        }
+                    </select>
+                </div>
+
+                <div>
+                    <label asp-for="University"
+                           class="filter-label">
+                    </label>
+
+                    <select asp-for="University"
+                            class="form-select filter-input">
+                        <option value="">All Universities</option>
+
+                        @foreach (var university in
+                                                Model.AvailableUniversities)
+                        {
+                            <option value="@university">
+                                @university
+                            </option>
+                        }
+                    </select>
+                </div>
+
+                <div>
+                    <label asp-for="GraduationYear"
+                           class="filter-label">
+                    </label>
+
+                    <input asp-for="GraduationYear"
+                           class="form-control filter-input"
+                           placeholder="Example: 2027" />
+                </div>
+
+                <div>
+                    <label asp-for="MinimumRating"
+                           class="filter-label">
+                    </label>
+
+                    <select asp-for="MinimumRating"
+                            class="form-select filter-input">
+                        <option value="">Any Rating</option>
+                        <option value="4.5">4.5 and above</option>
+                        <option value="4">4.0 and above</option>
+                        <option value="3.5">3.5 and above</option>
+                        <option value="3">3.0 and above</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label asp-for="MinimumVerifiedHours"
+                           class="filter-label">
+                    </label>
+
+                    <select asp-for="MinimumVerifiedHours"
+                            class="form-select filter-input">
+                        <option value="">Any Hours</option>
+                        <option value="20">20+ Hours</option>
+                        <option value="50">50+ Hours</option>
+                        <option value="100">100+ Hours</option>
+                        <option value="200">200+ Hours</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label asp-for="SortBy"
+                           class="filter-label">
+                    </label>
+
+                    <select asp-for="SortBy"
+                            class="form-select filter-input">
+                        <option value="score">Talent Score</option>
+                        <option value="rating">Company Rating</option>
+                        <option value="hours">Verified Hours</option>
+                        <option value="projects">Projects</option>
+                        <option value="graduation">Graduation Year</option>
+                        <option value="name">Student Name</option>
+                    </select>
+                </div>
+
+                <div class="filter-actions">
+                    <button type="submit"
+                            class="filter-button search-button">
+                        <i class="bi bi-search"></i>
+                        Search Talent
+                    </button>
+
+                    <a asp-action="Index"
+                       class="filter-button reset-button">
+                        <i class="bi bi-arrow-counterclockwise"></i>
+                        Reset
+                    </a>
+                </div>
+            </form>
+        </section>
+
+        <div class="results-heading">
+            <h2>Talent Results</h2>
+
+            <span class="results-count">
+                @Model.Candidates.Count candidate(s)
+            </span>
+        </div>
+
+        @if (Model.Candidates.Any())
+        {
+            <section class="candidates-grid">
+                @{
+                    var animationDelay = 0;
+                }
+
+                @foreach (var candidate in Model.Candidates)
+                {
+                    <article class="candidate-card"
+                             style="animation-delay: @(animationDelay)ms">
+
+                        <div class="candidate-header">
+                            <div class="candidate-identity">
+                                <div class="candidate-avatar">
+                                    @(string.IsNullOrWhiteSpace(
+                                                                candidate.FullName)
+                                                                ? "S"
+                                                                : candidate.FullName
+                                                                .Substring(0, 1)
+                                                                .ToUpper())
+                        </div>
+
+                                <div>
+                                    <h3 class="candidate-name">
+                                        @candidate.FullName
+                                    </h3>
+
+                                    <span class="candidate-headline">
+                                        @candidate.Headline
+                                    </span>
+
+                            @if (candidate.HasVerifiedExperience)
+                                    {
+                                        <span class="verified-label">
+                                            <i class="bi bi-patch-check-fill"></i>
+                                            Verified Experience
+                                        </span>
+                                    }
+                                </div>
+                            </div>
+
+                            <div class="talent-score"
+                                 style="--score: @candidate.TalentScore"
+                                 title="Talent Score">
+                                @candidate.TalentScore
+                            </div>
+                        </div>
+
+                        <div class="candidate-information">
+                            <span class="information-chip">
+                                <i class="bi bi-mortarboard-fill"></i>
+                                @candidate.University
+                            </span>
+
+                            <span class="information-chip">
+                                <i class="bi bi-book-fill"></i>
+                                @candidate.Specialization
+                            </span>
+
+                            <span class="information-chip">
+                                <i class="bi bi-calendar-check-fill"></i>
+                                @candidate.GraduationYear
+                            </span>
+                        </div>
+
+                        <div class="candidate-skills">
+                            @foreach (var skill in
+                                                candidate.Skills.Take(6))
+                            {
+                                <span class="skill-chip">@skill</span>
+                            }
+
+                            @if (candidate.Skills.Count > 6)
+                            {
+                                <span class="skill-chip more-skills">
+                                    +@(candidate.Skills.Count - 6) more
+                                </span>
+                            }
+
+                            @if (!candidate.Skills.Any())
+                            {
+                                <span class="text-muted small">
+                                    No skills added yet
+                                </span>
+                            }
+                        </div>
+
+                        <div class="candidate-metrics">
+                            <div class="metric">
+                                <strong>@candidate.ProjectsCount</strong>
+                                <span>Projects</span>
+                            </div>
+
+                            <div class="metric">
+                                <strong>
+                                    @candidate.CompletedTrainingsCount
+                                </strong>
+                                <span>Trainings</span>
+                            </div>
+
+                            <div class="metric">
+                                <strong>
+                                    @candidate.VerifiedTrainingHours
+                                </strong>
+                                <span>Hours</span>
+                            </div>
+
+                            <div class="metric">
+                                <strong>
+                                    @candidate.AverageRating.ToString("0.0")
+                                </strong>
+                                <span>Rating</span>
+                            </div>
+                        </div>
+
+                        <div class="candidate-footer">
+                            <span class="graduation-text">
+                                <i class="bi bi-award-fill me-1"></i>
+                                @candidate.EvaluationsCount verified evaluation(s)
+                            </span>
+
+                            <a asp-controller="Portfolio"
+                               asp-action="Public"
+                               asp-route-slug="@candidate.PortfolioSlug"
+                               target="_blank"
+                               class="portfolio-button">
+                                <i class="bi bi-person-vcard-fill"></i>
+                                View Portfolio
+                            </a>
+                        </div>
+                    </article>
+
+                    animationDelay += 70;
+                }
+            </section>
+        }
+        else
+        {
+            <div class="empty-results">
+                <span>🔎</span>
+
+                <h3>No Matching Candidates</h3>
+
+                <p>
+                    Try changing the skills, rating or training-hour filters.
+                </p>
+
+                <a asp-action="Index"
+                   class="filter-button search-button mt-2">
+                    Clear All Filters
+                </a>
+            </div>
+        }
+    </div>
+</div>

@@ -1,0 +1,523 @@
+﻿@model InternshipPortal.Models.ViewModels.ComplianceReportViewModel
+
+@{
+    ViewData["Title"] = "Official Training Compliance Report";
+    Layout = null;
+}
+
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0" />
+
+    <title>Official Training Compliance Report</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            padding: 35px;
+            color: #1e293b;
+            font-family: Arial, Helvetica, sans-serif;
+            background: #f8fafc;
+        }
+
+        .report-container {
+            max-width: 1200px;
+            padding: 42px;
+            margin: auto;
+            border: 1px solid #dbe3ee;
+            background: white;
+        }
+
+        .report-header {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 25px;
+            padding-bottom: 25px;
+            margin-bottom: 27px;
+            border-bottom: 3px solid #1d4ed8;
+        }
+
+        .report-brand {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .brand-icon {
+            width: 62px;
+            height: 62px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 29px;
+            font-weight: bold;
+            border-radius: 15px;
+            background: linear-gradient(135deg, #1d4ed8, #059669);
+        }
+
+        .report-header h1 {
+            margin: 0;
+            color: #172554;
+            font-size: 24px;
+        }
+
+        .report-header p {
+            margin: 6px 0 0;
+            color: #64748b;
+            font-size: 12px;
+        }
+
+        .report-information {
+            color: #475569;
+            font-size: 11px;
+            line-height: 1.8;
+            text-align: right;
+        }
+
+        .official-label {
+            display: inline-block;
+            padding: 6px 10px;
+            margin-bottom: 6px;
+            color: #047857;
+            font-weight: bold;
+            border-radius: 15px;
+            background: #d1fae5;
+        }
+
+        .summary-grid {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 11px;
+            margin-bottom: 27px;
+        }
+
+        .summary-card {
+            padding: 14px;
+            text-align: center;
+            border: 1px solid #dbe3ee;
+            border-radius: 10px;
+            background: #f8fafc;
+        }
+
+            .summary-card strong,
+            .summary-card span {
+                display: block;
+            }
+
+            .summary-card strong {
+                color: #172554;
+                font-size: 20px;
+            }
+
+            .summary-card span {
+                margin-top: 5px;
+                color: #64748b;
+                font-size: 9px;
+                font-weight: bold;
+                text-transform: uppercase;
+            }
+
+        .filter-summary {
+            padding: 12px 15px;
+            margin-bottom: 20px;
+            color: #475569;
+            font-size: 10px;
+            border-left: 4px solid #1d4ed8;
+            background: #eff6ff;
+        }
+
+        .report-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+            .report-table th {
+                padding: 10px 7px;
+                color: white;
+                font-size: 8px;
+                text-align: left;
+                background: #1e3a8a;
+                text-transform: uppercase;
+            }
+
+            .report-table td {
+                padding: 10px 7px;
+                color: #334155;
+                font-size: 8px;
+                border: 1px solid #e2e8f0;
+                vertical-align: top;
+            }
+
+            .report-table tbody tr:nth-child(even) {
+                background: #f8fafc;
+            }
+
+        .student-name {
+            color: #172554;
+            font-weight: bold;
+        }
+
+        .status {
+            display: inline-block;
+            padding: 4px 7px;
+            font-size: 7px;
+            font-weight: bold;
+            border-radius: 10px;
+        }
+
+        .status-compliant {
+            color: #047857;
+            background: #d1fae5;
+        }
+
+        .status-on-track {
+            color: #1d4ed8;
+            background: #dbeafe;
+        }
+
+        .status-attention {
+            color: #b45309;
+            background: #fef3c7;
+        }
+
+        .status-overdue {
+            color: #b91c1c;
+            background: #fee2e2;
+        }
+
+        .status-pending {
+            color: #6d28d9;
+            background: #ede9fe;
+        }
+
+        .report-footer {
+            display: flex;
+            align-items: flex-end;
+            justify-content: space-between;
+            gap: 25px;
+            padding-top: 30px;
+            margin-top: 35px;
+            color: #64748b;
+            font-size: 9px;
+            border-top: 1px solid #dbe3ee;
+        }
+
+        .verification-box {
+            max-width: 500px;
+            line-height: 1.7;
+        }
+
+            .verification-box strong {
+                display: block;
+                margin-bottom: 4px;
+                color: #047857;
+                font-size: 10px;
+            }
+
+        .signature-box {
+            min-width: 210px;
+            padding-top: 34px;
+            text-align: center;
+            border-top: 1px solid #64748b;
+        }
+
+        .print-controls {
+            max-width: 1200px;
+            display: flex;
+            justify-content: flex-end;
+            gap: 9px;
+            margin: 0 auto 16px;
+        }
+
+        .print-button {
+            padding: 10px 17px;
+            color: white;
+            font-weight: bold;
+            border: none;
+            border-radius: 8px;
+            background: #1d4ed8;
+            cursor: pointer;
+        }
+
+        .close-button {
+            padding: 10px 17px;
+            color: #475569;
+            border: none;
+            border-radius: 8px;
+            background: #e2e8f0;
+            cursor: pointer;
+        }
+
+        @@media print {
+            body {
+                padding: 0;
+                background: white;
+            }
+
+            .report-container {
+                max-width: none;
+                padding: 15px;
+                border: none;
+            }
+
+            .print-controls {
+                display: none;
+            }
+
+            .report-table tr {
+                page-break-inside: avoid;
+            }
+
+            @@page {
+                size: landscape;
+                margin: 12mm;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="print-controls">
+        <button type="button"
+                class="close-button"
+                onclick="window.close()">
+            Close
+        </button>
+
+        <button type="button"
+                class="print-button"
+                onclick="window.print()">
+            Print / Save as PDF
+        </button>
+    </div>
+
+    <main class="report-container">
+        <header class="report-header">
+            <div class="report-brand">
+                <div class="brand-icon">IP</div>
+
+                <div>
+                    <h1>Training Compliance Report</h1>
+
+                    <p>
+                        Internship Portal — University Training Records
+                    </p>
+                </div>
+            </div>
+
+            <div class="report-information">
+                <span class="official-label">
+                    Official System Report
+                </span>
+
+                <div>
+                    Report Date:
+                    @DateTime.Now.ToString("dd MMMM yyyy")
+                </div>
+
+                <div>
+                    Report Time:
+                    @DateTime.Now.ToString("hh:mm tt")
+                </div>
+
+                <div>
+                    Reference:
+                    IPR-@DateTime.Now.ToString("yyyyMMddHHmm")
+                </div>
+            </div>
+        </header>
+
+        <section class="summary-grid">
+            <div class="summary-card">
+                <strong>@Model.TotalEnrollments</strong>
+                <span>Enrollments</span>
+            </div>
+
+            <div class="summary-card">
+                <strong>@Model.UniversityApproved</strong>
+                <span>Approved</span>
+            </div>
+
+            <div class="summary-card">
+                <strong>@Model.FullyCompliant</strong>
+                <span>Compliant</span>
+            </div>
+
+            <div class="summary-card">
+                <strong>@Model.NeedsAttention</strong>
+                <span>Attention</span>
+            </div>
+
+            <div class="summary-card">
+                <strong>
+                    @Model.OverallComplianceRate.ToString("0.0")%
+                </strong>
+
+                <span>Hours Compliance</span>
+            </div>
+        </section>
+
+        @if (!string.IsNullOrWhiteSpace(Model.Search) ||
+                !string.IsNullOrWhiteSpace(Model.University) ||
+                !string.IsNullOrWhiteSpace(Model.ComplianceStatus))
+        {
+            <div class="filter-summary">
+                <strong>Applied Filters:</strong>
+
+                Search:
+                @(string.IsNullOrWhiteSpace(Model.Search)
+                            ? "All"
+                            : Model.Search)
+
+                &nbsp; | &nbsp;
+
+                University:
+                @(string.IsNullOrWhiteSpace(Model.University)
+                            ? "All"
+                            : Model.University)
+
+                &nbsp; | &nbsp;
+
+                Status:
+                @(string.IsNullOrWhiteSpace(Model.ComplianceStatus)
+                            ? "All"
+                            : Model.ComplianceStatus)
+        </div>
+                }
+
+        <table class="report-table">
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Student</th>
+                    <th>University</th>
+                    <th>Specialization</th>
+                    <th>Internship</th>
+                    <th>Company</th>
+                    <th>Period</th>
+                    <th>Required</th>
+                    <th>Logged</th>
+                    <th>Approved</th>
+                    <th>Reports</th>
+                    <th>University</th>
+                    <th>Compliance</th>
+                    <th>Score</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                @{
+                    var rowNumber = 1;
+                }
+
+                @foreach (var student in Model.Students)
+                {
+                    var statusClass =
+                    student.ComplianceStatus switch
+                    {
+                        "Compliant" => "status-compliant",
+                        "On Track" => "status-on-track",
+                        "Overdue" => "status-overdue",
+                        "Pending Approval" => "status-pending",
+                        _ => "status-attention"
+                    };
+
+                    <tr>
+                        <td>@rowNumber</td>
+
+                        <td>
+                            <span class="student-name">
+                                @student.StudentName
+                            </span>
+                        </td>
+
+                        <td>@student.University</td>
+
+                        <td>@student.Specialization</td>
+
+                        <td>@student.InternshipTitle</td>
+
+                        <td>@student.CompanyName</td>
+
+                        <td>
+                            @student.StartDate.ToString("dd/MM/yyyy")
+                            <br />
+                            @student.ExpectedEndDate.ToString("dd/MM/yyyy")
+                        </td>
+
+                        <td>@student.RequiredHours h</td>
+
+                        <td>
+                            @student.LoggedHours.ToString("0.##") h
+                        </td>
+
+                        <td>
+                            @student.ApprovedHours.ToString("0.##") h
+                            <br />
+                            @student.HoursCompletionRate.ToString("0.0")%
+                        </td>
+
+                        <td>
+                            @student.ApprovedReportsCount
+                            /
+                            @student.WeeklyReportsCount
+                        </td>
+
+                        <td>
+                            @(student.IsUniversityApproved
+                                                    ? "Approved"
+                                                    : "Pending")
+                    </td>
+
+                        <td>
+                            <span class="status @statusClass">
+                                @student.ComplianceStatus
+                            </span>
+                        </td>
+
+                        <td>@student.ComplianceScore / 100</td>
+                    </tr>
+
+                                rowNumber++;
+                }
+
+                @if (!Model.Students.Any())
+                {
+                    <tr>
+                        <td colspan="14"
+                            style="padding: 35px; text-align: center;">
+                            No training records match the selected filters.
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+
+        <footer class="report-footer">
+            <div class="verification-box">
+                <strong>System Verification</strong>
+
+                This report was generated directly from the
+                Internship Portal database. Approved training hours,
+                weekly reports and university approvals are based on
+                recorded platform activity at the time of generation.
+            </div>
+
+            <div class="signature-box">
+                University Supervisor Signature
+            </div>
+        </footer>
+    </main>
+</body>
+</html>

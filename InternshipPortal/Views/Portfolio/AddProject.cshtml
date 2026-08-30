@@ -1,0 +1,14 @@
+﻿@model InternshipPortal.Models.ViewModels.PortfolioProjectViewModel
+
+@{
+    ViewData["Title"] = "Add Portfolio Project";
+    ViewData["ProjectPageTitle"] = "Add a New Project";
+    ViewData["ProjectFormAction"] = "AddProject";
+    ViewData["ProjectSubmitText"] = "Add Project";
+}
+
+<partial name="_ProjectForm" model="Model" />
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}
