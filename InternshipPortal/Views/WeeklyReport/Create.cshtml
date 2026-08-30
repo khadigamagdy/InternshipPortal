@@ -1,0 +1,697 @@
+﻿@model InternshipPortal.Models.ViewModels.WeeklyReportViewModel
+
+@{
+    ViewData["Title"] = "Create Weekly Report";
+}
+
+<style>
+    .create-report-page {
+        min-height: 100vh;
+        padding: 45px 0 70px;
+        background: radial-gradient(circle at top left, rgba(99, 102, 241, 0.14), transparent 35%), radial-gradient(circle at bottom right, rgba(14, 165, 233, 0.13), transparent 35%), #f8fafc;
+    }
+
+    .report-header {
+        position: relative;
+        overflow: hidden;
+        padding: 36px;
+        margin-bottom: 25px;
+        color: white;
+        border-radius: 27px;
+        background: linear-gradient(135deg, #172554, #4f46e5, #0284c7);
+        box-shadow: 0 22px 48px rgba(79, 70, 229, 0.24);
+        animation: headerAppear 0.7s ease;
+    }
+
+        .report-header::after {
+            position: absolute;
+            width: 280px;
+            height: 280px;
+            right: -80px;
+            bottom: -180px;
+            content: "";
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+    .header-content {
+        position: relative;
+        z-index: 2;
+    }
+
+    .header-icon {
+        min-width: 68px;
+        height: 68px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-right: 18px;
+        font-size: 30px;
+        border-radius: 21px;
+        background: rgba(255, 255, 255, 0.17);
+        animation: iconFloat 3s ease-in-out infinite;
+    }
+
+    .report-header h1 {
+        margin: 0;
+        font-weight: 900;
+    }
+
+    .report-header p {
+        margin: 8px 0 0;
+        color: rgba(255, 255, 255, 0.8);
+    }
+
+    .back-button {
+        display: inline-flex;
+        align-items: center;
+        gap: 7px;
+        padding: 11px 16px;
+        color: white;
+        font-size: 12px;
+        font-weight: 900;
+        border: 1px solid rgba(255, 255, 255, 0.32);
+        border-radius: 13px;
+        text-decoration: none;
+        background: rgba(255, 255, 255, 0.13);
+        transition: 0.3s;
+    }
+
+        .back-button:hover {
+            color: #312e81;
+            background: white;
+            transform: translateY(-3px);
+        }
+
+    .report-layout {
+        display: grid;
+        grid-template-columns: 310px 1fr;
+        gap: 24px;
+        align-items: start;
+    }
+
+    .summary-card,
+    .form-card {
+        border: 1px solid #e2e8f0;
+        border-radius: 23px;
+        background: white;
+        box-shadow: 0 12px 32px rgba(15, 23, 42, 0.07);
+        animation: cardAppear 0.7s ease;
+    }
+
+    .summary-card {
+        position: sticky;
+        top: 25px;
+        overflow: hidden;
+    }
+
+    .summary-top {
+        padding: 27px 22px;
+        text-align: center;
+        color: white;
+        background: linear-gradient(135deg, #4f46e5, #0284c7);
+    }
+
+    .week-circle {
+        width: 80px;
+        height: 80px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-direction: column;
+        margin: 0 auto 15px;
+        border-radius: 24px;
+        background: rgba(255, 255, 255, 0.18);
+    }
+
+        .week-circle strong {
+            font-size: 29px;
+            font-weight: 900;
+            line-height: 1;
+        }
+
+        .week-circle span {
+            margin-top: 6px;
+            font-size: 10px;
+            font-weight: 800;
+        }
+
+    .summary-top h3 {
+        margin: 0;
+        font-size: 17px;
+        font-weight: 900;
+    }
+
+    .summary-top p {
+        margin: 7px 0 0;
+        color: rgba(255, 255, 255, 0.8);
+        font-size: 12px;
+    }
+
+    .summary-content {
+        padding: 22px;
+    }
+
+    .summary-item {
+        padding: 13px 0;
+        border-bottom: 1px solid #f1f5f9;
+    }
+
+        .summary-item:last-child {
+            border-bottom: none;
+        }
+
+        .summary-item span {
+            display: block;
+            margin-bottom: 4px;
+            color: #94a3b8;
+            font-size: 10px;
+            font-weight: 800;
+            text-transform: uppercase;
+        }
+
+        .summary-item strong {
+            color: #334155;
+            font-size: 12px;
+        }
+
+    .help-box {
+        display: flex;
+        align-items: flex-start;
+        gap: 9px;
+        padding: 13px;
+        margin-top: 15px;
+        color: #5b21b6;
+        font-size: 11px;
+        line-height: 1.6;
+        border: 1px solid #ddd6fe;
+        border-radius: 13px;
+        background: #f5f3ff;
+    }
+
+    .form-card {
+        padding: 30px;
+    }
+
+    .form-heading {
+        padding-bottom: 20px;
+        margin-bottom: 24px;
+        border-bottom: 1px solid #e2e8f0;
+    }
+
+        .form-heading h2 {
+            margin: 0;
+            color: #0f172a;
+            font-size: 22px;
+            font-weight: 900;
+        }
+
+        .form-heading p {
+            margin: 6px 0 0;
+            color: #94a3b8;
+            font-size: 12px;
+        }
+
+    .form-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 19px;
+    }
+
+    .full-width {
+        grid-column: 1 / -1;
+    }
+
+    .form-group label {
+        display: block;
+        margin-bottom: 8px;
+        color: #334155;
+        font-size: 13px;
+        font-weight: 900;
+    }
+
+    .required-star {
+        color: #ef4444;
+    }
+
+    .input-wrapper {
+        position: relative;
+    }
+
+    .input-icon {
+        position: absolute;
+        top: 50%;
+        left: 15px;
+        z-index: 2;
+        color: #64748b;
+        transform: translateY(-50%);
+    }
+
+    .textarea-icon {
+        top: 17px;
+        transform: none;
+    }
+
+    .report-input {
+        min-height: 51px;
+        padding-left: 44px;
+        color: #0f172a;
+        border: 2px solid #e2e8f0;
+        border-radius: 14px;
+        background: #f8fafc;
+        transition: 0.3s;
+    }
+
+    textarea.report-input {
+        min-height: 135px;
+        padding-top: 14px;
+        resize: vertical;
+    }
+
+    .report-input:focus {
+        border-color: #4f46e5;
+        background: white;
+        box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.1);
+    }
+
+    .validation-summary {
+        padding: 13px 16px;
+        margin-bottom: 20px;
+        color: #b91c1c;
+        font-size: 12px;
+        border: 1px solid #fecaca;
+        border-radius: 13px;
+        background: #fef2f2;
+    }
+
+    .validation-message {
+        display: block;
+        margin-top: 6px;
+        color: #dc2626;
+        font-size: 11px;
+        font-weight: 700;
+    }
+
+    .form-actions {
+        display: flex;
+        justify-content: flex-end;
+        gap: 11px;
+        padding-top: 23px;
+        margin-top: 24px;
+        border-top: 1px solid #e2e8f0;
+    }
+
+    .cancel-button,
+    .draft-button,
+    .submit-button {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 7px;
+        min-height: 49px;
+        padding: 0 18px;
+        font-size: 12px;
+        font-weight: 900;
+        border-radius: 13px;
+        transition: 0.3s;
+    }
+
+    .cancel-button {
+        color: #475569;
+        border: 1px solid #cbd5e1;
+        text-decoration: none;
+        background: white;
+    }
+
+    .draft-button {
+        color: #4338ca;
+        border: 1px solid #c7d2fe;
+        background: #eef2ff;
+    }
+
+    .submit-button {
+        color: white;
+        border: none;
+        background: linear-gradient(135deg, #4f46e5, #0284c7);
+        box-shadow: 0 10px 23px rgba(79, 70, 229, 0.25);
+    }
+
+        .cancel-button:hover,
+        .draft-button:hover,
+        .submit-button:hover {
+            transform: translateY(-3px);
+        }
+
+        .submit-button:hover {
+            color: white;
+        }
+
+    @@keyframes headerAppear {
+        from {
+            opacity: 0;
+            transform: translateY(-25px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    @@keyframes cardAppear {
+        from {
+            opacity: 0;
+            transform: translateY(25px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    @@keyframes iconFloat {
+        0%, 100% {
+            transform: translateY(0);
+        }
+
+        50% {
+            transform: translateY(-8px);
+        }
+    }
+
+    @@media (max-width: 992px) {
+        .report-layout {
+            grid-template-columns: 1fr;
+        }
+
+        .summary-card {
+            position: static;
+        }
+    }
+
+    @@media (max-width: 700px) {
+        .form-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .full-width {
+            grid-column: auto;
+        }
+
+        .form-actions {
+            flex-direction: column-reverse;
+        }
+
+        .cancel-button,
+        .draft-button,
+        .submit-button {
+            width: 100%;
+        }
+    }
+</style>
+
+<div class="create-report-page">
+    <div class="container">
+        <div class="report-header">
+            <div class="header-content d-flex flex-wrap align-items-center justify-content-between gap-4">
+                <div class="d-flex align-items-center">
+                    <div class="header-icon">
+                        <i class="bi bi-journal-plus"></i>
+                    </div>
+
+                    <div>
+                        <h1>Create Weekly Report</h1>
+
+                        <p>
+                            Summarize your achievements,
+                            learned skills and upcoming goals.
+                        </p>
+                    </div>
+                </div>
+
+                <a asp-action="Index"
+                   class="back-button">
+
+                    <i class="bi bi-arrow-left"></i>
+                    Weekly Reports
+                </a>
+            </div>
+        </div>
+
+        <div class="report-layout">
+            <aside class="summary-card">
+                <div class="summary-top">
+                    <div class="week-circle">
+                        <strong>@Model.WeekNumber</strong>
+                        <span>WEEK</span>
+                    </div>
+
+                    <h3>@Model.InternshipTitle</h3>
+                    <p>@Model.CompanyName</p>
+                </div>
+
+                <div class="summary-content">
+                    <div class="summary-item">
+                        <span>Report Period</span>
+
+                        <strong>
+                            @Model.WeekStartDate.ToString("dd MMM yyyy")
+                            -
+                            @Model.WeekEndDate.ToString("dd MMM yyyy")
+                        </strong>
+                    </div>
+
+                    <div class="summary-item">
+                        <span>Review Process</span>
+
+                        <strong>
+                            Company review followed by
+                            university approval
+                        </strong>
+                    </div>
+
+                    <div class="help-box">
+                        <i class="bi bi-lightbulb-fill"></i>
+
+                        <span>
+                            Write clear and accurate information.
+                            This report becomes part of your
+                            verified training record.
+                        </span>
+                    </div>
+                </div>
+            </aside>
+
+            <div class="form-card">
+                <div class="form-heading">
+                    <h2>Weekly Progress Information</h2>
+
+                    <p>
+                        Required fields must be completed
+                        before saving or submitting.
+                    </p>
+                </div>
+
+                <form asp-action="Create"
+                      method="post">
+
+                    @Html.AntiForgeryToken()
+
+                    <input asp-for="TrainingEnrollmentId"
+                           type="hidden" />
+
+                    <input asp-for="InternshipTitle"
+                           type="hidden" />
+
+                    <input asp-for="CompanyName"
+                           type="hidden" />
+
+                    <div asp-validation-summary="ModelOnly"
+                         class="validation-summary">
+                    </div>
+
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label asp-for="WeekNumber">
+                                Week Number
+                                <span class="required-star">*</span>
+                            </label>
+
+                            <div class="input-wrapper">
+                                <i class="bi bi-calendar-week input-icon"></i>
+
+                                <input asp-for="WeekNumber"
+                                       readonly
+                                       class="form-control report-input" />
+                            </div>
+
+                            <span asp-validation-for="WeekNumber"
+                                  class="validation-message">
+                            </span>
+                        </div>
+
+                        <div class="form-group">
+                            <label>
+                                Report Status
+                            </label>
+
+                            <div class="input-wrapper">
+                                <i class="bi bi-file-earmark-text input-icon"></i>
+
+                                <input value="New Report"
+                                       readonly
+                                       class="form-control report-input" />
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label asp-for="WeekStartDate">
+                                Week Start Date
+                                <span class="required-star">*</span>
+                            </label>
+
+                            <div class="input-wrapper">
+                                <i class="bi bi-calendar-check input-icon"></i>
+
+                                <input asp-for="WeekStartDate"
+                                       class="form-control report-input" />
+                            </div>
+
+                            <span asp-validation-for="WeekStartDate"
+                                  class="validation-message">
+                            </span>
+                        </div>
+
+                        <div class="form-group">
+                            <label asp-for="WeekEndDate">
+                                Week End Date
+                                <span class="required-star">*</span>
+                            </label>
+
+                            <div class="input-wrapper">
+                                <i class="bi bi-calendar-check input-icon"></i>
+
+                                <input asp-for="WeekEndDate"
+                                       class="form-control report-input" />
+                            </div>
+
+                            <span asp-validation-for="WeekEndDate"
+                                  class="validation-message">
+                            </span>
+                        </div>
+
+                        <div class="form-group full-width">
+                            <label asp-for="TasksCompleted">
+                                Tasks Completed
+                                <span class="required-star">*</span>
+                            </label>
+
+                            <div class="input-wrapper">
+                                <i class="bi bi-list-check input-icon textarea-icon"></i>
+
+                                <textarea asp-for="TasksCompleted"
+                                          class="form-control report-input"
+                                          placeholder="Describe the tasks and activities completed during this week...">
+                                </textarea>
+                            </div>
+
+                            <span asp-validation-for="TasksCompleted"
+                                  class="validation-message">
+                            </span>
+                        </div>
+
+                        <div class="form-group full-width">
+                            <label asp-for="SkillsLearned">
+                                Skills Learned
+                                <span class="required-star">*</span>
+                            </label>
+
+                            <div class="input-wrapper">
+                                <i class="bi bi-stars input-icon textarea-icon"></i>
+
+                                <textarea asp-for="SkillsLearned"
+                                          class="form-control report-input"
+                                          placeholder="Describe the technical and professional skills you developed...">
+                                </textarea>
+                            </div>
+
+                            <span asp-validation-for="SkillsLearned"
+                                  class="validation-message">
+                            </span>
+                        </div>
+
+                        <div class="form-group full-width">
+                            <label asp-for="Challenges">
+                                Challenges
+                            </label>
+
+                            <div class="input-wrapper">
+                                <i class="bi bi-lightning-charge input-icon textarea-icon"></i>
+
+                                <textarea asp-for="Challenges"
+                                          class="form-control report-input"
+                                          placeholder="Mention challenges and how you handled them...">
+                                </textarea>
+                            </div>
+
+                            <span asp-validation-for="Challenges"
+                                  class="validation-message">
+                            </span>
+                        </div>
+
+                        <div class="form-group full-width">
+                            <label asp-for="NextWeekPlan">
+                                Next Week Plan
+                            </label>
+
+                            <div class="input-wrapper">
+                                <i class="bi bi-calendar2-check input-icon textarea-icon"></i>
+
+                                <textarea asp-for="NextWeekPlan"
+                                          class="form-control report-input"
+                                          placeholder="Describe your goals and planned activities for next week...">
+                                </textarea>
+                            </div>
+
+                            <span asp-validation-for="NextWeekPlan"
+                                  class="validation-message">
+                            </span>
+                        </div>
+                    </div>
+
+                    <div class="form-actions">
+                        <a asp-action="Index"
+                           class="cancel-button">
+
+                            <i class="bi bi-x-circle"></i>
+                            Cancel
+                        </a>
+
+                        <button type="submit"
+                                name="submitReport"
+                                value="false"
+                                class="draft-button">
+
+                            <i class="bi bi-file-earmark"></i>
+                            Save as Draft
+                        </button>
+
+                        <button type="submit"
+                                name="submitReport"
+                                value="true"
+                                class="submit-button">
+
+                            <i class="bi bi-send-check-fill"></i>
+                            Submit to Company
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

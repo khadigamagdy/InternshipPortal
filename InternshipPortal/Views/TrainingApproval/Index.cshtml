@@ -1,0 +1,704 @@
+﻿@model IEnumerable<InternshipPortal.Models.TrainingEnrollment>
+@using InternshipPortal.Models.Enums
+
+@{
+    ViewData["Title"] = "Training Approvals";
+
+    var enrollments = Model.ToList();
+
+    var pendingCount = enrollments.Count(enrollment =>
+        enrollment.Status ==
+            TrainingStatus.PendingUniversityApproval);
+
+    var activeCount = enrollments.Count(enrollment =>
+        enrollment.Status == TrainingStatus.Active);
+
+    var completedCount = enrollments.Count(enrollment =>
+        enrollment.Status == TrainingStatus.Completed);
+}
+
+<style>
+    .approval-page {
+        min-height: 100vh;
+        padding: 45px 0 70px;
+        background: radial-gradient(circle at top left, rgba(37, 99, 235, 0.14), transparent 35%), radial-gradient(circle at bottom right, rgba(124, 58, 237, 0.13), transparent 35%), #f8fafc;
+    }
+
+    .approval-header {
+        position: relative;
+        overflow: hidden;
+        padding: 37px;
+        margin-bottom: 25px;
+        color: white;
+        border-radius: 27px;
+        background: linear-gradient(135deg, #172554, #2563eb, #7c3aed);
+        box-shadow: 0 22px 48px rgba(30, 64, 175, 0.25);
+        animation: headerAppear 0.7s ease;
+    }
+
+        .approval-header::after {
+            position: absolute;
+            width: 280px;
+            height: 280px;
+            right: -80px;
+            bottom: -180px;
+            content: "";
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+    .header-content {
+        position: relative;
+        z-index: 2;
+    }
+
+    .header-icon {
+        min-width: 68px;
+        height: 68px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-right: 18px;
+        font-size: 30px;
+        border-radius: 21px;
+        background: rgba(255, 255, 255, 0.17);
+        animation: iconFloat 3s ease-in-out infinite;
+    }
+
+    .approval-header h1 {
+        margin: 0;
+        font-weight: 900;
+    }
+
+    .approval-header p {
+        margin: 8px 0 0;
+        color: rgba(255, 255, 255, 0.8);
+    }
+
+    .supervisor-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 7px;
+        padding: 10px 15px;
+        font-size: 12px;
+        font-weight: 900;
+        border-radius: 30px;
+        background: rgba(255, 255, 255, 0.16);
+    }
+
+    .statistics-grid {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 17px;
+        margin-bottom: 27px;
+    }
+
+    .statistic-card {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        padding: 20px;
+        border: 1px solid #e2e8f0;
+        border-radius: 19px;
+        background: white;
+        box-shadow: 0 10px 27px rgba(15, 23, 42, 0.07);
+        transition: 0.3s;
+    }
+
+        .statistic-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 17px 35px rgba(37, 99, 235, 0.14);
+        }
+
+    .statistic-icon {
+        min-width: 51px;
+        height: 51px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 22px;
+        border-radius: 16px;
+    }
+
+    .total-icon {
+        color: #1d4ed8;
+        background: #dbeafe;
+    }
+
+    .pending-icon {
+        color: #b45309;
+        background: #fef3c7;
+    }
+
+    .active-icon {
+        color: #047857;
+        background: #d1fae5;
+    }
+
+    .completed-icon {
+        color: #6d28d9;
+        background: #ede9fe;
+    }
+
+    .statistic-number {
+        display: block;
+        color: #0f172a;
+        font-size: 25px;
+        font-weight: 900;
+    }
+
+    .statistic-label {
+        color: #64748b;
+        font-size: 12px;
+        font-weight: 700;
+    }
+
+    .approval-card {
+        padding: 25px;
+        margin-bottom: 19px;
+        border: 1px solid #e2e8f0;
+        border-radius: 23px;
+        background: white;
+        box-shadow: 0 11px 30px rgba(15, 23, 42, 0.07);
+        transition: 0.35s;
+        animation: cardAppear 0.7s ease both;
+    }
+
+        .approval-card:hover {
+            border-color: #bfdbfe;
+            transform: translateY(-5px);
+            box-shadow: 0 19px 39px rgba(37, 99, 235, 0.14);
+        }
+
+    .student-avatar {
+        min-width: 61px;
+        height: 61px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 24px;
+        font-weight: 900;
+        border-radius: 19px;
+        background: linear-gradient(135deg, #2563eb, #7c3aed);
+    }
+
+    .student-name {
+        margin: 0 0 5px;
+        color: #0f172a;
+        font-size: 19px;
+        font-weight: 900;
+    }
+
+    .internship-name {
+        color: #475569;
+        font-size: 13px;
+        font-weight: 700;
+    }
+
+    .company-name {
+        margin-top: 5px;
+        color: #94a3b8;
+        font-size: 12px;
+    }
+
+    .status-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 8px 12px;
+        font-size: 11px;
+        font-weight: 900;
+        border-radius: 20px;
+    }
+
+    .status-pending {
+        color: #b45309;
+        background: #fef3c7;
+    }
+
+    .status-active {
+        color: #047857;
+        background: #d1fae5;
+    }
+
+    .status-completed {
+        color: #1d4ed8;
+        background: #dbeafe;
+    }
+
+    .status-cancelled {
+        color: #b91c1c;
+        background: #fee2e2;
+    }
+
+    .training-details {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 12px;
+        margin-top: 20px;
+    }
+
+    .detail-box {
+        padding: 14px;
+        border: 1px solid #e2e8f0;
+        border-radius: 14px;
+        background: #f8fafc;
+    }
+
+        .detail-box span {
+            display: block;
+            margin-bottom: 5px;
+            color: #94a3b8;
+            font-size: 10px;
+            font-weight: 800;
+            text-transform: uppercase;
+        }
+
+        .detail-box strong {
+            color: #334155;
+            font-size: 13px;
+        }
+
+    .approval-actions {
+        display: flex;
+        justify-content: flex-end;
+        gap: 10px;
+        padding-top: 19px;
+        margin-top: 19px;
+        border-top: 1px solid #f1f5f9;
+    }
+
+    .approve-button,
+    .reject-button {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 7px;
+        padding: 11px 17px;
+        font-size: 12px;
+        font-weight: 900;
+        border: none;
+        border-radius: 12px;
+        transition: 0.3s;
+    }
+
+    .approve-button {
+        color: white;
+        background: linear-gradient(135deg, #059669, #10b981);
+        box-shadow: 0 9px 20px rgba(16, 185, 129, 0.23);
+    }
+
+    .reject-button {
+        color: #b91c1c;
+        background: #fee2e2;
+    }
+
+        .approve-button:hover,
+        .reject-button:hover {
+            color: white;
+            transform: translateY(-3px);
+        }
+
+        .reject-button:hover {
+            background: #ef4444;
+        }
+
+    .approved-information {
+        display: inline-flex;
+        align-items: center;
+        gap: 7px;
+        padding: 10px 14px;
+        color: #047857;
+        font-size: 12px;
+        font-weight: 800;
+        border-radius: 13px;
+        background: #ecfdf5;
+    }
+
+    .empty-state {
+        padding: 80px 25px;
+        text-align: center;
+        border: 2px dashed #cbd5e1;
+        border-radius: 25px;
+        background: white;
+    }
+
+        .empty-state span {
+            display: block;
+            font-size: 75px;
+            animation: iconFloat 3s ease-in-out infinite;
+        }
+
+        .empty-state h3 {
+            margin-top: 18px;
+            color: #0f172a;
+            font-weight: 900;
+        }
+
+        .empty-state p {
+            color: #64748b;
+        }
+
+    @@keyframes headerAppear {
+        from {
+            opacity: 0;
+            transform: translateY(-25px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    @@keyframes cardAppear {
+        from {
+            opacity: 0;
+            transform: translateY(25px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    @@keyframes iconFloat {
+        0%, 100% {
+            transform: translateY(0);
+        }
+
+        50% {
+            transform: translateY(-8px);
+        }
+    }
+
+    @@media (max-width: 992px) {
+        .statistics-grid,
+        .training-details {
+            grid-template-columns: repeat(2, 1fr);
+        }
+    }
+
+    @@media (max-width: 576px) {
+        .statistics-grid,
+        .training-details {
+            grid-template-columns: 1fr;
+        }
+
+        .approval-actions {
+            flex-direction: column;
+        }
+
+            .approval-actions form,
+            .approve-button,
+            .reject-button {
+                width: 100%;
+            }
+    }
+</style>
+
+<div class="approval-page">
+    <div class="container">
+        @if (TempData["SuccessMessage"] != null)
+        {
+            <div class="alert alert-success alert-dismissible fade show shadow-sm">
+                <i class="bi bi-check-circle-fill me-2"></i>
+                @TempData["SuccessMessage"]
+
+                <button type="button"
+                        class="btn-close"
+                        data-bs-dismiss="alert">
+                </button>
+            </div>
+        }
+
+        @if (TempData["ErrorMessage"] != null)
+        {
+            <div class="alert alert-danger alert-dismissible fade show shadow-sm">
+                <i class="bi bi-exclamation-circle-fill me-2"></i>
+                @TempData["ErrorMessage"]
+
+                <button type="button"
+                        class="btn-close"
+                        data-bs-dismiss="alert">
+                </button>
+            </div>
+        }
+
+        <div class="approval-header">
+            <div class="header-content d-flex flex-wrap align-items-center justify-content-between gap-4">
+                <div class="d-flex align-items-center">
+                    <div class="header-icon">
+                        <i class="bi bi-mortarboard-fill"></i>
+                    </div>
+
+                    <div>
+                        <h1>Training Approvals</h1>
+
+                        <p>
+                            Verify internship enrollments and
+                            supervise approved student training.
+                        </p>
+                    </div>
+                </div>
+
+                <span class="supervisor-badge">
+                    <i class="bi bi-shield-check"></i>
+                    University Supervisor
+                </span>
+            </div>
+        </div>
+
+        <div class="statistics-grid">
+            <div class="statistic-card">
+                <div class="statistic-icon total-icon">
+                    <i class="bi bi-journals"></i>
+                </div>
+
+                <div>
+                    <span class="statistic-number">
+                        @enrollments.Count
+                    </span>
+
+                    <span class="statistic-label">
+                        Displayed Records
+                    </span>
+                </div>
+            </div>
+
+            <div class="statistic-card">
+                <div class="statistic-icon pending-icon">
+                    <i class="bi bi-hourglass-split"></i>
+                </div>
+
+                <div>
+                    <span class="statistic-number">
+                        @pendingCount
+                    </span>
+
+                    <span class="statistic-label">
+                        Pending Approval
+                    </span>
+                </div>
+            </div>
+
+            <div class="statistic-card">
+                <div class="statistic-icon active-icon">
+                    <i class="bi bi-play-circle-fill"></i>
+                </div>
+
+                <div>
+                    <span class="statistic-number">
+                        @activeCount
+                    </span>
+
+                    <span class="statistic-label">
+                        Active Training
+                    </span>
+                </div>
+            </div>
+
+            <div class="statistic-card">
+                <div class="statistic-icon completed-icon">
+                    <i class="bi bi-award-fill"></i>
+                </div>
+
+                <div>
+                    <span class="statistic-number">
+                        @completedCount
+                    </span>
+
+                    <span class="statistic-label">
+                        Completed Training
+                    </span>
+                </div>
+            </div>
+        </div>
+
+        @if (enrollments.Any())
+        {
+            var animationDelay = 0;
+
+            foreach (var enrollment in enrollments)
+            {
+                var application =
+                enrollment.InternshipApplication;
+
+                var student = application.Student;
+                var internship = application.Internship;
+                var company = internship.Company;
+
+                var approvedHours =
+                enrollment.HourEntries
+                .Where(entry =>
+                entry.Status ==
+                TrainingHourStatus.Approved)
+                .Sum(entry => entry.Hours);
+
+                var statusClass =
+                enrollment.Status switch
+                {
+                    TrainingStatus.Active =>
+                    "status-active",
+
+                    TrainingStatus.Completed =>
+                    "status-completed",
+
+                    TrainingStatus.Cancelled =>
+                    "status-cancelled",
+
+                    _ => "status-pending"
+                };
+
+                var statusIcon =
+                enrollment.Status switch
+                {
+                    TrainingStatus.Active =>
+                    "bi-play-circle-fill",
+
+                    TrainingStatus.Completed =>
+                    "bi-award-fill",
+
+                    TrainingStatus.Cancelled =>
+                    "bi-x-circle-fill",
+
+                    _ => "bi-hourglass-split"
+                };
+
+                <div class="approval-card"
+                     style="animation-delay: @(animationDelay)ms">
+
+                    <div class="d-flex flex-wrap align-items-start justify-content-between gap-3">
+                        <div class="d-flex align-items-center gap-3">
+                            <div class="student-avatar">
+                                @(string.IsNullOrWhiteSpace(student.FullName)
+                                                        ? "S"
+                                                        : student.FullName
+                                                        .Substring(0, 1)
+                                                        .ToUpper())
+                    </div>
+
+                            <div>
+                                <h3 class="student-name">
+                                    @student.FullName
+                                </h3>
+
+                                <div class="internship-name">
+                                    <i class="bi bi-briefcase-fill me-1"></i>
+                                    @internship.Title
+                                </div>
+
+                                <div class="company-name">
+                                    <i class="bi bi-building-fill me-1"></i>
+                                    @company.Name
+                                </div>
+                            </div>
+                        </div>
+
+                        <span class="status-badge @statusClass">
+                            <i class="bi @statusIcon"></i>
+                            @enrollment.Status
+                        </span>
+                    </div>
+
+                    <div class="training-details">
+                        <div class="detail-box">
+                            <span>University</span>
+                            <strong>
+                                @student.University
+                            </strong>
+                        </div>
+
+                        <div class="detail-box">
+                            <span>Specialization</span>
+                            <strong>
+                                @student.Specialization
+                            </strong>
+                        </div>
+
+                        <div class="detail-box">
+                            <span>Training Period</span>
+                            <strong>
+                                @enrollment.StartDate.ToString("dd MMM")
+                                -
+                                @enrollment.ExpectedEndDate.ToString("dd MMM yyyy")
+                            </strong>
+                        </div>
+
+                        <div class="detail-box">
+                            <span>Training Hours</span>
+                            <strong>
+                                @approvedHours.ToString("0.0")
+                                /
+                                @enrollment.RequiredHours
+                            </strong>
+                        </div>
+                    </div>
+
+                    <div class="approval-actions">
+                @if (enrollment.Status ==
+                                TrainingStatus.PendingUniversityApproval)
+                        {
+                            <form asp-action="Reject"
+                                  asp-route-id="@enrollment.Id"
+                                  method="post"
+                                  onsubmit="return confirm('Reject this training enrollment?');">
+
+                                @Html.AntiForgeryToken()
+
+                                <button type="submit"
+                                        class="reject-button">
+
+                                    <i class="bi bi-x-circle-fill"></i>
+                                    Reject
+                                </button>
+                            </form>
+
+                            <form asp-action="Approve"
+                                  asp-route-id="@enrollment.Id"
+                                  method="post"
+                                  onsubmit="return confirm('Approve and activate this training?');">
+
+                                @Html.AntiForgeryToken()
+
+                                <button type="submit"
+                                        class="approve-button">
+
+                                    <i class="bi bi-check-circle-fill"></i>
+                                    Approve Training
+                                </button>
+                            </form>
+                        }
+                        else if (enrollment.Status ==
+                        TrainingStatus.Active)
+                        {
+                            <span class="approved-information">
+                                <i class="bi bi-patch-check-fill"></i>
+
+                                Approved on
+                                @enrollment.UniversityApprovedAt?.ToString(
+                                "dd MMM yyyy")
+                </span>
+                                }
+                    </div>
+                </div>
+
+                animationDelay += 90;
+            }
+        }
+        else
+        {
+            <div class="empty-state">
+                <span>🎓</span>
+                <h3>No Training Enrollments</h3>
+
+                <p>
+                    Pending training approvals and supervised
+                    students will appear here.
+                </p>
+            </div>
+        }
+    </div>
+</div>

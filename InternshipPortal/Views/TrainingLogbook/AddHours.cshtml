@@ -1,0 +1,709 @@
+﻿@model InternshipPortal.Models.ViewModels.TrainingHourEntryViewModel
+
+@{
+    ViewData["Title"] = "Add Training Hours";
+}
+
+<style>
+    .hours-page {
+        min-height: 100vh;
+        padding: 45px 0 70px;
+        background: radial-gradient( circle at top left, rgba(37, 99, 235, 0.14), transparent 35%), radial-gradient( circle at bottom right, rgba(16, 185, 129, 0.13), transparent 35%), #f8fafc;
+    }
+
+    .hours-header {
+        position: relative;
+        overflow: hidden;
+        padding: 35px;
+        margin-bottom: 25px;
+        color: white;
+        border-radius: 27px;
+        background: linear-gradient( 135deg, #0f172a, #1d4ed8, #0891b2);
+        box-shadow: 0 21px 46px rgba(30, 64, 175, 0.24);
+        animation: headerAppear 0.7s ease;
+    }
+
+        .hours-header::after {
+            position: absolute;
+            width: 250px;
+            height: 250px;
+            right: -70px;
+            bottom: -150px;
+            content: "";
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+    .header-content {
+        position: relative;
+        z-index: 2;
+    }
+
+    .header-icon {
+        min-width: 67px;
+        height: 67px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-right: 18px;
+        font-size: 30px;
+        border-radius: 21px;
+        background: rgba(255, 255, 255, 0.17);
+        animation: clockFloat 3s ease-in-out infinite;
+    }
+
+    .hours-header h1 {
+        margin: 0;
+        font-size: 31px;
+        font-weight: 900;
+    }
+
+    .hours-header p {
+        margin: 8px 0 0;
+        color: rgba(255, 255, 255, 0.8);
+    }
+
+    .back-button {
+        display: inline-flex;
+        align-items: center;
+        gap: 7px;
+        padding: 11px 16px;
+        color: white;
+        font-size: 13px;
+        font-weight: 800;
+        border: 1px solid rgba(255, 255, 255, 0.32);
+        border-radius: 13px;
+        text-decoration: none;
+        background: rgba(255, 255, 255, 0.13);
+        transition: 0.3s;
+    }
+
+        .back-button:hover {
+            color: #1e3a8a;
+            background: white;
+            transform: translateY(-3px);
+        }
+
+    .hours-layout {
+        display: grid;
+        grid-template-columns: 320px 1fr;
+        gap: 24px;
+        align-items: start;
+    }
+
+    .information-card,
+    .form-card {
+        border: 1px solid #e2e8f0;
+        border-radius: 23px;
+        background: white;
+        box-shadow: 0 12px 32px rgba(15, 23, 42, 0.07);
+        animation: cardAppear 0.7s ease;
+    }
+
+    .information-card {
+        position: sticky;
+        top: 25px;
+        overflow: hidden;
+    }
+
+    .information-top {
+        padding: 27px 22px;
+        text-align: center;
+        color: white;
+        background: linear-gradient( 135deg, #2563eb, #7c3aed);
+    }
+
+    .information-icon {
+        width: 76px;
+        height: 76px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 16px;
+        font-size: 34px;
+        border-radius: 23px;
+        background: rgba(255, 255, 255, 0.18);
+    }
+
+    .information-top h3 {
+        margin: 0;
+        font-size: 18px;
+        font-weight: 900;
+    }
+
+    .information-top p {
+        margin: 7px 0 0;
+        color: rgba(255, 255, 255, 0.8);
+        font-size: 13px;
+    }
+
+    .guidelines {
+        padding: 23px;
+    }
+
+        .guidelines h4 {
+            margin-bottom: 17px;
+            color: #0f172a;
+            font-size: 15px;
+            font-weight: 900;
+        }
+
+    .guideline-item {
+        display: flex;
+        align-items: flex-start;
+        gap: 11px;
+        margin-bottom: 16px;
+    }
+
+    .guideline-number {
+        min-width: 29px;
+        height: 29px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #2563eb;
+        font-size: 12px;
+        font-weight: 900;
+        border-radius: 10px;
+        background: #dbeafe;
+    }
+
+    .guideline-item strong {
+        display: block;
+        color: #334155;
+        font-size: 12px;
+    }
+
+    .guideline-item span {
+        display: block;
+        margin-top: 3px;
+        color: #94a3b8;
+        font-size: 11px;
+        line-height: 1.5;
+    }
+
+    .verification-box {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 13px;
+        margin-top: 7px;
+        color: #047857;
+        font-size: 11px;
+        font-weight: 800;
+        border: 1px solid #a7f3d0;
+        border-radius: 13px;
+        background: #ecfdf5;
+    }
+
+        .verification-box i {
+            font-size: 21px;
+        }
+
+    .form-card {
+        padding: 30px;
+    }
+
+    .form-heading {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 15px;
+        padding-bottom: 20px;
+        margin-bottom: 24px;
+        border-bottom: 1px solid #e2e8f0;
+    }
+
+        .form-heading h2 {
+            margin: 0;
+            color: #0f172a;
+            font-size: 22px;
+            font-weight: 900;
+        }
+
+        .form-heading p {
+            margin: 6px 0 0;
+            color: #94a3b8;
+            font-size: 12px;
+        }
+
+    .pending-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 8px 12px;
+        color: #b45309;
+        font-size: 11px;
+        font-weight: 900;
+        border-radius: 20px;
+        background: #fef3c7;
+    }
+
+    .form-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 19px;
+    }
+
+    .full-width {
+        grid-column: 1 / -1;
+    }
+
+    .form-group label {
+        display: block;
+        margin-bottom: 8px;
+        color: #334155;
+        font-size: 13px;
+        font-weight: 900;
+    }
+
+    .required-star {
+        color: #ef4444;
+    }
+
+    .input-wrapper {
+        position: relative;
+    }
+
+    .input-icon {
+        position: absolute;
+        top: 50%;
+        left: 15px;
+        z-index: 2;
+        color: #64748b;
+        transform: translateY(-50%);
+    }
+
+    .textarea-icon {
+        top: 17px;
+        transform: none;
+    }
+
+    .hours-input {
+        min-height: 51px;
+        padding-left: 44px;
+        color: #0f172a;
+        border: 2px solid #e2e8f0;
+        border-radius: 14px;
+        background: #f8fafc;
+        transition: 0.3s;
+    }
+
+    textarea.hours-input {
+        min-height: 130px;
+        padding-top: 14px;
+        resize: vertical;
+    }
+
+    .hours-input:focus {
+        border-color: #2563eb;
+        background: white;
+        box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.1);
+    }
+
+    .field-help {
+        display: block;
+        margin-top: 6px;
+        color: #94a3b8;
+        font-size: 10px;
+    }
+
+    .validation-message {
+        display: block;
+        margin-top: 6px;
+        color: #dc2626;
+        font-size: 11px;
+        font-weight: 700;
+    }
+
+    .validation-summary {
+        padding: 13px 16px;
+        margin-bottom: 20px;
+        color: #b91c1c;
+        font-size: 12px;
+        border: 1px solid #fecaca;
+        border-radius: 13px;
+        background: #fef2f2;
+    }
+
+    .form-actions {
+        display: flex;
+        justify-content: flex-end;
+        gap: 12px;
+        padding-top: 23px;
+        margin-top: 24px;
+        border-top: 1px solid #e2e8f0;
+    }
+
+    .cancel-button,
+    .submit-button {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        min-height: 49px;
+        padding: 0 20px;
+        font-size: 13px;
+        font-weight: 900;
+        border-radius: 13px;
+        transition: 0.3s;
+    }
+
+    .cancel-button {
+        color: #475569;
+        border: 1px solid #cbd5e1;
+        text-decoration: none;
+        background: white;
+    }
+
+        .cancel-button:hover {
+            color: #dc2626;
+            border-color: #fecaca;
+            background: #fef2f2;
+        }
+
+    .submit-button {
+        color: white;
+        border: none;
+        background: linear-gradient( 135deg, #2563eb, #7c3aed);
+        box-shadow: 0 10px 23px rgba(37, 99, 235, 0.26);
+    }
+
+        .submit-button:hover {
+            color: white;
+            transform: translateY(-3px);
+            box-shadow: 0 15px 29px rgba(37, 99, 235, 0.36);
+        }
+
+    @@keyframes headerAppear {
+        from {
+            opacity: 0;
+            transform: translateY(-25px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    @@keyframes cardAppear {
+        from {
+            opacity: 0;
+            transform: translateY(25px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    @@keyframes clockFloat {
+        0%, 100% {
+            transform: translateY(0) rotate(0deg);
+        }
+
+        50% {
+            transform: translateY(-7px) rotate(5deg);
+        }
+    }
+
+    @@media (max-width: 992px) {
+        .hours-layout {
+            grid-template-columns: 1fr;
+        }
+
+        .information-card {
+            position: static;
+        }
+    }
+
+    @@media (max-width: 768px) {
+        .hours-header {
+            padding: 26px 20px;
+        }
+
+        .back-button {
+            margin-top: 15px;
+        }
+
+        .form-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .full-width {
+            grid-column: auto;
+        }
+
+        .form-card {
+            padding: 22px 17px;
+        }
+
+        .form-actions {
+            flex-direction: column-reverse;
+        }
+
+        .cancel-button,
+        .submit-button {
+            width: 100%;
+        }
+    }
+</style>
+
+<div class="hours-page">
+    <div class="container">
+        <div class="hours-header">
+            <div class="header-content d-flex flex-wrap align-items-center justify-content-between gap-4">
+                <div class="d-flex align-items-center">
+                    <div class="header-icon">
+                        <i class="bi bi-clock-history"></i>
+                    </div>
+
+                    <div>
+                        <h1>Add Training Hours</h1>
+
+                        <p>
+                            Document your daily work,
+                            completed tasks and newly acquired skills.
+                        </p>
+                    </div>
+                </div>
+
+                <a asp-action="Index"
+                   class="back-button">
+
+                    <i class="bi bi-arrow-left"></i>
+                    Training Logbook
+                </a>
+            </div>
+        </div>
+
+        <div class="hours-layout">
+            <aside class="information-card">
+                <div class="information-top">
+                    <div class="information-icon">
+                        <i class="bi bi-journal-check"></i>
+                    </div>
+
+                    <h3>@Model.InternshipTitle</h3>
+                    <p>@Model.CompanyName</p>
+                </div>
+
+                <div class="guidelines">
+                    <h4>
+                        <i class="bi bi-lightbulb-fill text-warning me-1"></i>
+                        Entry Guidelines
+                    </h4>
+
+                    <div class="guideline-item">
+                        <span class="guideline-number">1</span>
+
+                        <div>
+                            <strong>Use the correct date</strong>
+                            <span>
+                                Select the actual day when
+                                you completed the training.
+                            </span>
+                        </div>
+                    </div>
+
+                    <div class="guideline-item">
+                        <span class="guideline-number">2</span>
+
+                        <div>
+                            <strong>Describe real tasks</strong>
+                            <span>
+                                Clearly explain the work
+                                you completed during the day.
+                            </span>
+                        </div>
+                    </div>
+
+                    <div class="guideline-item">
+                        <span class="guideline-number">3</span>
+
+                        <div>
+                            <strong>Add learned skills</strong>
+                            <span>
+                                Mention technical and professional
+                                skills gained from the work.
+                            </span>
+                        </div>
+                    </div>
+
+                    <div class="verification-box">
+                        <i class="bi bi-shield-check"></i>
+
+                        <span>
+                            Your entry will be sent to the
+                            company for verification.
+                        </span>
+                    </div>
+                </div>
+            </aside>
+
+            <div class="form-card">
+                <div class="form-heading">
+                    <div>
+                        <h2>Daily Training Entry</h2>
+                        <p>
+                            All submitted hours require
+                            company approval.
+                        </p>
+                    </div>
+
+                    <span class="pending-badge">
+                        <i class="bi bi-hourglass-split"></i>
+                        Pending Approval
+                    </span>
+                </div>
+
+                <form asp-action="AddHours"
+                      method="post">
+
+                    @Html.AntiForgeryToken()
+
+                    <input asp-for="TrainingEnrollmentId"
+                           type="hidden" />
+
+                    <input asp-for="InternshipTitle"
+                           type="hidden" />
+
+                    <input asp-for="CompanyName"
+                           type="hidden" />
+
+                    <div asp-validation-summary="ModelOnly"
+                         class="validation-summary">
+                    </div>
+
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label asp-for="TrainingDate">
+                                Training Date
+                                <span class="required-star">*</span>
+                            </label>
+
+                            <div class="input-wrapper">
+                                <i class="bi bi-calendar-check input-icon"></i>
+
+                                <input asp-for="TrainingDate"
+                                       class="form-control hours-input"
+                                       max="@DateTime.Today.ToString("yyyy-MM-dd")" />
+                            </div>
+
+                            <span asp-validation-for="TrainingDate"
+                                  class="validation-message">
+                            </span>
+                        </div>
+
+                        <div class="form-group">
+                            <label asp-for="Hours">
+                                Number of Hours
+                                <span class="required-star">*</span>
+                            </label>
+
+                            <div class="input-wrapper">
+                                <i class="bi bi-clock-fill input-icon"></i>
+
+                                <input asp-for="Hours"
+                                       type="number"
+                                       min="0.5"
+                                       max="24"
+                                       step="0.5"
+                                       class="form-control hours-input"
+                                       placeholder="Example: 7.5" />
+                            </div>
+
+                            <span class="field-help">
+                                Enter a value between 0.5 and 24 hours.
+                            </span>
+
+                            <span asp-validation-for="Hours"
+                                  class="validation-message">
+                            </span>
+                        </div>
+
+                        <div class="form-group full-width">
+                            <label asp-for="TaskTitle">
+                                Task Title
+                                <span class="required-star">*</span>
+                            </label>
+
+                            <div class="input-wrapper">
+                                <i class="bi bi-list-task input-icon"></i>
+
+                                <input asp-for="TaskTitle"
+                                       class="form-control hours-input"
+                                       placeholder="Example: Developed the authentication module" />
+                            </div>
+
+                            <span asp-validation-for="TaskTitle"
+                                  class="validation-message">
+                            </span>
+                        </div>
+
+                        <div class="form-group full-width">
+                            <label asp-for="TaskDescription">
+                                Task Description
+                                <span class="required-star">*</span>
+                            </label>
+
+                            <div class="input-wrapper">
+                                <i class="bi bi-card-text input-icon textarea-icon"></i>
+
+                                <textarea asp-for="TaskDescription"
+                                          class="form-control hours-input"
+                                          placeholder="Describe what you worked on, the tools you used and the result you achieved...">
+                                </textarea>
+                            </div>
+
+                            <span asp-validation-for="TaskDescription"
+                                  class="validation-message">
+                            </span>
+                        </div>
+
+                        <div class="form-group full-width">
+                            <label asp-for="LearnedSkills">
+                                Skills Learned
+                            </label>
+
+                            <div class="input-wrapper">
+                                <i class="bi bi-stars input-icon textarea-icon"></i>
+
+                                <textarea asp-for="LearnedSkills"
+                                          class="form-control hours-input"
+                                          placeholder="Example: ASP.NET Core MVC, EF Core, teamwork, problem solving...">
+                                </textarea>
+                            </div>
+
+                            <span asp-validation-for="LearnedSkills"
+                                  class="validation-message">
+                            </span>
+                        </div>
+                    </div>
+
+                    <div class="form-actions">
+                        <a asp-action="Index"
+                           class="cancel-button">
+
+                            <i class="bi bi-x-circle"></i>
+                            Cancel
+                        </a>
+
+                        <button type="submit"
+                                class="submit-button">
+
+                            <i class="bi bi-send-check-fill"></i>
+                            Submit Hours for Approval
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

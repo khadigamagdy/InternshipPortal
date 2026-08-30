@@ -31,6 +31,7 @@ namespace InternshipPortal.Models
             = null!;
 
         public Evaluation? Evaluation { get; set; }
+        public TrainingEnrollment? TrainingEnrollment { get; set; }
 
         public ICollection<Interview> Interviews { get; set; }
             = new List<Interview>();

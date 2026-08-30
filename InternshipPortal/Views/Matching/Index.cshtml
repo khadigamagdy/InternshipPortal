@@ -1,0 +1,945 @@
+﻿@model IEnumerable<InternshipPortal.Models.ViewModels.InternshipMatchViewModel>
+
+@{
+    ViewData["Title"] = "Smart Internship Matches";
+
+    var matches = Model.ToList();
+    var totalMatches = matches.Count;
+
+    var strongMatches = matches.Count(match =>
+        match.MatchPercentage >= 75);
+
+    var bestMatch = matches.Any()
+        ? matches.Max(match => match.MatchPercentage)
+        : 0;
+}
+
+<style>
+    .matches-page {
+        min-height: 100vh;
+        padding: 45px 0;
+        background: radial-gradient(circle at top left, rgba(99, 102, 241, 0.15), transparent 34%), radial-gradient(circle at bottom right, rgba(14, 165, 233, 0.13), transparent 35%), #f8fafc;
+    }
+
+    .matches-header {
+        position: relative;
+        overflow: hidden;
+        padding: 38px;
+        margin-bottom: 24px;
+        color: white;
+        border-radius: 28px;
+        background: linear-gradient(135deg, #1e1b4b, #4f46e5, #0284c7);
+        box-shadow: 0 22px 48px rgba(49, 46, 129, 0.25);
+        animation: headerAppear 0.7s ease;
+    }
+
+        .matches-header::after {
+            position: absolute;
+            width: 260px;
+            height: 260px;
+            right: -70px;
+            bottom: -160px;
+            content: "";
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+    .header-layout {
+        position: relative;
+        z-index: 2;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 25px;
+    }
+
+    .header-main {
+        display: flex;
+        align-items: center;
+        gap: 18px;
+    }
+
+    .header-icon {
+        min-width: 70px;
+        height: 70px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 32px;
+        border-radius: 22px;
+        background: rgba(255, 255, 255, 0.16);
+        animation: sparkleFloat 3s ease-in-out infinite;
+    }
+
+    .matches-header h1 {
+        margin: 0;
+        font-weight: 900;
+    }
+
+    .matches-header p {
+        margin: 7px 0 0;
+        color: rgba(255, 255, 255, 0.82);
+    }
+
+    .header-actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+    }
+
+    .header-button {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        padding: 12px 17px;
+        font-size: 12px;
+        font-weight: 800;
+        border-radius: 13px;
+        text-decoration: none;
+        transition: 0.3s;
+    }
+
+    .preferences-button {
+        color: #312e81;
+        background: white;
+    }
+
+    .roadmaps-button {
+        color: white;
+        border: 1px solid rgba(255, 255, 255, 0.35);
+        background: rgba(255, 255, 255, 0.13);
+    }
+
+    .header-button:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 12px 25px rgba(15, 23, 42, 0.2);
+    }
+
+    .preferences-button:hover {
+        color: #312e81;
+    }
+
+    .roadmaps-button:hover {
+        color: #312e81;
+        background: white;
+    }
+
+    .summary-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 17px;
+        margin-bottom: 25px;
+    }
+
+    .summary-card {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        padding: 20px;
+        border: 1px solid #e2e8f0;
+        border-radius: 19px;
+        background: white;
+        box-shadow: 0 9px 25px rgba(15, 23, 42, 0.07);
+        transition: 0.3s;
+    }
+
+        .summary-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 16px 34px rgba(79, 70, 229, 0.14);
+        }
+
+    .summary-icon {
+        min-width: 52px;
+        height: 52px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 23px;
+        border-radius: 16px;
+    }
+
+    .purple-icon {
+        color: #4338ca;
+        background: #e0e7ff;
+    }
+
+    .green-icon {
+        color: #047857;
+        background: #d1fae5;
+    }
+
+    .blue-icon {
+        color: #0369a1;
+        background: #e0f2fe;
+    }
+
+    .summary-number {
+        display: block;
+        color: #0f172a;
+        font-size: 26px;
+        font-weight: 900;
+    }
+
+    .summary-label {
+        color: #64748b;
+        font-size: 12px;
+        font-weight: 700;
+    }
+
+    .match-card {
+        position: relative;
+        overflow: hidden;
+        padding: 25px;
+        margin-bottom: 19px;
+        border: 1px solid #e2e8f0;
+        border-radius: 23px;
+        background: white;
+        box-shadow: 0 11px 29px rgba(15, 23, 42, 0.07);
+        animation: cardAppear 0.6s ease both;
+        transition: 0.35s;
+    }
+
+        .match-card:hover {
+            border-color: #c7d2fe;
+            transform: translateY(-6px);
+            box-shadow: 0 19px 40px rgba(79, 70, 229, 0.15);
+        }
+
+        .match-card::before {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 6px;
+            height: 100%;
+            content: "";
+            background: linear-gradient(#6366f1, #06b6d4);
+        }
+
+    .match-top {
+        display: grid;
+        grid-template-columns: 1fr auto;
+        gap: 20px;
+        align-items: start;
+    }
+
+    .company-area {
+        display: flex;
+        align-items: flex-start;
+        gap: 15px;
+    }
+
+    .company-logo {
+        min-width: 65px;
+        height: 65px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        overflow: hidden;
+        color: white;
+        font-size: 25px;
+        font-weight: 900;
+        border-radius: 19px;
+        background: linear-gradient(135deg, #6366f1, #0284c7);
+        box-shadow: 0 9px 21px rgba(99, 102, 241, 0.22);
+    }
+
+        .company-logo img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+    .internship-title {
+        margin: 0 0 5px;
+        color: #0f172a;
+        font-size: 21px;
+        font-weight: 900;
+    }
+
+    .company-name {
+        color: #4f46e5;
+        font-size: 14px;
+        font-weight: 800;
+    }
+
+    .internship-details {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin-top: 12px;
+    }
+
+    .detail-chip {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 6px 10px;
+        color: #475569;
+        font-size: 11px;
+        font-weight: 700;
+        border-radius: 20px;
+        background: #f1f5f9;
+    }
+
+    .match-score {
+        min-width: 140px;
+        padding: 14px;
+        text-align: center;
+        border-radius: 18px;
+        background: linear-gradient(135deg, #eef2ff, #e0f2fe);
+    }
+
+    .score-number {
+        display: block;
+        color: #312e81;
+        font-size: 31px;
+        font-weight: 900;
+    }
+
+    .score-level {
+        color: #4f46e5;
+        font-size: 11px;
+        font-weight: 900;
+        text-transform: uppercase;
+    }
+
+    .score-track {
+        height: 6px;
+        margin-top: 10px;
+        overflow: hidden;
+        border-radius: 10px;
+        background: #dbeafe;
+    }
+
+        .score-track span {
+            display: block;
+            height: 100%;
+            border-radius: 10px;
+            background: linear-gradient(90deg, #6366f1, #06b6d4);
+            animation: scoreGrow 1.2s ease;
+        }
+
+    .match-information {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 17px;
+        margin-top: 21px;
+    }
+
+    .skills-box {
+        padding: 16px;
+        border-radius: 16px;
+        background: #f8fafc;
+    }
+
+        .skills-box h6 {
+            display: flex;
+            align-items: center;
+            gap: 7px;
+            margin-bottom: 12px;
+            color: #1e293b;
+            font-size: 13px;
+            font-weight: 900;
+        }
+
+    .skill-list {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 7px;
+    }
+
+    .skill-chip {
+        padding: 6px 10px;
+        font-size: 11px;
+        font-weight: 800;
+        border-radius: 20px;
+    }
+
+    .matched-skill {
+        color: #047857;
+        background: #d1fae5;
+    }
+
+    .missing-skill {
+        color: #b45309;
+        background: #fef3c7;
+    }
+
+    .empty-skill {
+        color: #64748b;
+        background: #e2e8f0;
+    }
+
+    .reasons-box {
+        margin-top: 17px;
+        padding: 15px 17px;
+        border-radius: 15px;
+        background: linear-gradient(135deg, #eef2ff, #f0f9ff);
+    }
+
+        .reasons-box strong {
+            display: block;
+            margin-bottom: 9px;
+            color: #312e81;
+            font-size: 13px;
+        }
+
+    .reasons-list {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px 17px;
+        margin: 0;
+        padding: 0;
+        list-style: none;
+    }
+
+        .reasons-list li {
+            color: #475569;
+            font-size: 11px;
+        }
+
+        .reasons-list i {
+            margin-right: 5px;
+            color: #10b981;
+        }
+
+    .card-actions {
+        display: flex;
+        align-items: center;
+        justify-content: flex-end;
+        flex-wrap: wrap;
+        gap: 10px;
+        margin-top: 19px;
+        padding-top: 18px;
+        border-top: 1px solid #f1f5f9;
+    }
+
+    .action-button {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 7px;
+        padding: 10px 15px;
+        font-size: 12px;
+        font-weight: 800;
+        border: none;
+        border-radius: 12px;
+        text-decoration: none;
+        transition: 0.3s;
+    }
+
+    .details-button {
+        color: #4338ca;
+        background: #eef2ff;
+    }
+
+    .roadmap-button {
+        color: #6d28d9;
+        background: #ede9fe;
+    }
+
+    .save-button {
+        color: #be123c;
+        background: #ffe4e6;
+    }
+
+    .saved-button {
+        color: white;
+        background: #f43f5e;
+    }
+
+    .apply-button {
+        color: white;
+        background: linear-gradient(135deg, #4f46e5, #0284c7);
+        box-shadow: 0 8px 20px rgba(79, 70, 229, 0.23);
+    }
+
+    .applied-button {
+        color: #047857;
+        background: #d1fae5;
+        cursor: default;
+    }
+
+    .ready-button {
+        color: #047857;
+        background: #d1fae5;
+        cursor: default;
+    }
+
+    .action-button:hover {
+        transform: translateY(-3px);
+    }
+
+    .details-button:hover {
+        color: white;
+        background: #4f46e5;
+    }
+
+    .roadmap-button:hover {
+        color: white;
+        background: #7c3aed;
+        box-shadow: 0 9px 20px rgba(124, 58, 237, 0.24);
+    }
+
+    .save-button:hover,
+    .saved-button:hover {
+        color: white;
+        background: #e11d48;
+    }
+
+    .apply-button:hover {
+        color: white;
+        box-shadow: 0 12px 25px rgba(79, 70, 229, 0.31);
+    }
+
+    .empty-state {
+        padding: 80px 25px;
+        text-align: center;
+        border: 2px dashed #cbd5e1;
+        border-radius: 25px;
+        background: white;
+    }
+
+    .empty-state-icon {
+        font-size: 75px;
+        animation: sparkleFloat 3s ease-in-out infinite;
+    }
+
+    .empty-state h3 {
+        margin-top: 18px;
+        color: #0f172a;
+        font-weight: 900;
+    }
+
+    .empty-state p {
+        color: #64748b;
+    }
+
+    @@keyframes headerAppear {
+        from {
+            opacity: 0;
+            transform: translateY(-25px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    @@keyframes cardAppear {
+        from {
+            opacity: 0;
+            transform: translateY(25px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    @@keyframes scoreGrow {
+        from {
+            width: 0;
+        }
+    }
+
+    @@keyframes sparkleFloat {
+        0%, 100% {
+            transform: translateY(0) rotate(0);
+        }
+
+        50% {
+            transform: translateY(-7px) rotate(6deg);
+        }
+    }
+
+    @@media (max-width: 768px) {
+        .header-layout,
+        .match-top {
+            grid-template-columns: 1fr;
+            flex-direction: column;
+            align-items: stretch;
+        }
+
+        .summary-grid,
+        .match-information {
+            grid-template-columns: 1fr;
+        }
+
+        .header-actions,
+        .header-button,
+        .match-score,
+        .card-actions,
+        .card-actions form,
+        .action-button {
+            width: 100%;
+        }
+    }
+</style>
+
+<div class="matches-page">
+    <div class="container">
+        @if (TempData["SuccessMessage"] != null)
+        {
+            <div class="alert alert-success alert-dismissible fade show shadow-sm">
+                <i class="bi bi-check-circle-fill me-2"></i>
+                @TempData["SuccessMessage"]
+
+                <button type="button"
+                        class="btn-close"
+                        data-bs-dismiss="alert">
+                </button>
+            </div>
+        }
+
+        @if (TempData["Error"] != null)
+        {
+            <div class="alert alert-danger alert-dismissible fade show shadow-sm">
+                <i class="bi bi-exclamation-circle-fill me-2"></i>
+                @TempData["Error"]
+
+                <button type="button"
+                        class="btn-close"
+                        data-bs-dismiss="alert">
+                </button>
+            </div>
+        }
+
+        <div class="matches-header">
+            <div class="header-layout">
+                <div class="header-main">
+                    <div class="header-icon">
+                        <i class="bi bi-stars"></i>
+                    </div>
+
+                    <div>
+                        <h1>Smart Internship Matches</h1>
+
+                        <p>
+                            Opportunities ranked for @ViewBag.StudentName
+                            based on skills, interests and career goals.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="header-actions">
+                    <a asp-controller="SkillRoadmap"
+                       asp-action="Index"
+                       class="header-button roadmaps-button">
+                        <i class="bi bi-signpost-split-fill"></i>
+                        My Roadmaps
+                    </a>
+
+                    <a asp-controller="StudentPreference"
+                       asp-action="Index"
+                       class="header-button preferences-button">
+                        <i class="bi bi-sliders"></i>
+                        Edit Preferences
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <div class="summary-grid">
+            <div class="summary-card">
+                <div class="summary-icon purple-icon">
+                    <i class="bi bi-briefcase-fill"></i>
+                </div>
+
+                <div>
+                    <span class="summary-number">@totalMatches</span>
+                    <span class="summary-label">Available Matches</span>
+                </div>
+            </div>
+
+            <div class="summary-card">
+                <div class="summary-icon green-icon">
+                    <i class="bi bi-lightning-charge-fill"></i>
+                </div>
+
+                <div>
+                    <span class="summary-number">@strongMatches</span>
+                    <span class="summary-label">Strong Matches</span>
+                </div>
+            </div>
+
+            <div class="summary-card">
+                <div class="summary-icon blue-icon">
+                    <i class="bi bi-graph-up-arrow"></i>
+                </div>
+
+                <div>
+                    <span class="summary-number">@bestMatch%</span>
+                    <span class="summary-label">Highest Compatibility</span>
+                </div>
+            </div>
+        </div>
+
+        @if (!matches.Any())
+        {
+            <div class="empty-state">
+                <div class="empty-state-icon">✨</div>
+
+                <h3>No Active Matches Yet</h3>
+
+                <p>
+                    New matching opportunities will appear when companies
+                    publish approved internships.
+                </p>
+
+                <a asp-controller="Internship"
+                   asp-action="Index"
+                   class="btn btn-primary rounded-pill px-4">
+                    Browse All Internships
+                </a>
+            </div>
+        }
+        else
+        {
+            var animationDelay = 0;
+
+            foreach (var match in matches)
+            {
+                var internship = match.Internship;
+                var company = internship.Company;
+
+                <article class="match-card"
+                         style="animation-delay: @(animationDelay)ms">
+
+                    <div class="match-top">
+                        <div class="company-area">
+                            <div class="company-logo">
+                                @if (!string.IsNullOrWhiteSpace(company.LogoPath))
+                                {
+                                    <img src="@company.LogoPath"
+                                         alt="@company.Name" />
+                                }
+                                else
+                                {
+                                    @(string.IsNullOrWhiteSpace(company.Name)
+                                                            ? "C"
+                                                            : company.Name.Substring(0, 1).ToUpper())
+                                                }
+                            </div>
+
+                            <div>
+                                <h3 class="internship-title">
+                                    @internship.Title
+                                </h3>
+
+                                <div class="company-name">
+                                    <i class="bi bi-building-fill me-1"></i>
+                                    @company.Name
+                                </div>
+
+                                <div class="internship-details">
+                                    <span class="detail-chip">
+                                        <i class="bi bi-geo-alt-fill"></i>
+                                        @internship.Location
+                                    </span>
+
+                                    <span class="detail-chip">
+                                        <i class="bi bi-laptop"></i>
+                                        @internship.WorkMode
+                                    </span>
+
+                                    <span class="detail-chip">
+                                        <i class="bi bi-people-fill"></i>
+                                        @internship.AvailablePositions positions
+                                    </span>
+
+                                    <span class="detail-chip">
+                                        <i class="bi bi-cash-stack"></i>
+
+                                        @if (internship.IsPaid)
+                                        {
+                                            <text>
+                                                @(internship.Salary?.ToString("N0")
+                                                                                    ?? "Paid")
+                                </text>
+                                                                }
+                                        else
+                                        {
+                                            <text>Unpaid</text>
+                                        }
+                                    </span>
+
+                                    <span class="detail-chip">
+                                        <i class="bi bi-calendar-event"></i>
+                                        Deadline
+                                        @internship.ApplicationDeadline
+                                        .ToString("dd MMM")
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="match-score">
+                            <span class="score-number">
+                                @match.MatchPercentage%
+                            </span>
+
+                            <span class="score-level">
+                                @match.MatchLevel
+                            </span>
+
+                            <div class="score-track">
+                                <span style="width: @match.MatchPercentage%">
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="match-information">
+                        <div class="skills-box">
+                            <h6>
+                                <i class="bi bi-check-circle-fill text-success"></i>
+                                Matched Skills
+                            </h6>
+
+                            <div class="skill-list">
+                                @if (match.MatchedSkills.Any())
+                                {
+                                    foreach (var skill in match.MatchedSkills)
+                                    {
+                                        <span class="skill-chip matched-skill">
+                                            <i class="bi bi-check me-1"></i>
+                                            @skill
+                                        </span>
+                                    }
+                                }
+                                else
+                                {
+                                    <span class="skill-chip empty-skill">
+                                        No direct skill matches
+                                    </span>
+                                }
+                            </div>
+                        </div>
+
+                        <div class="skills-box">
+                            <h6>
+                                <i class="bi bi-lightbulb-fill text-warning"></i>
+                                Skills To Improve
+                            </h6>
+
+                            <div class="skill-list">
+                                @if (match.MissingSkills.Any())
+                                {
+                                    foreach (var skill in match.MissingSkills)
+                                    {
+                                        <span class="skill-chip missing-skill">
+                                            <i class="bi bi-plus me-1"></i>
+                                            @skill
+                                        </span>
+                                    }
+                                }
+                                else
+                                {
+                                    <span class="skill-chip matched-skill">
+                                        All listed skills matched
+                                    </span>
+                                }
+                            </div>
+                        </div>
+                    </div>
+
+                    @if (match.MatchReasons.Any())
+                    {
+                        <div class="reasons-box">
+                            <strong>
+                                <i class="bi bi-stars me-1"></i>
+                                Why this opportunity matches you
+                            </strong>
+
+                            <ul class="reasons-list">
+                                @foreach (var reason in match.MatchReasons)
+                                {
+                                    <li>
+                                        <i class="bi bi-check-circle-fill"></i>
+                                        @reason
+                                    </li>
+                                }
+                            </ul>
+                        </div>
+                    }
+
+                    <div class="card-actions">
+                        <a asp-controller="Internship"
+                           asp-action="Details"
+                           asp-route-id="@internship.Id"
+                           class="action-button details-button">
+                            <i class="bi bi-eye-fill"></i>
+                            View Details
+                        </a>
+
+                        @if (match.MissingSkills.Any())
+                        {
+                            <form asp-controller="SkillRoadmap"
+                                  asp-action="Generate"
+                                  asp-route-internshipId="@internship.Id"
+                                  method="post">
+                                @Html.AntiForgeryToken()
+
+                                <button type="submit"
+                                        class="action-button roadmap-button">
+                                    <i class="bi bi-signpost-split-fill"></i>
+                                    Create Skill Roadmap
+                                </button>
+                            </form>
+                        }
+                        else
+                        {
+                            <span class="action-button ready-button">
+                                <i class="bi bi-patch-check-fill"></i>
+                                Skills Ready
+                            </span>
+                        }
+
+                        <form asp-controller="MatchSave"
+                              asp-action="Toggle"
+                              asp-route-internshipId="@internship.Id"
+                              method="post">
+                            @Html.AntiForgeryToken()
+
+                            <button type="submit"
+                                    class="action-button @(match.IsSaved
+                                                                            ? "saved-button"
+                                                                            : "save-button")">
+                        <i class="bi @(match.IsSaved
+                                                               ? "bi-heart-fill"
+                                                               : "bi-heart")">
+                        </i>
+
+                                @(match.IsSaved ? "Saved" : "Save")
+                            </button>
+                        </form>
+
+                @if (match.HasApplied)
+                        {
+                            <span class="action-button applied-button">
+                                <i class="bi bi-patch-check-fill"></i>
+                                Already Applied
+                            </span>
+                        }
+                        else
+                        {
+                            <a asp-controller="Application"
+                               asp-action="Apply"
+                               asp-route-internshipId="@internship.Id"
+                               class="action-button apply-button">
+                                <i class="bi bi-send-fill"></i>
+                                Apply Now
+                            </a>
+                        }
+                    </div>
+                </article>
+
+                animationDelay += 80;
+            }
+        }
+    </div>
+</div>

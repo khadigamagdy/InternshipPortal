@@ -1,0 +1,653 @@
+﻿@model InternshipPortal.Models.SkillDevelopmentPlan
+@using InternshipPortal.Models.Enums
+
+@{
+    ViewData["Title"] = "Roadmap Details";
+
+    var completedItems = (int)ViewBag.CompletedItems;
+    var totalItems = (int)ViewBag.TotalItems;
+    var overallProgress = (int)ViewBag.OverallProgress;
+}
+
+<style>
+    .roadmap-details-page {
+        min-height: 100vh;
+        padding: 45px 0;
+        background: radial-gradient(circle at top left, rgba(124, 58, 237, 0.14), transparent 35%), radial-gradient(circle at bottom right, rgba(6, 182, 212, 0.13), transparent 35%), #f8fafc;
+    }
+
+    .details-header {
+        position: relative;
+        overflow: hidden;
+        padding: 36px;
+        margin-bottom: 24px;
+        color: white;
+        border-radius: 27px;
+        background: linear-gradient(135deg, #312e81, #7c3aed, #0891b2);
+        box-shadow: 0 21px 47px rgba(76, 29, 149, 0.24);
+    }
+
+        .details-header::after {
+            position: absolute;
+            width: 250px;
+            height: 250px;
+            right: -70px;
+            bottom: -155px;
+            content: "";
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+    .header-content {
+        position: relative;
+        z-index: 2;
+    }
+
+    .header-top {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 20px;
+    }
+
+    .header-title {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+    }
+
+    .header-icon {
+        min-width: 65px;
+        height: 65px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 29px;
+        border-radius: 20px;
+        background: rgba(255, 255, 255, 0.16);
+    }
+
+    .details-header h1 {
+        margin: 0;
+        font-weight: 900;
+    }
+
+    .details-header p {
+        margin: 7px 0 0;
+        color: rgba(255, 255, 255, 0.83);
+    }
+
+    .back-button {
+        display: inline-flex;
+        align-items: center;
+        gap: 7px;
+        padding: 11px 17px;
+        color: white;
+        font-weight: 800;
+        border: 1px solid rgba(255, 255, 255, 0.35);
+        border-radius: 13px;
+        background: rgba(255, 255, 255, 0.12);
+        text-decoration: none;
+        transition: 0.3s;
+    }
+
+        .back-button:hover {
+            color: #4c1d95;
+            background: white;
+            transform: translateY(-3px);
+        }
+
+    .header-progress {
+        margin-top: 28px;
+        padding: 17px;
+        border-radius: 16px;
+        background: rgba(255, 255, 255, 0.13);
+    }
+
+    .progress-heading {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 9px;
+        font-size: 13px;
+        font-weight: 800;
+    }
+
+    .progress-track {
+        height: 11px;
+        overflow: hidden;
+        border-radius: 20px;
+        background: rgba(255, 255, 255, 0.2);
+    }
+
+    .progress-value {
+        display: block;
+        height: 100%;
+        border-radius: 20px;
+        background: linear-gradient(90deg, #fbbf24, #f8fafc);
+        animation: progressGrow 1.2s ease;
+    }
+
+    .summary-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 17px;
+        margin-bottom: 25px;
+    }
+
+    .summary-card {
+        display: flex;
+        align-items: center;
+        gap: 13px;
+        padding: 19px;
+        border: 1px solid #e2e8f0;
+        border-radius: 18px;
+        background: white;
+        box-shadow: 0 9px 25px rgba(15, 23, 42, 0.06);
+    }
+
+    .summary-icon {
+        min-width: 49px;
+        height: 49px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 21px;
+        border-radius: 15px;
+        color: #6d28d9;
+        background: #ede9fe;
+    }
+
+    .summary-card strong {
+        display: block;
+        color: #0f172a;
+        font-size: 21px;
+        font-weight: 900;
+    }
+
+    .summary-card span {
+        color: #64748b;
+        font-size: 11px;
+        font-weight: 700;
+    }
+
+    .skills-list {
+        display: flex;
+        flex-direction: column;
+        gap: 17px;
+    }
+
+    .skill-card {
+        padding: 23px;
+        border: 1px solid #e2e8f0;
+        border-radius: 21px;
+        background: white;
+        box-shadow: 0 10px 28px rgba(15, 23, 42, 0.07);
+        transition: 0.3s;
+        animation: skillAppear 0.6s ease both;
+    }
+
+        .skill-card:hover {
+            border-color: #c4b5fd;
+            transform: translateY(-4px);
+            box-shadow: 0 17px 35px rgba(109, 40, 217, 0.13);
+        }
+
+    .skill-top {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 15px;
+    }
+
+    .skill-title-area {
+        display: flex;
+        align-items: center;
+        gap: 13px;
+    }
+
+    .skill-number {
+        min-width: 45px;
+        height: 45px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-weight: 900;
+        border-radius: 14px;
+        background: linear-gradient(135deg, #7c3aed, #0891b2);
+    }
+
+    .skill-name {
+        margin: 0 0 4px;
+        color: #0f172a;
+        font-size: 18px;
+        font-weight: 900;
+    }
+
+    .skill-goal {
+        margin: 0;
+        color: #64748b;
+        font-size: 12px;
+    }
+
+    .status-badge {
+        padding: 7px 11px;
+        font-size: 11px;
+        font-weight: 800;
+        border-radius: 20px;
+    }
+
+    .not-started {
+        color: #64748b;
+        background: #e2e8f0;
+    }
+
+    .in-progress {
+        color: #b45309;
+        background: #fef3c7;
+    }
+
+    .completed {
+        color: #047857;
+        background: #d1fae5;
+    }
+
+    .item-progress {
+        margin-top: 17px;
+    }
+
+    .item-progress-heading {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 7px;
+        color: #475569;
+        font-size: 11px;
+        font-weight: 800;
+    }
+
+    .item-progress-track {
+        height: 7px;
+        overflow: hidden;
+        border-radius: 20px;
+        background: #e2e8f0;
+    }
+
+    .item-progress-value {
+        display: block;
+        height: 100%;
+        border-radius: 20px;
+        background: linear-gradient(90deg, #7c3aed, #06b6d4);
+    }
+
+    .skill-actions {
+        display: grid;
+        grid-template-columns: auto 1fr;
+        gap: 15px;
+        align-items: end;
+        margin-top: 18px;
+        padding-top: 17px;
+        border-top: 1px solid #f1f5f9;
+    }
+
+    .resource-button {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 7px;
+        min-height: 44px;
+        padding: 10px 15px;
+        color: #4338ca;
+        font-size: 12px;
+        font-weight: 800;
+        border-radius: 12px;
+        background: #eef2ff;
+        text-decoration: none;
+        transition: 0.3s;
+    }
+
+        .resource-button:hover {
+            color: white;
+            background: #4f46e5;
+            transform: translateY(-2px);
+        }
+
+    .update-form {
+        display: grid;
+        grid-template-columns: 1fr 1fr auto;
+        gap: 10px;
+        align-items: end;
+    }
+
+    .update-group label {
+        display: block;
+        margin-bottom: 6px;
+        color: #475569;
+        font-size: 10px;
+        font-weight: 800;
+    }
+
+    .update-input {
+        width: 100%;
+        min-height: 44px;
+        padding: 9px 11px;
+        border: 2px solid #e2e8f0;
+        border-radius: 11px;
+        background: #f8fafc;
+        outline: none;
+    }
+
+        .update-input:focus {
+            border-color: #7c3aed;
+        }
+
+    .update-button {
+        min-height: 44px;
+        padding: 10px 15px;
+        color: white;
+        font-size: 12px;
+        font-weight: 800;
+        border: none;
+        border-radius: 11px;
+        background: linear-gradient(135deg, #7c3aed, #0891b2);
+        transition: 0.3s;
+    }
+
+        .update-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 9px 20px rgba(124, 58, 237, 0.23);
+        }
+
+    .delete-area {
+        display: flex;
+        justify-content: flex-end;
+        margin-top: 24px;
+    }
+
+    .delete-button {
+        padding: 10px 16px;
+        color: #b91c1c;
+        font-size: 12px;
+        font-weight: 800;
+        border: none;
+        border-radius: 12px;
+        background: #fee2e2;
+        transition: 0.3s;
+    }
+
+        .delete-button:hover {
+            color: white;
+            background: #ef4444;
+        }
+
+    @@keyframes progressGrow {
+        from {
+            width: 0;
+        }
+    }
+
+    @@keyframes skillAppear {
+        from {
+            opacity: 0;
+            transform: translateY(22px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    @@media (max-width: 800px) {
+        .summary-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .skill-actions,
+        .update-form {
+            grid-template-columns: 1fr;
+        }
+
+        .header-top,
+        .skill-top {
+            flex-direction: column;
+        }
+    }
+</style>
+
+<div class="roadmap-details-page">
+    <div class="container">
+        @if (TempData["SuccessMessage"] != null)
+        {
+            <div class="alert alert-success alert-dismissible fade show shadow-sm">
+                <i class="bi bi-check-circle-fill me-2"></i>
+                @TempData["SuccessMessage"]
+
+                <button type="button"
+                        class="btn-close"
+                        data-bs-dismiss="alert">
+                </button>
+            </div>
+        }
+
+        <div class="details-header">
+            <div class="header-content">
+                <div class="header-top">
+                    <div class="header-title">
+                        <div class="header-icon">
+                            <i class="bi bi-signpost-split-fill"></i>
+                        </div>
+
+                        <div>
+                            <h1>@Model.Title</h1>
+
+                            <p>
+                                @Model.Internship.Company.Name ·
+                                @Model.Internship.Title
+                            </p>
+                        </div>
+                    </div>
+
+                    <a asp-action="Index"
+                       class="back-button">
+                        <i class="bi bi-arrow-left"></i>
+                        My Roadmaps
+                    </a>
+                </div>
+
+                <div class="header-progress">
+                    <div class="progress-heading">
+                        <span>
+                            @completedItems of @totalItems skills completed
+                        </span>
+
+                        <span>@overallProgress%</span>
+                    </div>
+
+                    <div class="progress-track">
+                        <span class="progress-value"
+                              style="width: @overallProgress%">
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="summary-grid">
+            <div class="summary-card">
+                <div class="summary-icon">
+                    <i class="bi bi-list-check"></i>
+                </div>
+
+                <div>
+                    <strong>@totalItems</strong>
+                    <span>Skills To Develop</span>
+                </div>
+            </div>
+
+            <div class="summary-card">
+                <div class="summary-icon">
+                    <i class="bi bi-check-circle-fill"></i>
+                </div>
+
+                <div>
+                    <strong>@completedItems</strong>
+                    <span>Completed Skills</span>
+                </div>
+            </div>
+
+            <div class="summary-card">
+                <div class="summary-icon">
+                    <i class="bi bi-flag-fill"></i>
+                </div>
+
+                <div>
+                    <strong>
+                        @(Model.TargetCompletionDate.HasValue
+                                                ? Model.TargetCompletionDate.Value
+                                                .ToString("dd MMM yyyy")
+                                                : "No date")
+                    </strong>
+                    <span>Target Completion</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="skills-list">
+            @{
+                var order = 1;
+                var animationDelay = 0;
+            }
+
+            @foreach (var item in Model.Items)
+            {
+                var statusClass = item.Status switch
+                {
+                    SkillProgressStatus.Completed => "completed",
+                    SkillProgressStatus.InProgress => "in-progress",
+                    _ => "not-started"
+                };
+
+                <article class="skill-card"
+                         style="animation-delay: @(animationDelay)ms">
+
+                    <div class="skill-top">
+                        <div class="skill-title-area">
+                            <div class="skill-number">@order</div>
+
+                            <div>
+                                <h3 class="skill-name">
+                                    @item.SkillName
+                                </h3>
+
+                                <p class="skill-goal">
+                                    @item.LearningGoal
+                                </p>
+                            </div>
+                        </div>
+
+                        <span class="status-badge @statusClass">
+                            @item.Status
+                        </span>
+                    </div>
+
+                    <div class="item-progress">
+                        <div class="item-progress-heading">
+                            <span>Skill progress</span>
+                            <span>@item.ProgressPercentage%</span>
+                        </div>
+
+                        <div class="item-progress-track">
+                            <span class="item-progress-value"
+                                  style="width: @item.ProgressPercentage%">
+                            </span>
+                        </div>
+                    </div>
+
+                    <div class="skill-actions">
+                        @if (!string.IsNullOrWhiteSpace(
+                                            item.LearningResourceUrl))
+                        {
+                            <a href="@item.LearningResourceUrl"
+                               target="_blank"
+                               rel="noopener noreferrer"
+                               class="resource-button">
+                                <i class="bi bi-book-fill"></i>
+                                Open Learning Resource
+                            </a>
+                        }
+
+                        <form asp-action="UpdateItem"
+                              method="post"
+                              class="update-form">
+                            @Html.AntiForgeryToken()
+
+                            <input type="hidden"
+                                   name="itemId"
+                                   value="@item.Id" />
+
+                            <div class="update-group">
+                                <label>Status</label>
+
+                                <select name="status"
+                                        class="update-input">
+                                    @foreach (var status in
+                                                                    Enum.GetValues<SkillProgressStatus>())
+                                    {
+                                        if (status == item.Status)
+                                        {
+                                            <option value="@status"
+                                                    selected>
+                                                @status
+                                            </option>
+                                        }
+                                        else
+                                        {
+                                            <option value="@status">
+                                                @status
+                                            </option>
+                                        }
+                                    }
+                                </select>
+                            </div>
+
+                            <div class="update-group">
+                                <label>Progress Percentage</label>
+
+                                <input type="number"
+                                       name="progressPercentage"
+                                       value="@item.ProgressPercentage"
+                                       min="0"
+                                       max="100"
+                                       class="update-input" />
+                            </div>
+
+                            <button type="submit"
+                                    class="update-button">
+                                <i class="bi bi-arrow-repeat"></i>
+                                Update
+                            </button>
+                        </form>
+                    </div>
+                </article>
+
+                order++;
+                animationDelay += 80;
+            }
+        </div>
+
+        <div class="delete-area">
+            <form asp-action="Delete"
+                  asp-route-id="@Model.Id"
+                  method="post"
+                  onsubmit="return confirm('Delete this development roadmap?');">
+                @Html.AntiForgeryToken()
+
+                <button type="submit"
+                        class="delete-button">
+                    <i class="bi bi-trash3-fill me-1"></i>
+                    Delete Roadmap
+                </button>
+            </form>
+        </div>
+    </div>
+</div>

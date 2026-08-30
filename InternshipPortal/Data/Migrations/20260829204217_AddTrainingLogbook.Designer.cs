@@ -4,6 +4,7 @@ using InternshipPortal.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace InternshipPortal.Data.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260829204217_AddTrainingLogbook")]
+    partial class AddTrainingLogbook
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -375,6 +378,10 @@ namespace InternshipPortal.Data.Migrations
                     b.Property<int>("GraduationYear")
                         .HasColumnType("int");
 
+                    b.Property<string>("Skills")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
                     b.Property<string>("Specialization")
                         .IsRequired()
                         .HasMaxLength(100)
@@ -395,57 +402,6 @@ namespace InternshipPortal.Data.Migrations
                         .IsUnique();
 
                     b.ToTable("Students");
-                });
-
-            modelBuilder.Entity("InternshipPortal.Models.StudentPreference", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<bool>("AcceptRemoteInternships")
-                        .HasColumnType("bit");
-
-                    b.Property<bool>("AcceptUnpaidInternships")
-                        .HasColumnType("bit");
-
-                    b.Property<string>("CareerInterests")
-                        .HasMaxLength(500)
-                        .HasColumnType("nvarchar(500)");
-
-                    b.Property<int?>("MaximumWeeklyHours")
-                        .HasColumnType("int");
-
-                    b.Property<decimal?>("MinimumSalary")
-                        .HasPrecision(10, 2)
-                        .HasColumnType("decimal(10,2)");
-
-                    b.Property<string>("PreferredLocation")
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
-
-                    b.Property<int?>("PreferredWorkMode")
-                        .HasColumnType("int");
-
-                    b.Property<string>("Skills")
-                        .IsRequired()
-                        .HasMaxLength(1000)
-                        .HasColumnType("nvarchar(1000)");
-
-                    b.Property<int>("StudentId")
-                        .HasColumnType("int");
-
-                    b.Property<DateTime>("UpdatedAt")
-                        .HasColumnType("datetime2");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("StudentId")
-                        .IsUnique();
-
-                    b.ToTable("StudentPreferences");
                 });
 
             modelBuilder.Entity("InternshipPortal.Models.TrainingEnrollment", b =>
@@ -517,7 +473,7 @@ namespace InternshipPortal.Data.Migrations
                         .HasColumnType("datetime2");
 
                     b.Property<decimal>("Hours")
-                        .HasPrecision(5, 2)
+                        .HasPrecision(4, 1)
                         .HasColumnType("decimal(4,1)");
 
                     b.Property<string>("LearnedSkills")
@@ -834,8 +790,7 @@ namespace InternshipPortal.Data.Migrations
                 {
                     b.HasOne("Microsoft.AspNetCore.Identity.IdentityUser", "ChangedByUser")
                         .WithMany()
-                        .HasForeignKey("ChangedByUserId")
-                        .OnDelete(DeleteBehavior.Restrict);
+                        .HasForeignKey("ChangedByUserId");
 
                     b.HasOne("InternshipPortal.Models.InternshipApplication", "InternshipApplication")
                         .WithMany("StatusHistory")
@@ -950,17 +905,6 @@ namespace InternshipPortal.Data.Migrations
                         .IsRequired();
 
                     b.Navigation("User");
-                });
-
-            modelBuilder.Entity("InternshipPortal.Models.StudentPreference", b =>
-                {
-                    b.HasOne("InternshipPortal.Models.Student", "Student")
-                        .WithOne("Preference")
-                        .HasForeignKey("InternshipPortal.Models.StudentPreference", "StudentId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Student");
                 });
 
             modelBuilder.Entity("InternshipPortal.Models.TrainingEnrollment", b =>
@@ -1078,8 +1022,6 @@ namespace InternshipPortal.Data.Migrations
             modelBuilder.Entity("InternshipPortal.Models.Student", b =>
                 {
                     b.Navigation("Applications");
-
-                    b.Navigation("Preference");
                 });
 
             modelBuilder.Entity("InternshipPortal.Models.TrainingEnrollment", b =>

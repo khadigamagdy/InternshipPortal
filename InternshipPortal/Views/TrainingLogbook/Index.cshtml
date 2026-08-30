@@ -1,0 +1,1012 @@
+﻿@model IEnumerable<InternshipPortal.Models.TrainingEnrollment>
+@using InternshipPortal.Models.Enums
+
+@{
+    ViewData["Title"] = "Training Logbook";
+
+    var enrollments = Model.ToList();
+
+    var totalRequiredHours =
+        enrollments.Sum(enrollment =>
+            enrollment.RequiredHours);
+
+    var totalApprovedHours =
+        enrollments.Sum(enrollment =>
+            enrollment.HourEntries
+                .Where(entry =>
+                    entry.Status ==
+                        TrainingHourStatus.Approved)
+                .Sum(entry => entry.Hours));
+
+    var totalPendingHours =
+        enrollments.Sum(enrollment =>
+            enrollment.HourEntries
+                .Where(entry =>
+                    entry.Status ==
+                        TrainingHourStatus.Pending)
+                .Sum(entry => entry.Hours));
+}
+
+<style>
+    .logbook-page {
+        min-height: 100vh;
+        padding: 45px 0 70px;
+        background: radial-gradient( circle at top left, rgba(59, 130, 246, 0.14), transparent 34%), radial-gradient( circle at bottom right, rgba(124, 58, 237, 0.14), transparent 35%), #f8fafc;
+    }
+
+    .logbook-header {
+        position: relative;
+        overflow: hidden;
+        padding: 38px;
+        margin-bottom: 26px;
+        color: white;
+        border-radius: 28px;
+        background: linear-gradient( 135deg, #0f172a, #1d4ed8 57%, #7c3aed);
+        box-shadow: 0 22px 48px rgba(30, 64, 175, 0.25);
+        animation: headerAppear 0.7s ease;
+    }
+
+        .logbook-header::before,
+        .logbook-header::after {
+            position: absolute;
+            content: "";
+            border-radius: 50%;
+            border: 1px solid rgba(255, 255, 255, 0.14);
+        }
+
+        .logbook-header::before {
+            width: 260px;
+            height: 260px;
+            right: 90px;
+            top: -120px;
+        }
+
+        .logbook-header::after {
+            width: 350px;
+            height: 350px;
+            right: -110px;
+            bottom: -230px;
+        }
+
+    .header-content {
+        position: relative;
+        z-index: 2;
+    }
+
+    .header-icon {
+        width: 68px;
+        height: 68px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-right: 18px;
+        font-size: 31px;
+        border-radius: 21px;
+        background: rgba(255, 255, 255, 0.16);
+        backdrop-filter: blur(10px);
+        animation: iconFloat 3s ease-in-out infinite;
+    }
+
+    .logbook-header h1 {
+        margin: 0;
+        font-size: 32px;
+        font-weight: 900;
+    }
+
+    .logbook-header p {
+        max-width: 620px;
+        margin: 8px 0 0;
+        color: rgba(255, 255, 255, 0.8);
+    }
+
+    .header-actions {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        justify-content: flex-end;
+        gap: 10px;
+    }
+
+    .header-badge,
+    .header-reports-button {
+        display: inline-flex;
+        align-items: center;
+        gap: 7px;
+        padding: 10px 15px;
+        font-size: 12px;
+        font-weight: 800;
+        border-radius: 30px;
+    }
+
+    .header-badge {
+        background: rgba(255, 255, 255, 0.16);
+        backdrop-filter: blur(10px);
+    }
+
+    .header-reports-button {
+        color: white;
+        text-decoration: none;
+        border: 1px solid rgba(255, 255, 255, 0.3);
+        background: rgba(255, 255, 255, 0.12);
+        transition: 0.3s;
+    }
+
+        .header-reports-button:hover {
+            color: #1e3a8a;
+            background: white;
+            transform: translateY(-3px);
+        }
+
+    .summary-grid {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 18px;
+        margin-bottom: 28px;
+    }
+
+    .summary-card {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+        padding: 21px;
+        border: 1px solid #e2e8f0;
+        border-radius: 20px;
+        background: white;
+        box-shadow: 0 10px 28px rgba(15, 23, 42, 0.07);
+        transition: 0.3s;
+    }
+
+        .summary-card:hover {
+            transform: translateY(-6px);
+            box-shadow: 0 18px 36px rgba(37, 99, 235, 0.14);
+        }
+
+    .summary-icon {
+        min-width: 53px;
+        height: 53px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 23px;
+        border-radius: 16px;
+    }
+
+    .training-icon {
+        color: #1d4ed8;
+        background: #dbeafe;
+    }
+
+    .required-icon {
+        color: #6d28d9;
+        background: #ede9fe;
+    }
+
+    .approved-icon {
+        color: #047857;
+        background: #d1fae5;
+    }
+
+    .pending-icon {
+        color: #b45309;
+        background: #fef3c7;
+    }
+
+    .summary-number {
+        display: block;
+        color: #0f172a;
+        font-size: 25px;
+        font-weight: 900;
+    }
+
+    .summary-label {
+        color: #64748b;
+        font-size: 12px;
+        font-weight: 700;
+    }
+
+    .training-card {
+        position: relative;
+        overflow: hidden;
+        padding: 27px;
+        margin-bottom: 22px;
+        border: 1px solid #e2e8f0;
+        border-radius: 24px;
+        background: white;
+        box-shadow: 0 12px 32px rgba(15, 23, 42, 0.08);
+        transition: 0.35s;
+        animation: cardAppear 0.7s ease both;
+    }
+
+        .training-card:hover {
+            border-color: #bfdbfe;
+            transform: translateY(-6px);
+            box-shadow: 0 20px 42px rgba(37, 99, 235, 0.14);
+        }
+
+        .training-card::before {
+            position: absolute;
+            width: 6px;
+            top: 0;
+            left: 0;
+            bottom: 0;
+            content: "";
+            background: linear-gradient( 180deg, #2563eb, #7c3aed);
+        }
+
+    .company-logo {
+        min-width: 62px;
+        height: 62px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        overflow: hidden;
+        color: white;
+        font-size: 24px;
+        font-weight: 900;
+        border-radius: 19px;
+        background: linear-gradient( 135deg, #2563eb, #7c3aed);
+        box-shadow: 0 10px 22px rgba(37, 99, 235, 0.23);
+    }
+
+        .company-logo img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+    .internship-title {
+        margin: 0 0 5px;
+        color: #0f172a;
+        font-size: 20px;
+        font-weight: 900;
+    }
+
+    .company-name {
+        color: #475569;
+        font-size: 13px;
+        font-weight: 700;
+    }
+
+    .training-dates {
+        margin-top: 7px;
+        color: #94a3b8;
+        font-size: 12px;
+    }
+
+    .status-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 8px 12px;
+        font-size: 11px;
+        font-weight: 900;
+        border-radius: 30px;
+    }
+
+    .status-pending {
+        color: #b45309;
+        background: #fef3c7;
+    }
+
+    .status-active {
+        color: #047857;
+        background: #d1fae5;
+    }
+
+    .status-paused {
+        color: #9a3412;
+        background: #ffedd5;
+    }
+
+    .status-completed {
+        color: #1d4ed8;
+        background: #dbeafe;
+    }
+
+    .status-cancelled {
+        color: #b91c1c;
+        background: #fee2e2;
+    }
+
+    .progress-section {
+        padding: 21px;
+        margin-top: 23px;
+        border-radius: 18px;
+        background: linear-gradient( 135deg, #f8fafc, #eff6ff);
+        border: 1px solid #e2e8f0;
+    }
+
+    .progress-information {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 11px;
+    }
+
+        .progress-information strong {
+            color: #0f172a;
+            font-size: 13px;
+        }
+
+    .progress-percentage {
+        color: #2563eb;
+        font-size: 16px;
+        font-weight: 900;
+    }
+
+    .progress-track {
+        height: 12px;
+        overflow: hidden;
+        border-radius: 20px;
+        background: #dbe4f0;
+    }
+
+    .progress-value {
+        height: 100%;
+        border-radius: 20px;
+        background: linear-gradient( 90deg, #2563eb, #06b6d4, #10b981);
+        box-shadow: 0 0 13px rgba(37, 99, 235, 0.3);
+        animation: progressGrow 1.3s ease;
+    }
+
+    .hours-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 13px;
+        margin-top: 17px;
+    }
+
+    .hour-box {
+        padding: 14px;
+        text-align: center;
+        border-radius: 14px;
+        background: white;
+        border: 1px solid #e2e8f0;
+    }
+
+        .hour-box strong {
+            display: block;
+            color: #0f172a;
+            font-size: 19px;
+            font-weight: 900;
+        }
+
+        .hour-box span {
+            color: #64748b;
+            font-size: 11px;
+            font-weight: 700;
+        }
+
+    .training-footer {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 15px;
+        margin-top: 21px;
+        padding-top: 20px;
+        border-top: 1px solid #f1f5f9;
+    }
+
+    .report-information {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+    }
+
+    .information-chip {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 7px 11px;
+        color: #475569;
+        font-size: 11px;
+        font-weight: 700;
+        border-radius: 20px;
+        background: #f1f5f9;
+    }
+
+    .training-actions {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: flex-end;
+        gap: 9px;
+    }
+
+    .add-hours-button,
+    .weekly-report-button,
+    .view-reports-button {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 7px;
+        padding: 11px 16px;
+        font-size: 12px;
+        font-weight: 900;
+        border-radius: 13px;
+        text-decoration: none;
+        transition: 0.3s;
+    }
+
+    .add-hours-button {
+        color: white;
+        background: linear-gradient( 135deg, #2563eb, #06b6d4);
+        box-shadow: 0 9px 21px rgba(37, 99, 235, 0.24);
+    }
+
+    .weekly-report-button {
+        color: white;
+        background: linear-gradient( 135deg, #7c3aed, #4f46e5);
+        box-shadow: 0 9px 21px rgba(124, 58, 237, 0.24);
+    }
+
+    .view-reports-button {
+        color: #4338ca;
+        border: 1px solid #c7d2fe;
+        background: #eef2ff;
+    }
+
+        .add-hours-button:hover,
+        .weekly-report-button:hover,
+        .view-reports-button:hover {
+            color: white;
+            transform: translateY(-3px);
+        }
+
+        .view-reports-button:hover {
+            background: #4f46e5;
+        }
+
+    .waiting-message {
+        display: inline-flex;
+        align-items: center;
+        gap: 7px;
+        padding: 10px 14px;
+        color: #b45309;
+        font-size: 12px;
+        font-weight: 800;
+        border-radius: 13px;
+        background: #fffbeb;
+        border: 1px solid #fde68a;
+    }
+
+    .cancelled-message {
+        display: inline-flex;
+        align-items: center;
+        gap: 7px;
+        padding: 10px 14px;
+        color: #b91c1c;
+        font-size: 12px;
+        font-weight: 800;
+        border-radius: 13px;
+        background: #fef2f2;
+        border: 1px solid #fecaca;
+    }
+
+    .empty-state {
+        padding: 80px 25px;
+        text-align: center;
+        border: 2px dashed #cbd5e1;
+        border-radius: 26px;
+        background: white;
+        animation: cardAppear 0.7s ease;
+    }
+
+    .empty-icon {
+        font-size: 75px;
+        animation: iconFloat 3s ease-in-out infinite;
+    }
+
+    .empty-state h3 {
+        margin-top: 20px;
+        color: #0f172a;
+        font-weight: 900;
+    }
+
+    .empty-state p {
+        color: #64748b;
+    }
+
+    @@keyframes headerAppear {
+        from {
+            opacity: 0;
+            transform: translateY(-25px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    @@keyframes cardAppear {
+        from {
+            opacity: 0;
+            transform: translateY(25px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    @@keyframes iconFloat {
+        0%, 100% {
+            transform: translateY(0) rotate(0deg);
+        }
+
+        50% {
+            transform: translateY(-8px) rotate(4deg);
+        }
+    }
+
+    @@keyframes progressGrow {
+        from {
+            width: 0;
+        }
+    }
+
+    @@media (max-width: 992px) {
+        .summary-grid {
+            grid-template-columns: repeat(2, 1fr);
+        }
+
+        .training-footer {
+            align-items: flex-start;
+            flex-direction: column;
+        }
+
+        .training-actions {
+            width: 100%;
+            justify-content: flex-start;
+        }
+    }
+
+    @@media (max-width: 768px) {
+        .logbook-header {
+            padding: 27px 21px;
+        }
+
+        .header-actions {
+            width: 100%;
+            justify-content: flex-start;
+        }
+
+        .training-actions {
+            flex-direction: column;
+        }
+
+        .add-hours-button,
+        .weekly-report-button,
+        .view-reports-button,
+        .waiting-message,
+        .cancelled-message {
+            width: 100%;
+        }
+    }
+
+    @@media (max-width: 576px) {
+        .summary-grid,
+        .hours-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .training-card {
+            padding: 22px 18px;
+        }
+    }
+</style>
+
+<div class="logbook-page">
+    <div class="container">
+        @if (TempData["SuccessMessage"] != null)
+        {
+            <div class="alert alert-success alert-dismissible fade show shadow-sm">
+                <i class="bi bi-check-circle-fill me-2"></i>
+                @TempData["SuccessMessage"]
+
+                <button type="button"
+                        class="btn-close"
+                        data-bs-dismiss="alert">
+                </button>
+            </div>
+        }
+
+        @if (TempData["ErrorMessage"] != null)
+        {
+            <div class="alert alert-danger alert-dismissible fade show shadow-sm">
+                <i class="bi bi-exclamation-circle-fill me-2"></i>
+                @TempData["ErrorMessage"]
+
+                <button type="button"
+                        class="btn-close"
+                        data-bs-dismiss="alert">
+                </button>
+            </div>
+        }
+
+        <div class="logbook-header">
+            <div class="header-content d-flex flex-wrap align-items-center justify-content-between gap-4">
+                <div class="d-flex align-items-center">
+                    <div class="header-icon">
+                        <i class="bi bi-journal-check"></i>
+                    </div>
+
+                    <div>
+                        <h1>Training Logbook</h1>
+
+                        <p>
+                            Record your daily activities,
+                            track approved hours and document
+                            your professional development.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="header-actions">
+                    <span class="header-badge">
+                        <i class="bi bi-patch-check-fill"></i>
+                        Verified Training Record
+                    </span>
+
+                    <a asp-controller="WeeklyReport"
+                       asp-action="Index"
+                       class="header-reports-button">
+
+                        <i class="bi bi-journal-text"></i>
+                        My Weekly Reports
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <div class="summary-grid">
+            <div class="summary-card">
+                <div class="summary-icon training-icon">
+                    <i class="bi bi-briefcase-fill"></i>
+                </div>
+
+                <div>
+                    <span class="summary-number">
+                        @enrollments.Count
+                    </span>
+
+                    <span class="summary-label">
+                        Training Enrollments
+                    </span>
+                </div>
+            </div>
+
+            <div class="summary-card">
+                <div class="summary-icon required-icon">
+                    <i class="bi bi-clock-history"></i>
+                </div>
+
+                <div>
+                    <span class="summary-number">
+                        @totalRequiredHours
+                    </span>
+
+                    <span class="summary-label">
+                        Required Hours
+                    </span>
+                </div>
+            </div>
+
+            <div class="summary-card">
+                <div class="summary-icon approved-icon">
+                    <i class="bi bi-check-circle-fill"></i>
+                </div>
+
+                <div>
+                    <span class="summary-number">
+                        @totalApprovedHours.ToString("0.0")
+                    </span>
+
+                    <span class="summary-label">
+                        Approved Hours
+                    </span>
+                </div>
+            </div>
+
+            <div class="summary-card">
+                <div class="summary-icon pending-icon">
+                    <i class="bi bi-hourglass-split"></i>
+                </div>
+
+                <div>
+                    <span class="summary-number">
+                        @totalPendingHours.ToString("0.0")
+                    </span>
+
+                    <span class="summary-label">
+                        Hours Under Review
+                    </span>
+                </div>
+            </div>
+        </div>
+
+        @if (enrollments.Any())
+        {
+            var animationDelay = 0;
+
+            foreach (var enrollment in enrollments)
+            {
+                var application =
+                enrollment.InternshipApplication;
+
+                var internship =
+                application.Internship;
+
+                var company =
+                internship.Company;
+
+                var approvedHours =
+                enrollment.HourEntries
+                .Where(entry =>
+                entry.Status ==
+                TrainingHourStatus.Approved)
+                .Sum(entry => entry.Hours);
+
+                var pendingHours =
+                enrollment.HourEntries
+                .Where(entry =>
+                entry.Status ==
+                TrainingHourStatus.Pending)
+                .Sum(entry => entry.Hours);
+
+                var rejectedHours =
+                enrollment.HourEntries
+                .Where(entry =>
+                entry.Status ==
+                TrainingHourStatus.Rejected)
+                .Sum(entry => entry.Hours);
+
+                var progress =
+                enrollment.RequiredHours > 0
+                ? approvedHours * 100 /
+                enrollment.RequiredHours
+                : 0;
+
+                if (progress > 100)
+                {
+                    progress = 100;
+                }
+
+                var statusClass =
+                enrollment.Status switch
+                {
+                    TrainingStatus.Active =>
+                    "status-active",
+
+                    TrainingStatus.Paused =>
+                    "status-paused",
+
+                    TrainingStatus.Completed =>
+                    "status-completed",
+
+                    TrainingStatus.Cancelled =>
+                    "status-cancelled",
+
+                    _ => "status-pending"
+                };
+
+                var statusIcon =
+                enrollment.Status switch
+                {
+                    TrainingStatus.Active =>
+                    "bi-play-circle-fill",
+
+                    TrainingStatus.Paused =>
+                    "bi-pause-circle-fill",
+
+                    TrainingStatus.Completed =>
+                    "bi-patch-check-fill",
+
+                    TrainingStatus.Cancelled =>
+                    "bi-x-circle-fill",
+
+                    _ => "bi-hourglass-split"
+                };
+
+                <div class="training-card"
+                     style="animation-delay: @(animationDelay)ms">
+
+                    <div class="d-flex flex-wrap align-items-start justify-content-between gap-3">
+                        <div class="d-flex align-items-center gap-3">
+                            <div class="company-logo">
+                                @if (!string.IsNullOrWhiteSpace(
+                                                        company.LogoPath))
+                                {
+                                    <img src="@company.LogoPath"
+                                         alt="@company.Name" />
+                                }
+                                else
+                                {
+                                    @(string.IsNullOrWhiteSpace(
+                                                            company.Name)
+                                                            ? "C"
+                                                            : company.Name
+                                                            .Substring(0, 1)
+                                                            .ToUpper())
+                                                }
+                            </div>
+
+                            <div>
+                                <h3 class="internship-title">
+                                    @internship.Title
+                                </h3>
+
+                                <div class="company-name">
+                                    <i class="bi bi-building-fill me-1"></i>
+                                    @company.Name
+                                </div>
+
+                                <div class="training-dates">
+                                    <i class="bi bi-calendar-range me-1"></i>
+
+                                    @enrollment.StartDate.ToString("dd MMM yyyy")
+
+                                    <span class="mx-1">—</span>
+
+                                    @enrollment.ExpectedEndDate.ToString("dd MMM yyyy")
+                                </div>
+                            </div>
+                        </div>
+
+                        <span class="status-badge @statusClass">
+                            <i class="bi @statusIcon"></i>
+                            @enrollment.Status
+                        </span>
+                    </div>
+
+                    <div class="progress-section">
+                        <div class="progress-information">
+                            <strong>
+                                Training Progress
+                            </strong>
+
+                            <span class="progress-percentage">
+                                @progress.ToString("0")%
+                            </span>
+                        </div>
+
+                        <div class="progress-track">
+                            <div class="progress-value"
+                                 style="width: @progress.ToString("0.##", System.Globalization.CultureInfo.InvariantCulture)%">
+                            </div>
+                        </div>
+
+                        <div class="hours-grid">
+                            <div class="hour-box">
+                                <strong>
+                                    @approvedHours.ToString("0.0")
+                                </strong>
+
+                                <span>Approved Hours</span>
+                            </div>
+
+                            <div class="hour-box">
+                                <strong>
+                                    @pendingHours.ToString("0.0")
+                                </strong>
+
+                                <span>Pending Hours</span>
+                            </div>
+
+                            <div class="hour-box">
+                                <strong>
+                                    @enrollment.RequiredHours
+                                </strong>
+
+                                <span>Required Hours</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="training-footer">
+                        <div class="report-information">
+                            <span class="information-chip">
+                                <i class="bi bi-list-task"></i>
+
+                                @enrollment.HourEntries.Count
+                                Daily Entries
+                            </span>
+
+                            <span class="information-chip">
+                                <i class="bi bi-journal-text"></i>
+
+                                @enrollment.WeeklyReports.Count
+                                Weekly Reports
+                            </span>
+
+                            @if (rejectedHours > 0)
+                            {
+                                <span class="information-chip">
+                                    <i class="bi bi-x-circle-fill text-danger"></i>
+
+                                    @rejectedHours.ToString("0.0")
+                                    Rejected Hours
+                                </span>
+                            }
+                        </div>
+
+                        <div class="training-actions">
+                            @if (enrollment.WeeklyReports.Any())
+                            {
+                                <a asp-controller="WeeklyReport"
+                                   asp-action="Index"
+                                   class="view-reports-button">
+
+                                    <i class="bi bi-eye-fill"></i>
+                                    View Reports
+                                </a>
+                            }
+
+                            @if (enrollment.Status ==
+                                                TrainingStatus.Active)
+                            {
+                                <a asp-action="AddHours"
+                                   asp-route-enrollmentId="@enrollment.Id"
+                                   class="add-hours-button">
+
+                                    <i class="bi bi-plus-circle-fill"></i>
+                                    Add Training Hours
+                                </a>
+
+                                <a asp-controller="WeeklyReport"
+                                   asp-action="Create"
+                                   asp-route-enrollmentId="@enrollment.Id"
+                                   class="weekly-report-button">
+
+                                    <i class="bi bi-journal-plus"></i>
+                                    Add Weekly Report
+                                </a>
+                            }
+                            else if (enrollment.Status ==
+                            TrainingStatus.PendingUniversityApproval)
+                            {
+                                <span class="waiting-message">
+                                    <i class="bi bi-hourglass-split"></i>
+                                    Waiting for university approval
+                                </span>
+                            }
+                            else if (enrollment.Status ==
+                            TrainingStatus.Cancelled)
+                            {
+                                <span class="cancelled-message">
+                                    <i class="bi bi-x-circle-fill"></i>
+                                    Training enrollment was not approved
+                                </span>
+                            }
+                        </div>
+                    </div>
+                </div>
+
+                animationDelay += 100;
+            }
+        }
+        else
+        {
+            <div class="empty-state">
+                <div class="empty-icon">📘</div>
+
+                <h3>No Training Records Yet</h3>
+
+                <p>
+                    Your training logbook will be created
+                    automatically after a company accepts
+                    your application.
+                </p>
+
+                <a asp-controller="Internship"
+                   asp-action="Index"
+                   class="btn btn-primary rounded-pill px-4 mt-2">
+
+                    <i class="bi bi-search me-1"></i>
+                    Browse Internships
+                </a>
+            </div>
+        }
+    </div>
+</div>

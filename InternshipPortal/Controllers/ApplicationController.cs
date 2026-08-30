@@ -290,6 +290,8 @@ namespace InternshipPortal.Controllers
                         application.Interviews)
                     .Include(application =>
                         application.StatusHistory)
+                    .Include(application =>
+                        application.TrainingEnrollment)
                     .Where(application =>
                         application.StudentId == student.Id)
                     .OrderByDescending(application =>
@@ -329,6 +331,8 @@ namespace InternshipPortal.Controllers
                         application.StatusHistory)
                     .ThenInclude(history =>
                         history.ChangedByUser)
+                    .Include(application =>
+                        application.TrainingEnrollment)
                     .Where(application =>
                         application.InternshipId ==
                             internshipId)
@@ -444,12 +448,21 @@ namespace InternshipPortal.Controllers
                 return RedirectToApplicants(application);
             }
 
+            if (application.TrainingEnrollment != null)
+            {
+                TempData["ErrorMessage"] =
+                    "A training enrollment already exists for this application.";
+
+                return RedirectToApplicants(application);
+            }
+
             var previousStatus = application.Status;
+            var currentDate = DateTime.Now;
 
             application.Status =
                 ApplicationStatus.Accepted;
 
-            application.ReviewedAt = DateTime.Now;
+            application.ReviewedAt = currentDate;
 
             application.Internship.AvailablePositions--;
 
@@ -457,8 +470,48 @@ namespace InternshipPortal.Controllers
                 application,
                 previousStatus,
                 ApplicationStatus.Accepted,
-                "The company accepted the application.",
+                "The company accepted the application and created the training enrollment.",
                 userId);
+
+            var startDate =
+                application.Internship.StartDate;
+
+            if (startDate.Date < DateTime.Today)
+            {
+                startDate = DateTime.Today;
+            }
+
+            var expectedEndDate =
+                application.Internship.EndDate;
+
+            if (expectedEndDate.Date < startDate.Date)
+            {
+                expectedEndDate =
+                    startDate.AddMonths(3);
+            }
+
+            var trainingEnrollment =
+                new TrainingEnrollment
+                {
+                    InternshipApplicationId =
+                        application.Id,
+
+                    StartDate = startDate,
+
+                    ExpectedEndDate =
+                        expectedEndDate,
+
+                    RequiredHours = 120,
+
+                    Status =
+                        TrainingStatus
+                            .PendingUniversityApproval,
+
+                    CreatedAt = currentDate
+                };
+
+            context.TrainingEnrollments.Add(
+                trainingEnrollment);
 
             context.Notifications.Add(
                 new Notification
@@ -468,17 +521,18 @@ namespace InternshipPortal.Controllers
                     Message =
                         $"Congratulations! Your application for " +
                         $"'{application.Internship.Title}' " +
-                        $"has been accepted.",
+                        $"has been accepted. Your training record " +
+                        $"was created and is waiting for approval.",
 
                     UserId = application.Student.UserId,
                     IsRead = false,
-                    CreatedAt = DateTime.Now
+                    CreatedAt = currentDate
                 });
 
             await context.SaveChangesAsync();
 
             TempData["SuccessMessage"] =
-                "Student application accepted successfully.";
+                "Student accepted and training enrollment created successfully.";
 
             return RedirectToApplicants(application);
         }
@@ -581,6 +635,8 @@ namespace InternshipPortal.Controllers
                     application.Interviews)
                 .Include(application =>
                     application.StatusHistory)
+                .Include(application =>
+                    application.TrainingEnrollment)
                 .FirstOrDefaultAsync(application =>
                     application.Id == applicationId &&
                     application.Internship.Company.UserId ==

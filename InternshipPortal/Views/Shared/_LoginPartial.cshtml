@@ -1,7 +1,6 @@
 ﻿@using Microsoft.AspNetCore.Identity
 @using Microsoft.EntityFrameworkCore
 @using InternshipPortal.Data
-@using InternshipPortal.Models.Enums
 
 @inject SignInManager<IdentityUser> SignInManager
 @inject UserManager<IdentityUser> UserManager
@@ -9,45 +8,17 @@
 
 @{
     var unreadNotificationsCount = 0;
-    var savedInternshipsCount = 0;
-    var upcomingInterviewsCount = 0;
 
     if (SignInManager.IsSignedIn(User))
     {
-        var currentUserId = UserManager.GetUserId(User);
+        var currentUserId =
+            UserManager.GetUserId(User);
 
-        unreadNotificationsCount = await DbContext.Notifications
-            .CountAsync(notification =>
-                notification.UserId == currentUserId &&
-                !notification.IsRead);
-
-        if (User.IsInRole("Student"))
-        {
-            var studentId = await DbContext.Students
-                .Where(student =>
-                    student.UserId == currentUserId)
-                .Select(student => (int?)student.Id)
-                .FirstOrDefaultAsync();
-
-            if (studentId.HasValue)
-            {
-                savedInternshipsCount =
-                    await DbContext.SavedInternships
-                        .CountAsync(saved =>
-                            saved.StudentId == studentId.Value);
-
-                upcomingInterviewsCount =
-                    await DbContext.Interviews
-                        .CountAsync(interview =>
-                            interview.InternshipApplication.StudentId ==
-                                studentId.Value &&
-                            interview.ScheduledAt > DateTime.Now &&
-                            (interview.Status ==
-                                InterviewStatus.Pending ||
-                             interview.Status ==
-                                InterviewStatus.AcceptedByStudent));
-            }
-        }
+        unreadNotificationsCount =
+            await DbContext.Notifications
+                .CountAsync(notification =>
+                    notification.UserId == currentUserId &&
+                    !notification.IsRead);
     }
 }
 
@@ -59,7 +30,6 @@
     }
 
     .portal-nav-link {
-        position: relative;
         display: flex;
         align-items: center;
         gap: 6px;
@@ -78,56 +48,96 @@
             transform: translateY(-2px);
         }
 
-    .nav-count {
-        min-width: 19px;
-        height: 19px;
-        display: inline-flex;
+    .portal-dropdown-button {
+        display: flex;
         align-items: center;
-        justify-content: center;
-        padding: 0 5px;
-        color: white;
-        font-size: 9px;
-        font-weight: 900;
-        border-radius: 20px;
+        gap: 6px;
+        padding: 9px 11px !important;
+        color: #475569 !important;
+        font-size: 13px;
+        font-weight: 700;
+        border: none;
+        border-radius: 12px;
+        background: transparent;
+        white-space: nowrap;
+        transition: 0.3s;
     }
 
-    .saved-nav-link {
-        color: #be123c !important;
-    }
-
-        .saved-nav-link:hover {
-            color: #e11d48 !important;
-            background: #fff1f2;
+        .portal-dropdown-button:hover,
+        .portal-dropdown-button:focus {
+            color: #4f46e5 !important;
+            background: #eef2ff;
         }
 
-        .saved-nav-link > i {
-            color: #e11d48;
-            animation: savedHeartPulse 1.7s ease-in-out infinite;
-        }
-
-    .saved-nav-count {
-        background: linear-gradient(135deg, #f43f5e, #ec4899);
-        box-shadow: 0 4px 10px rgba(225, 29, 72, 0.2);
+    .portal-dropdown-menu {
+        min-width: 235px;
+        padding: 9px;
+        border: 1px solid #e2e8f0;
+        border-radius: 16px;
+        background: white;
+        box-shadow: 0 18px 42px rgba(15, 23, 42, 0.14);
     }
 
-    .interview-nav-link {
-        color: #0369a1 !important;
+    .portal-dropdown-item {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 11px 12px;
+        color: #475569;
+        font-size: 12px;
+        font-weight: 700;
+        border-radius: 11px;
+        transition: 0.25s;
     }
 
-        .interview-nav-link:hover {
-            color: #0284c7 !important;
-            background: #e0f2fe;
+        .portal-dropdown-item i {
+            width: 27px;
+            height: 27px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #4f46e5;
+            border-radius: 9px;
+            background: #eef2ff;
         }
 
-        .interview-nav-link > i {
-            color: #0284c7;
-            animation: calendarPulse 1.8s ease-in-out infinite;
+        .portal-dropdown-item:hover {
+            color: #4f46e5;
+            background: #f8faff;
+            transform: translateX(3px);
         }
 
-    .interview-nav-count {
-        background: linear-gradient(135deg, #0ea5e9, #4f46e5);
-        box-shadow: 0 4px 10px rgba(14, 165, 233, 0.22);
+    .smart-career-button {
+        color: #4f46e5 !important;
+        background: linear-gradient( 135deg, rgba(99, 102, 241, 0.09), rgba(14, 165, 233, 0.09));
     }
+
+        .smart-career-button i {
+            color: #7c3aed;
+            animation: smartSparkle 2.2s ease-in-out infinite;
+        }
+
+        .smart-career-button:hover,
+        .smart-career-button:focus {
+            color: white !important;
+            background: linear-gradient(135deg, #6366f1, #0284c7);
+            box-shadow: 0 8px 19px rgba(99, 102, 241, 0.23);
+        }
+
+            .smart-career-button:hover i,
+            .smart-career-button:focus i {
+                color: white;
+            }
+
+    .smart-match-item {
+        color: #4338ca;
+        background: linear-gradient(135deg, #eef2ff, #f0f9ff);
+    }
+
+        .smart-match-item i {
+            color: white;
+            background: linear-gradient(135deg, #6366f1, #0284c7);
+        }
 
     .notification-nav-link {
         position: relative;
@@ -180,7 +190,7 @@
         background: white;
     }
 
-    .user-avatar {
+    .navbar-user-avatar {
         width: 37px;
         height: 37px;
         display: flex;
@@ -198,7 +208,7 @@
         line-height: 1.2;
     }
 
-    .user-email {
+    .navbar-user-email {
         display: block;
         overflow: hidden;
         color: #0f172a;
@@ -259,7 +269,6 @@
         .register-nav-button:hover {
             color: white !important;
             transform: translateY(-3px);
-            box-shadow: 0 12px 25px rgba(99, 102, 241, 0.3);
         }
 
     @@keyframes notificationPulse {
@@ -274,23 +283,13 @@
         }
     }
 
-    @@keyframes savedHeartPulse {
+    @@keyframes smartSparkle {
         0%, 100% {
-            transform: scale(1);
+            transform: rotate(0deg) scale(1);
         }
 
         50% {
-            transform: scale(1.18);
-        }
-    }
-
-    @@keyframes calendarPulse {
-        0%, 100% {
-            transform: translateY(0) rotate(0deg);
-        }
-
-        50% {
-            transform: translateY(-2px) rotate(5deg);
+            transform: rotate(12deg) scale(1.15);
         }
     }
 
@@ -302,7 +301,11 @@
             margin-top: 15px;
         }
 
-        .portal-nav-link {
+        .portal-dropdown-button {
+            width: 100%;
+        }
+
+        .portal-dropdown-menu {
             width: 100%;
         }
 
@@ -348,58 +351,91 @@
                 </a>
             </li>
 
-            <li class="nav-item">
-                <a class="nav-link portal-nav-link"
-                   asp-controller="Application"
-                   asp-action="MyApplications">
-                    <i class="bi bi-file-earmark-check-fill"></i>
-                    My Applications
-                </a>
+            <li class="nav-item dropdown">
+                <button class="nav-link dropdown-toggle portal-dropdown-button smart-career-button"
+                        type="button"
+                        data-bs-toggle="dropdown"
+                        aria-expanded="false">
+                    <i class="bi bi-stars"></i>
+                    Smart Career
+                </button>
+
+                <ul class="dropdown-menu portal-dropdown-menu">
+                    <li>
+                        <a class="dropdown-item portal-dropdown-item smart-match-item"
+                           asp-controller="Matching"
+                           asp-action="Index">
+                            <i class="bi bi-lightning-charge-fill"></i>
+                            Smart Matches
+                        </a>
+                    </li>
+
+                    <li>
+                        <a class="dropdown-item portal-dropdown-item"
+                           asp-controller="StudentPreference"
+                           asp-action="Index">
+                            <i class="bi bi-sliders"></i>
+                            Career Preferences
+                        </a>
+                    </li>
+
+                    <li>
+                        <a class="dropdown-item portal-dropdown-item"
+                           asp-controller="SkillRoadmap"
+                           asp-action="Index">
+                            <i class="bi bi-signpost-split-fill"></i>
+                            My Skill Roadmaps
+                        </a>
+                    </li>
+                </ul>
             </li>
 
-            <li class="nav-item">
-                <a class="nav-link portal-nav-link interview-nav-link"
-                   asp-controller="Interview"
-                   asp-action="MyInterviews">
-                    <i class="bi bi-calendar2-check-fill"></i>
-                    My Interviews
+            <li class="nav-item dropdown">
+                <button class="nav-link dropdown-toggle portal-dropdown-button"
+                        type="button"
+                        data-bs-toggle="dropdown"
+                        aria-expanded="false">
+                    <i class="bi bi-mortarboard-fill"></i>
+                    My Training
+                </button>
 
-                    @if (upcomingInterviewsCount > 0)
-                    {
-                        <span class="nav-count interview-nav-count">
-                            @(upcomingInterviewsCount > 99
-                                ? "99+"
-                                : upcomingInterviewsCount)
-                        </span>
-                    }
-                </a>
-            </li>
+                <ul class="dropdown-menu portal-dropdown-menu">
+                    <li>
+                        <a class="dropdown-item portal-dropdown-item"
+                           asp-controller="Application"
+                           asp-action="MyApplications">
+                            <i class="bi bi-file-earmark-check-fill"></i>
+                            My Applications
+                        </a>
+                    </li>
 
-            <li class="nav-item">
-                <a class="nav-link portal-nav-link saved-nav-link"
-                   asp-controller="SavedInternship"
-                   asp-action="Index">
-                    <i class="bi bi-heart-fill"></i>
-                    Saved Internships
+                    <li>
+                        <a class="dropdown-item portal-dropdown-item"
+                           asp-controller="TrainingLogbook"
+                           asp-action="Index">
+                            <i class="bi bi-journal-check"></i>
+                            Training Logbook
+                        </a>
+                    </li>
 
-                    @if (savedInternshipsCount > 0)
-                    {
-                        <span class="nav-count saved-nav-count">
-                            @(savedInternshipsCount > 99
-                                ? "99+"
-                                : savedInternshipsCount)
-                        </span>
-                    }
-                </a>
-            </li>
+                    <li>
+                        <a class="dropdown-item portal-dropdown-item"
+                           asp-controller="WeeklyReport"
+                           asp-action="Index">
+                            <i class="bi bi-journal-text"></i>
+                            Weekly Reports
+                        </a>
+                    </li>
 
-            <li class="nav-item">
-                <a class="nav-link portal-nav-link"
-                   asp-controller="Evaluation"
-                   asp-action="MyEvaluations">
-                    <i class="bi bi-trophy-fill"></i>
-                    My Evaluations
-                </a>
+                    <li>
+                        <a class="dropdown-item portal-dropdown-item"
+                           asp-controller="Evaluation"
+                           asp-action="MyEvaluations">
+                            <i class="bi bi-trophy-fill"></i>
+                            Evaluations & Certificates
+                        </a>
+                    </li>
+                </ul>
             </li>
 
             <li class="nav-item">
@@ -430,6 +466,36 @@
                     <i class="bi bi-plus-circle-fill"></i>
                     Add Internship
                 </a>
+            </li>
+
+            <li class="nav-item dropdown">
+                <button class="nav-link dropdown-toggle portal-dropdown-button"
+                        type="button"
+                        data-bs-toggle="dropdown"
+                        aria-expanded="false">
+                    <i class="bi bi-clipboard-check-fill"></i>
+                    Training Review
+                </button>
+
+                <ul class="dropdown-menu portal-dropdown-menu">
+                    <li>
+                        <a class="dropdown-item portal-dropdown-item"
+                           asp-controller="TrainingHoursReview"
+                           asp-action="Index">
+                            <i class="bi bi-clock-history"></i>
+                            Review Training Hours
+                        </a>
+                    </li>
+
+                    <li>
+                        <a class="dropdown-item portal-dropdown-item"
+                           asp-controller="WeeklyReportReview"
+                           asp-action="Index">
+                            <i class="bi bi-journal-check"></i>
+                            Review Weekly Reports
+                        </a>
+                    </li>
+                </ul>
             </li>
 
             <li class="nav-item">
@@ -472,48 +538,72 @@
             </li>
         }
 
+        @if (User.IsInRole("UniversitySupervisor"))
+        {
+            <li class="nav-item">
+                <a class="nav-link portal-nav-link"
+                   asp-controller="TrainingApproval"
+                   asp-action="Index">
+                    <i class="bi bi-shield-check"></i>
+                    Training Approvals
+                </a>
+            </li>
+
+            <li class="nav-item">
+                <a class="nav-link portal-nav-link"
+                   asp-controller="WeeklyReportReview"
+                   asp-action="Index">
+                    <i class="bi bi-journal-check"></i>
+                    Report Approvals
+                </a>
+            </li>
+        }
+
         <li class="nav-item">
             <a class="nav-link notification-nav-link"
                asp-controller="Notification"
                asp-action="Index"
                title="Notifications">
-
                 <i class="bi bi-bell-fill"></i>
 
                 @if (unreadNotificationsCount > 0)
                 {
                     <span class="notification-count">
                         @(unreadNotificationsCount > 99
-                            ? "99+"
-                            : unreadNotificationsCount)
-                    </span>
-                }
-            </a>
-        </li>
+                                        ? "99+"
+                                        : unreadNotificationsCount)
+            </span>
+                        }
+        </a>
+    </li>
 
-        <li class="nav-item">
-            <div class="user-area">
-                <div class="user-avatar">
-                    @(string.IsNullOrWhiteSpace(User.Identity?.Name)
-                        ? "U"
-                        : User.Identity.Name
-                            .Substring(0, 1)
-                            .ToUpper())
-                </div>
+    <li class="nav-item">
+        <div class="user-area">
+            <div class="navbar-user-avatar">
+                @(string.IsNullOrWhiteSpace(User.Identity?.Name)
+                                ? "U"
+                                : User.Identity.Name
+                                .Substring(0, 1)
+                                .ToUpper())
+            </div>
 
                 <div class="user-information">
-                    <span class="user-email">
+                    <span class="navbar-user-email">
                         @User.Identity?.Name
                     </span>
 
                     <span class="user-role">
-                        @if (User.IsInRole("Admin"))
+                    @if (User.IsInRole("Admin"))
                         {
                             <text>Administrator</text>
                         }
                         else if (User.IsInRole("Company"))
                         {
                             <text>Company</text>
+                        }
+                        else if (User.IsInRole("UniversitySupervisor"))
+                        {
+                            <text>Supervisor</text>
                         }
                         else
                         {
@@ -525,10 +615,10 @@
                 <form asp-area="Identity"
                       asp-page="/Account/Logout"
                       asp-route-returnUrl="@Url.Action(
-                                              "Index",
-                                              "Home",
-                                              new { area = "" })"
-                      method="post">
+                                                "Index",
+                                                "Home",
+                                                new { area = "" })"
+                  method="post">
 
                     <button type="submit"
                             class="logout-button"

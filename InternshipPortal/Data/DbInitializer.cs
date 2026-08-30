@@ -8,43 +8,81 @@ namespace InternshipPortal.Data
             IServiceProvider serviceProvider)
         {
             var roleManager =
-                serviceProvider.GetRequiredService<RoleManager<IdentityRole>>();
+                serviceProvider
+                    .GetRequiredService<
+                        RoleManager<IdentityRole>>();
 
             var userManager =
-                serviceProvider.GetRequiredService<UserManager<IdentityUser>>();
+                serviceProvider
+                    .GetRequiredService<
+                        UserManager<IdentityUser>>();
 
-            string[] roles = { "Admin", "Student", "Company" };
+            string[] roles =
+            {
+                "Admin",
+                "Student",
+                "Company",
+                "UniversitySupervisor"
+            };
 
             foreach (var role in roles)
             {
                 if (!await roleManager.RoleExistsAsync(role))
                 {
-                    await roleManager.CreateAsync(new IdentityRole(role));
+                    await roleManager.CreateAsync(
+                        new IdentityRole(role));
                 }
             }
 
-            string adminEmail = "admin@internship.com";
-            string adminPassword = "Admin123";
+            await CreateUserWithRoleAsync(
+                userManager,
+                "admin@internship.com",
+                "Admin123",
+                "Admin");
 
-            var admin = await userManager.FindByEmailAsync(adminEmail);
+            await CreateUserWithRoleAsync(
+                userManager,
+                "supervisor@internship.com",
+                "Supervisor123",
+                "UniversitySupervisor");
+        }
 
-            if (admin == null)
+        private static async Task CreateUserWithRoleAsync(
+            UserManager<IdentityUser> userManager,
+            string email,
+            string password,
+            string role)
+        {
+            var user =
+                await userManager.FindByEmailAsync(email);
+
+            if (user == null)
             {
-                admin = new IdentityUser
+                user = new IdentityUser
                 {
-                    UserName = adminEmail,
-                    Email = adminEmail,
+                    UserName = email,
+                    Email = email,
                     EmailConfirmed = true
                 };
 
-                var result = await userManager.CreateAsync(
-                    admin,
-                    adminPassword);
+                var createResult =
+                    await userManager.CreateAsync(
+                        user,
+                        password);
 
-                if (result.Succeeded)
+                if (!createResult.Succeeded)
                 {
-                    await userManager.AddToRoleAsync(admin, "Admin");
+                    return;
                 }
+            }
+
+            if (!await userManager.IsInRoleAsync(
+                user,
+                role))
+            {
+                await userManager.AddToRoleAsync(
+                    user,
+                    role);
             }
         }
     }

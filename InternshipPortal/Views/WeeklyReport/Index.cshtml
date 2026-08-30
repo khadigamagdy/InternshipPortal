@@ -1,0 +1,733 @@
+﻿@model IEnumerable<InternshipPortal.Models.WeeklyReport>
+@using InternshipPortal.Models.Enums
+
+@{
+    ViewData["Title"] = "Weekly Reports";
+
+    var reports = Model.ToList();
+
+    var draftCount = reports.Count(report =>
+        report.Status == WeeklyReportStatus.Draft);
+
+    var underReviewCount = reports.Count(report =>
+        report.Status == WeeklyReportStatus.Submitted ||
+        report.Status == WeeklyReportStatus.CompanyApproved);
+
+    var approvedCount = reports.Count(report =>
+        report.Status ==
+            WeeklyReportStatus.SupervisorApproved);
+
+    var returnedCount = reports.Count(report =>
+        report.Status ==
+            WeeklyReportStatus.CompanyRejected ||
+        report.Status ==
+            WeeklyReportStatus.SupervisorReturned);
+}
+
+<style>
+    .reports-page {
+        min-height: 100vh;
+        padding: 45px 0 70px;
+        background: radial-gradient(circle at top left, rgba(99, 102, 241, 0.14), transparent 35%), radial-gradient(circle at bottom right, rgba(14, 165, 233, 0.13), transparent 35%), #f8fafc;
+    }
+
+    .reports-header {
+        position: relative;
+        overflow: hidden;
+        padding: 37px;
+        margin-bottom: 25px;
+        color: white;
+        border-radius: 27px;
+        background: linear-gradient(135deg, #172554, #4f46e5, #0284c7);
+        box-shadow: 0 22px 48px rgba(79, 70, 229, 0.24);
+        animation: headerAppear 0.7s ease;
+    }
+
+        .reports-header::after {
+            position: absolute;
+            width: 280px;
+            height: 280px;
+            right: -80px;
+            bottom: -180px;
+            content: "";
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+    .header-content {
+        position: relative;
+        z-index: 2;
+    }
+
+    .header-icon {
+        min-width: 68px;
+        height: 68px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-right: 18px;
+        font-size: 30px;
+        border-radius: 21px;
+        background: rgba(255, 255, 255, 0.17);
+        animation: iconFloat 3s ease-in-out infinite;
+    }
+
+    .reports-header h1 {
+        margin: 0;
+        font-weight: 900;
+    }
+
+    .reports-header p {
+        margin: 8px 0 0;
+        color: rgba(255, 255, 255, 0.8);
+    }
+
+    .logbook-button {
+        display: inline-flex;
+        align-items: center;
+        gap: 7px;
+        padding: 11px 16px;
+        color: white;
+        font-size: 12px;
+        font-weight: 900;
+        border: 1px solid rgba(255, 255, 255, 0.32);
+        border-radius: 13px;
+        text-decoration: none;
+        background: rgba(255, 255, 255, 0.13);
+        transition: 0.3s;
+    }
+
+        .logbook-button:hover {
+            color: #312e81;
+            background: white;
+            transform: translateY(-3px);
+        }
+
+    .statistics-grid {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 17px;
+        margin-bottom: 27px;
+    }
+
+    .statistic-card {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        padding: 20px;
+        border: 1px solid #e2e8f0;
+        border-radius: 19px;
+        background: white;
+        box-shadow: 0 10px 27px rgba(15, 23, 42, 0.07);
+        transition: 0.3s;
+    }
+
+        .statistic-card:hover {
+            transform: translateY(-5px);
+        }
+
+    .statistic-icon {
+        min-width: 50px;
+        height: 50px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 21px;
+        border-radius: 15px;
+    }
+
+    .draft-icon {
+        color: #475569;
+        background: #f1f5f9;
+    }
+
+    .review-icon {
+        color: #b45309;
+        background: #fef3c7;
+    }
+
+    .approved-icon {
+        color: #047857;
+        background: #d1fae5;
+    }
+
+    .returned-icon {
+        color: #b91c1c;
+        background: #fee2e2;
+    }
+
+    .statistic-number {
+        display: block;
+        color: #0f172a;
+        font-size: 25px;
+        font-weight: 900;
+    }
+
+    .statistic-label {
+        color: #64748b;
+        font-size: 12px;
+        font-weight: 700;
+    }
+
+    .report-card {
+        padding: 25px;
+        margin-bottom: 19px;
+        border: 1px solid #e2e8f0;
+        border-radius: 23px;
+        background: white;
+        box-shadow: 0 11px 30px rgba(15, 23, 42, 0.07);
+        transition: 0.35s;
+        animation: cardAppear 0.7s ease both;
+    }
+
+        .report-card:hover {
+            border-color: #c7d2fe;
+            transform: translateY(-5px);
+            box-shadow: 0 19px 39px rgba(79, 70, 229, 0.14);
+        }
+
+    .week-box {
+        min-width: 70px;
+        height: 70px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-direction: column;
+        color: white;
+        border-radius: 20px;
+        background: linear-gradient(135deg, #4f46e5, #0284c7);
+    }
+
+        .week-box strong {
+            font-size: 24px;
+            font-weight: 900;
+            line-height: 1;
+        }
+
+        .week-box span {
+            margin-top: 5px;
+            font-size: 10px;
+            font-weight: 800;
+        }
+
+    .report-title {
+        margin: 0 0 5px;
+        color: #0f172a;
+        font-size: 18px;
+        font-weight: 900;
+    }
+
+    .company-name {
+        color: #475569;
+        font-size: 12px;
+        font-weight: 700;
+    }
+
+    .report-date {
+        margin-top: 6px;
+        color: #94a3b8;
+        font-size: 11px;
+    }
+
+    .status-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 8px 12px;
+        font-size: 11px;
+        font-weight: 900;
+        border-radius: 20px;
+    }
+
+    .status-draft {
+        color: #475569;
+        background: #f1f5f9;
+    }
+
+    .status-review {
+        color: #b45309;
+        background: #fef3c7;
+    }
+
+    .status-approved {
+        color: #047857;
+        background: #d1fae5;
+    }
+
+    .status-returned {
+        color: #b91c1c;
+        background: #fee2e2;
+    }
+
+    .report-content-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 14px;
+        margin-top: 20px;
+    }
+
+    .content-box {
+        padding: 17px;
+        border: 1px solid #e2e8f0;
+        border-radius: 16px;
+        background: #f8fafc;
+    }
+
+        .content-box h4 {
+            margin: 0 0 8px;
+            color: #334155;
+            font-size: 12px;
+            font-weight: 900;
+        }
+
+        .content-box p {
+            margin: 0;
+            color: #64748b;
+            font-size: 12px;
+            line-height: 1.7;
+            white-space: pre-line;
+        }
+
+    .feedback-box {
+        padding: 15px;
+        margin-top: 15px;
+        border-radius: 14px;
+        font-size: 12px;
+        line-height: 1.7;
+    }
+
+    .company-feedback {
+        color: #075985;
+        border: 1px solid #bae6fd;
+        background: #f0f9ff;
+    }
+
+    .supervisor-feedback {
+        color: #5b21b6;
+        border: 1px solid #ddd6fe;
+        background: #f5f3ff;
+    }
+
+    .report-actions {
+        display: flex;
+        justify-content: flex-end;
+        gap: 10px;
+        padding-top: 18px;
+        margin-top: 18px;
+        border-top: 1px solid #f1f5f9;
+    }
+
+    .submit-button {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 7px;
+        padding: 10px 16px;
+        color: white;
+        font-size: 12px;
+        font-weight: 900;
+        border: none;
+        border-radius: 12px;
+        background: linear-gradient(135deg, #4f46e5, #0284c7);
+        transition: 0.3s;
+    }
+
+        .submit-button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 22px rgba(79, 70, 229, 0.25);
+        }
+
+    .empty-state {
+        padding: 80px 25px;
+        text-align: center;
+        border: 2px dashed #cbd5e1;
+        border-radius: 25px;
+        background: white;
+    }
+
+        .empty-state span {
+            display: block;
+            font-size: 75px;
+        }
+
+        .empty-state h3 {
+            margin-top: 18px;
+            color: #0f172a;
+            font-weight: 900;
+        }
+
+        .empty-state p {
+            color: #64748b;
+        }
+
+    @@keyframes headerAppear {
+        from {
+            opacity: 0;
+            transform: translateY(-25px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    @@keyframes cardAppear {
+        from {
+            opacity: 0;
+            transform: translateY(25px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    @@keyframes iconFloat {
+        0%, 100% {
+            transform: translateY(0);
+        }
+
+        50% {
+            transform: translateY(-8px);
+        }
+    }
+
+    @@media (max-width: 992px) {
+        .statistics-grid,
+        .report-content-grid {
+            grid-template-columns: repeat(2, 1fr);
+        }
+    }
+
+    @@media (max-width: 650px) {
+        .statistics-grid,
+        .report-content-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .report-actions form,
+        .submit-button {
+            width: 100%;
+        }
+    }
+</style>
+
+<div class="reports-page">
+    <div class="container">
+        @if (TempData["SuccessMessage"] != null)
+        {
+            <div class="alert alert-success alert-dismissible fade show shadow-sm">
+                <i class="bi bi-check-circle-fill me-2"></i>
+                @TempData["SuccessMessage"]
+
+                <button type="button"
+                        class="btn-close"
+                        data-bs-dismiss="alert">
+                </button>
+            </div>
+        }
+
+        @if (TempData["ErrorMessage"] != null)
+        {
+            <div class="alert alert-danger alert-dismissible fade show shadow-sm">
+                <i class="bi bi-exclamation-circle-fill me-2"></i>
+                @TempData["ErrorMessage"]
+
+                <button type="button"
+                        class="btn-close"
+                        data-bs-dismiss="alert">
+                </button>
+            </div>
+        }
+
+        <div class="reports-header">
+            <div class="header-content d-flex flex-wrap align-items-center justify-content-between gap-4">
+                <div class="d-flex align-items-center">
+                    <div class="header-icon">
+                        <i class="bi bi-journal-text"></i>
+                    </div>
+
+                    <div>
+                        <h1>Weekly Reports</h1>
+
+                        <p>
+                            Document your weekly progress,
+                            learned skills and training challenges.
+                        </p>
+                    </div>
+                </div>
+
+                <a asp-controller="TrainingLogbook"
+                   asp-action="Index"
+                   class="logbook-button">
+
+                    <i class="bi bi-arrow-left"></i>
+                    Training Logbook
+                </a>
+            </div>
+        </div>
+
+        <div class="statistics-grid">
+            <div class="statistic-card">
+                <div class="statistic-icon draft-icon">
+                    <i class="bi bi-file-earmark"></i>
+                </div>
+
+                <div>
+                    <span class="statistic-number">@draftCount</span>
+                    <span class="statistic-label">Draft Reports</span>
+                </div>
+            </div>
+
+            <div class="statistic-card">
+                <div class="statistic-icon review-icon">
+                    <i class="bi bi-hourglass-split"></i>
+                </div>
+
+                <div>
+                    <span class="statistic-number">
+                        @underReviewCount
+                    </span>
+
+                    <span class="statistic-label">
+                        Under Review
+                    </span>
+                </div>
+            </div>
+
+            <div class="statistic-card">
+                <div class="statistic-icon approved-icon">
+                    <i class="bi bi-patch-check-fill"></i>
+                </div>
+
+                <div>
+                    <span class="statistic-number">
+                        @approvedCount
+                    </span>
+
+                    <span class="statistic-label">
+                        Fully Approved
+                    </span>
+                </div>
+            </div>
+
+            <div class="statistic-card">
+                <div class="statistic-icon returned-icon">
+                    <i class="bi bi-arrow-counterclockwise"></i>
+                </div>
+
+                <div>
+                    <span class="statistic-number">
+                        @returnedCount
+                    </span>
+
+                    <span class="statistic-label">
+                        Returned Reports
+                    </span>
+                </div>
+            </div>
+        </div>
+
+        @if (reports.Any())
+        {
+            var animationDelay = 0;
+
+            foreach (var report in reports)
+            {
+                var internship =
+                report.TrainingEnrollment
+                .InternshipApplication
+                .Internship;
+
+                var statusClass =
+                report.Status switch
+                {
+                    WeeklyReportStatus.Draft =>
+                    "status-draft",
+
+                    WeeklyReportStatus.SupervisorApproved =>
+                    "status-approved",
+
+                    WeeklyReportStatus.CompanyRejected =>
+                    "status-returned",
+
+                    WeeklyReportStatus.SupervisorReturned =>
+                    "status-returned",
+
+                    _ => "status-review"
+                };
+
+                var statusIcon =
+                report.Status switch
+                {
+                    WeeklyReportStatus.Draft =>
+                    "bi-file-earmark",
+
+                    WeeklyReportStatus.SupervisorApproved =>
+                    "bi-patch-check-fill",
+
+                    WeeklyReportStatus.CompanyRejected =>
+                    "bi-arrow-counterclockwise",
+
+                    WeeklyReportStatus.SupervisorReturned =>
+                    "bi-arrow-counterclockwise",
+
+                    _ => "bi-hourglass-split"
+                };
+
+                var canSubmit =
+                report.Status == WeeklyReportStatus.Draft ||
+                report.Status ==
+                WeeklyReportStatus.CompanyRejected ||
+                report.Status ==
+                WeeklyReportStatus.SupervisorReturned;
+
+                <div class="report-card"
+                     style="animation-delay: @(animationDelay)ms">
+
+                    <div class="d-flex flex-wrap align-items-start justify-content-between gap-3">
+                        <div class="d-flex align-items-center gap-3">
+                            <div class="week-box">
+                                <strong>@report.WeekNumber</strong>
+                                <span>WEEK</span>
+                            </div>
+
+                            <div>
+                                <h3 class="report-title">
+                                    @internship.Title
+                                </h3>
+
+                                <div class="company-name">
+                                    <i class="bi bi-building-fill me-1"></i>
+                                    @internship.Company.Name
+                                </div>
+
+                                <div class="report-date">
+                                    <i class="bi bi-calendar-range me-1"></i>
+
+                                    @report.WeekStartDate.ToString("dd MMM")
+                                    -
+                                    @report.WeekEndDate.ToString("dd MMM yyyy")
+                                </div>
+                            </div>
+                        </div>
+
+                        <span class="status-badge @statusClass">
+                            <i class="bi @statusIcon"></i>
+                            @report.Status
+                        </span>
+                    </div>
+
+                    <div class="report-content-grid">
+                        <div class="content-box">
+                            <h4>
+                                <i class="bi bi-list-check me-1"></i>
+                                Tasks Completed
+                            </h4>
+
+                            <p>@report.TasksCompleted</p>
+                        </div>
+
+                        <div class="content-box">
+                            <h4>
+                                <i class="bi bi-stars me-1"></i>
+                                Skills Learned
+                            </h4>
+
+                            <p>@report.SkillsLearned</p>
+                        </div>
+
+                        @if (!string.IsNullOrWhiteSpace(
+                                        report.Challenges))
+                        {
+                            <div class="content-box">
+                                <h4>
+                                    <i class="bi bi-lightning-charge me-1"></i>
+                                    Challenges
+                                </h4>
+
+                                <p>@report.Challenges</p>
+                            </div>
+                        }
+
+                        @if (!string.IsNullOrWhiteSpace(
+                                        report.NextWeekPlan))
+                        {
+                            <div class="content-box">
+                                <h4>
+                                    <i class="bi bi-calendar2-check me-1"></i>
+                                    Next Week Plan
+                                </h4>
+
+                                <p>@report.NextWeekPlan</p>
+                            </div>
+                        }
+                    </div>
+
+                    @if (!string.IsNullOrWhiteSpace(
+                                report.CompanyFeedback))
+                    {
+                        <div class="feedback-box company-feedback">
+                            <strong>
+                                <i class="bi bi-building-check me-1"></i>
+                                Company Feedback:
+                            </strong>
+
+                            @report.CompanyFeedback
+                        </div>
+                    }
+
+                    @if (!string.IsNullOrWhiteSpace(
+                                report.SupervisorFeedback))
+                    {
+                        <div class="feedback-box supervisor-feedback">
+                            <strong>
+                                <i class="bi bi-mortarboard-fill me-1"></i>
+                                Supervisor Feedback:
+                            </strong>
+
+                            @report.SupervisorFeedback
+                        </div>
+                    }
+
+                    @if (canSubmit)
+                    {
+                        <div class="report-actions">
+                            <form asp-action="Submit"
+                                  asp-route-id="@report.Id"
+                                  method="post"
+                                  onsubmit="return confirm('Submit this weekly report?');">
+
+                                @Html.AntiForgeryToken()
+
+                                <button type="submit"
+                                        class="submit-button">
+
+                                    <i class="bi bi-send-check-fill"></i>
+                                    Submit Report
+                                </button>
+                            </form>
+                        </div>
+                    }
+                </div>
+
+                animationDelay += 80;
+            }
+        }
+        else
+        {
+            <div class="empty-state">
+                <span>📑</span>
+
+                <h3>No Weekly Reports Yet</h3>
+
+                <p>
+                    Create your first report from the
+                    Training Logbook page.
+                </p>
+            </div>
+        }
+    </div>
+</div>
