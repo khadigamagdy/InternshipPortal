@@ -27,11 +27,13 @@ namespace InternshipPortal.Controllers
         [HttpGet]
         public async Task<IActionResult> Index()
         {
-            var userId = userManager.GetUserId(User);
+            var userId =
+                userManager.GetUserId(User);
 
-            var student = await context.Students
-                .FirstOrDefaultAsync(student =>
-                    student.UserId == userId);
+            var student =
+                await context.Students
+                    .FirstOrDefaultAsync(student =>
+                        student.UserId == userId);
 
             if (student == null)
             {
@@ -43,23 +45,25 @@ namespace InternshipPortal.Controllers
                     "Student");
             }
 
-            var enrollments = await context.TrainingEnrollments
-                .Include(enrollment =>
-                    enrollment.InternshipApplication)
-                .ThenInclude(application =>
-                    application.Internship)
-                .ThenInclude(internship =>
-                    internship.Company)
-                .Include(enrollment =>
-                    enrollment.HourEntries)
-                .Include(enrollment =>
-                    enrollment.WeeklyReports)
-                .Where(enrollment =>
-                    enrollment.InternshipApplication.StudentId ==
-                        student.Id)
-                .OrderByDescending(enrollment =>
-                    enrollment.CreatedAt)
-                .ToListAsync();
+            var enrollments =
+                await context.TrainingEnrollments
+                    .Include(enrollment =>
+                        enrollment.InternshipApplication)
+                    .ThenInclude(application =>
+                        application.Internship)
+                    .ThenInclude(internship =>
+                        internship.Company)
+                    .Include(enrollment =>
+                        enrollment.HourEntries)
+                    .Include(enrollment =>
+                        enrollment.WeeklyReports)
+                    .Where(enrollment =>
+                        enrollment
+                            .InternshipApplication
+                            .StudentId == student.Id)
+                    .OrderByDescending(enrollment =>
+                        enrollment.CreatedAt)
+                    .ToListAsync();
 
             return View(enrollments);
         }
@@ -78,33 +82,41 @@ namespace InternshipPortal.Controllers
                 return NotFound();
             }
 
-            if (enrollment.Status != TrainingStatus.Active)
+            if (enrollment.Status !=
+                TrainingStatus.Active)
             {
                 TempData["ErrorMessage"] =
                     "Training hours can only be added after the training is approved and activated.";
 
-                return RedirectToAction(nameof(Index));
+                return RedirectToAction(
+                    nameof(Index));
             }
 
-            var model = new TrainingHourEntryViewModel
-            {
-                TrainingEnrollmentId = enrollment.Id,
+            await AlignNewActiveTrainingWithCurrentDateAsync(
+                enrollment);
 
-                InternshipTitle =
-                    enrollment
-                        .InternshipApplication
-                        .Internship
-                        .Title,
+            var model =
+                new TrainingHourEntryViewModel
+                {
+                    TrainingEnrollmentId =
+                        enrollment.Id,
 
-                CompanyName =
-                    enrollment
-                        .InternshipApplication
-                        .Internship
-                        .Company
-                        .Name,
+                    InternshipTitle =
+                        enrollment
+                            .InternshipApplication
+                            .Internship
+                            .Title,
 
-                TrainingDate = DateTime.Today
-            };
+                    CompanyName =
+                        enrollment
+                            .InternshipApplication
+                            .Internship
+                            .Company
+                            .Name,
+
+                    TrainingDate =
+                        DateTime.Today
+                };
 
             return View(model);
         }
@@ -137,14 +149,16 @@ namespace InternshipPortal.Controllers
                     .Company
                     .Name;
 
-            if (enrollment.Status != TrainingStatus.Active)
+            if (enrollment.Status !=
+                TrainingStatus.Active)
             {
                 ModelState.AddModelError(
                     string.Empty,
                     "This training is not active.");
             }
 
-            if (model.TrainingDate.Date > DateTime.Today)
+            if (model.TrainingDate.Date >
+                DateTime.Today)
             {
                 ModelState.AddModelError(
                     nameof(model.TrainingDate),
@@ -167,6 +181,14 @@ namespace InternshipPortal.Controllers
                     "The training date cannot be after the expected end date.");
             }
 
+            if (model.Hours < 0.5m ||
+                model.Hours > 24)
+            {
+                ModelState.AddModelError(
+                    nameof(model.Hours),
+                    "Enter a value between 0.5 and 24 hours.");
+            }
+
             var registeredHoursForDate =
                 await context.TrainingHourEntries
                     .Where(entry =>
@@ -179,11 +201,28 @@ namespace InternshipPortal.Controllers
                     .SumAsync(entry =>
                         (decimal?)entry.Hours) ?? 0;
 
-            if (registeredHoursForDate + model.Hours > 24)
+            if (registeredHoursForDate +
+                model.Hours > 24)
             {
                 ModelState.AddModelError(
                     nameof(model.Hours),
                     "The total registered hours for this date cannot exceed 24 hours.");
+            }
+
+            if (string.IsNullOrWhiteSpace(
+                model.TaskTitle))
+            {
+                ModelState.AddModelError(
+                    nameof(model.TaskTitle),
+                    "Task title is required.");
+            }
+
+            if (string.IsNullOrWhiteSpace(
+                model.TaskDescription))
+            {
+                ModelState.AddModelError(
+                    nameof(model.TaskDescription),
+                    "Task description is required.");
             }
 
             if (!ModelState.IsValid)
@@ -191,33 +230,36 @@ namespace InternshipPortal.Controllers
                 return View(model);
             }
 
-            var hourEntry = new TrainingHourEntry
-            {
-                TrainingEnrollmentId =
-                    enrollment.Id,
+            var hourEntry =
+                new TrainingHourEntry
+                {
+                    TrainingEnrollmentId =
+                        enrollment.Id,
 
-                TrainingDate =
-                    model.TrainingDate.Date,
+                    TrainingDate =
+                        model.TrainingDate.Date,
 
-                Hours = model.Hours,
+                    Hours =
+                        model.Hours,
 
-                TaskTitle =
-                    model.TaskTitle.Trim(),
+                    TaskTitle =
+                        model.TaskTitle.Trim(),
 
-                TaskDescription =
-                    model.TaskDescription.Trim(),
+                    TaskDescription =
+                        model.TaskDescription.Trim(),
 
-                LearnedSkills =
-                    string.IsNullOrWhiteSpace(
-                        model.LearnedSkills)
-                        ? null
-                        : model.LearnedSkills.Trim(),
+                    LearnedSkills =
+                        string.IsNullOrWhiteSpace(
+                            model.LearnedSkills)
+                            ? null
+                            : model.LearnedSkills.Trim(),
 
-                Status =
-                    TrainingHourStatus.Pending,
+                    Status =
+                        TrainingHourStatus.Pending,
 
-                CreatedAt = DateTime.Now
-            };
+                    CreatedAt =
+                        DateTime.Now
+                };
 
             context.TrainingHourEntries.Add(
                 hourEntry);
@@ -232,17 +274,22 @@ namespace InternshipPortal.Controllers
             context.Notifications.Add(
                 new Notification
                 {
-                    UserId = companyUserId,
+                    UserId =
+                        companyUserId,
 
-                    Title = "Training Hours Submitted",
+                    Title =
+                        "Training Hours Submitted",
 
                     Message =
                         $"{enrollment.InternshipApplication.Student.FullName} " +
                         $"submitted {model.Hours:0.0} training hours " +
                         $"for {model.TrainingDate:dd MMM yyyy}.",
 
-                    IsRead = false,
-                    CreatedAt = DateTime.Now
+                    IsRead =
+                        false,
+
+                    CreatedAt =
+                        DateTime.Now
                 });
 
             await context.SaveChangesAsync();
@@ -250,7 +297,40 @@ namespace InternshipPortal.Controllers
             TempData["SuccessMessage"] =
                 "Training hours submitted successfully and sent to the company for approval.";
 
-            return RedirectToAction(nameof(Index));
+            return RedirectToAction(
+                nameof(Index));
+        }
+
+        private async Task AlignNewActiveTrainingWithCurrentDateAsync(
+            TrainingEnrollment enrollment)
+        {
+            if (enrollment.Status !=
+                    TrainingStatus.Active ||
+                enrollment.HourEntries.Any() ||
+                enrollment.StartDate.Date <=
+                    DateTime.Today)
+            {
+                return;
+            }
+
+            var trainingDuration =
+                enrollment.ExpectedEndDate.Date -
+                enrollment.StartDate.Date;
+
+            if (trainingDuration.TotalDays < 1)
+            {
+                trainingDuration =
+                    TimeSpan.FromDays(30);
+            }
+
+            enrollment.StartDate =
+                DateTime.Today;
+
+            enrollment.ExpectedEndDate =
+                DateTime.Today.Add(
+                    trainingDuration);
+
+            await context.SaveChangesAsync();
         }
 
         private async Task<TrainingEnrollment?>

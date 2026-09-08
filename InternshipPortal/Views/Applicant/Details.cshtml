@@ -3,6 +3,13 @@
 
 @{
     ViewData["Title"] = "Student Information";
+
+    var studentInitial =
+        string.IsNullOrWhiteSpace(Model.Student.FullName)
+            ? "S"
+            : Model.Student.FullName
+                .Substring(0, 1)
+                .ToUpper();
 }
 
 <div class="student-details-page">
@@ -10,9 +17,7 @@
 
         <section class="student-header">
             <div class="student-avatar">
-                @Model.Student.FullName
-                .Substring(0, 1)
-                .ToUpper()
+                @studentInitial
             </div>
 
             <div class="student-heading">
@@ -20,11 +25,25 @@
                     Internship Applicant
                 </span>
 
-                <h1>@Model.Student.FullName</h1>
+                <h1>
+                    @(string.IsNullOrWhiteSpace(
+                        Model.Student.FullName)
+                        ? "Student"
+                        : Model.Student.FullName)
+                </h1>
 
                 <p>
-                    @Model.Student.Specialization
-                    · @Model.Student.University
+                    @(string.IsNullOrWhiteSpace(
+                        Model.Student.Specialization)
+                        ? "Specialization not specified"
+                        : Model.Student.Specialization)
+
+                    ·
+
+                    @(string.IsNullOrWhiteSpace(
+                        Model.Student.University)
+                        ? "University not specified"
+                        : Model.Student.University)
                 </p>
             </div>
 
@@ -55,24 +74,45 @@
                     <div class="academic-grid">
                         <div class="information-item">
                             <small>Full Name</small>
-                            <strong>@Model.Student.FullName</strong>
+
+                            <strong>
+                                @(string.IsNullOrWhiteSpace(
+                                    Model.Student.FullName)
+                                    ? "Not provided"
+                                    : Model.Student.FullName)
+                            </strong>
                         </div>
 
                         <div class="information-item">
                             <small>University</small>
-                            <strong>@Model.Student.University</strong>
+
+                            <strong>
+                                @(string.IsNullOrWhiteSpace(
+                                    Model.Student.University)
+                                    ? "Not provided"
+                                    : Model.Student.University)
+                            </strong>
                         </div>
 
                         <div class="information-item">
                             <small>Faculty</small>
-                            <strong>@Model.Student.Faculty</strong>
+
+                            <strong>
+                                @(string.IsNullOrWhiteSpace(
+                                    Model.Student.Faculty)
+                                    ? "Not provided"
+                                    : Model.Student.Faculty)
+                            </strong>
                         </div>
 
                         <div class="information-item">
                             <small>Specialization</small>
 
                             <strong>
-                                @Model.Student.Specialization
+                                @(string.IsNullOrWhiteSpace(
+                                    Model.Student.Specialization)
+                                    ? "Not provided"
+                                    : Model.Student.Specialization)
                             </strong>
                         </div>
 
@@ -80,7 +120,10 @@
                             <small>Graduation Year</small>
 
                             <strong>
-                                @Model.Student.GraduationYear
+                                @(Model.Student.GraduationYear > 0
+                                    ? Model.Student.GraduationYear
+                                        .ToString()
+                                    : "Not provided")
                             </strong>
                         </div>
 
@@ -107,7 +150,8 @@
                         </div>
                     </div>
 
-                    @if (!string.IsNullOrEmpty(Model.CoverLetter))
+                    @if (!string.IsNullOrWhiteSpace(
+                        Model.CoverLetter))
                     {
                         <div class="cover-letter">
                             @Model.CoverLetter
@@ -137,15 +181,18 @@
                     <div class="internship-information">
                         <div>
                             <small>Internship</small>
-                            <strong>@Model.Internship.Title</strong>
+
+                            <strong>
+                                @Model.Internship.Title
+                            </strong>
                         </div>
 
                         <div>
                             <small>Application Date</small>
 
                             <strong>
-                                @Model.AppliedAt
-                                .ToString("dd MMMM yyyy")
+                                @(Model.AppliedAt
+                                    .ToString("dd MMMM yyyy"))
                             </strong>
                         </div>
 
@@ -172,7 +219,8 @@
                 <article class="application-card">
                     <h2>Application Status</h2>
 
-                    @if (Model.Status == ApplicationStatus.Pending)
+                    @if (Model.Status ==
+                         ApplicationStatus.Pending)
                     {
                         <div class="status-display pending-status">
                             <span>⏳</span>
@@ -182,6 +230,36 @@
 
                                 <p>
                                     A company decision is required.
+                                </p>
+                            </div>
+                        </div>
+                    }
+                    else if (Model.Status ==
+                             ApplicationStatus.UnderReview)
+                    {
+                        <div class="status-display review-status">
+                            <span>🔍</span>
+
+                            <div>
+                                <strong>Under Review</strong>
+
+                                <p>
+                                    The application is being reviewed.
+                                </p>
+                            </div>
+                        </div>
+                    }
+                    else if (Model.Status ==
+                             ApplicationStatus.InterviewScheduled)
+                    {
+                        <div class="status-display interview-status">
+                            <span>📅</span>
+
+                            <div>
+                                <strong>Interview Scheduled</strong>
+
+                                <p>
+                                    An interview has been scheduled.
                                 </p>
                             </div>
                         </div>
@@ -216,7 +294,8 @@
                             </div>
                         </div>
                     }
-                    else
+                    else if (Model.Status ==
+                             ApplicationStatus.Completed)
                     {
                         <div class="status-display completed-status">
                             <span>★</span>
@@ -236,13 +315,21 @@
                         <strong>#@Model.Id</strong>
                     </div>
 
-                    @if (!string.IsNullOrEmpty(Model.CVPath))
+                    @if (!string.IsNullOrWhiteSpace(
+                        Model.CVPath))
                     {
                         <a href="@Model.CVPath"
                            target="_blank"
+                           rel="noopener noreferrer"
                            class="cv-button">
                             📄 Open Student CV
                         </a>
+                    }
+                    else
+                    {
+                        <div class="no-cv-message">
+                            No CV was attached.
+                        </div>
                     }
 
                     @if (Model.Status ==
@@ -251,40 +338,40 @@
                         <div class="decision-actions">
                             <form asp-controller="Application"
                                   asp-action="Reject"
+                                  asp-route-id="@Model.Id"
                                   method="post">
 
-                                <input type="hidden"
-                                       name="id"
-                                       value="@Model.Id" />
+                                @Html.AntiForgeryToken()
 
                                 <button type="submit"
                                         class="reject-button"
-                                        onclick="return confirm('Reject this application?')">
+                                        onclick="return confirm('Reject this application?');">
                                     Reject Application
                                 </button>
                             </form>
 
                             <form asp-controller="Application"
                                   asp-action="Accept"
+                                  asp-route-id="@Model.Id"
                                   method="post">
 
-                                <input type="hidden"
-                                       name="id"
-                                       value="@Model.Id" />
+                                @Html.AntiForgeryToken()
 
                                 <button type="submit"
-                                        class="accept-button">
+                                        class="accept-button"
+                                        onclick="return confirm('Accept this student?');">
                                     ✓ Accept Student
                                 </button>
                             </form>
                         </div>
                     }
-                    else if (Model.ReviewedAt != null)
+
+                    @if (Model.ReviewedAt.HasValue)
                     {
                         <div class="review-information">
                             Reviewed on
-                            @Model.ReviewedAt.Value
-                            .ToString("dd MMMM yyyy")
+                            @(Model.ReviewedAt.Value
+                                .ToString("dd MMMM yyyy"))
                         </div>
                     }
                 </article>
@@ -310,7 +397,7 @@
     .student-details-page {
         min-height: 100vh;
         padding: 40px 20px 70px;
-        background: radial-gradient(circle at top left, rgba(37, 99, 235, 0.09), transparent 30%), radial-gradient(circle at bottom right, rgba(16, 185, 129, 0.07), transparent 35%), #f5f7fb;
+        background: radial-gradient( circle at top left, rgba(37, 99, 235, 0.09), transparent 30%), radial-gradient( circle at bottom right, rgba(16, 185, 129, 0.07), transparent 35%), #f5f7fb;
     }
 
     .page-container {
@@ -326,7 +413,7 @@
         gap: 18px;
         color: white;
         border-radius: 25px;
-        background: linear-gradient(135deg, #0f2b5b, #1d4ed8 58%, #059669);
+        background: linear-gradient( 135deg, #0f2b5b, #1d4ed8 58%, #059669);
         box-shadow: 0 20px 46px rgba(30, 64, 175, 0.2);
         animation: detailsEntrance 0.7s ease;
     }
@@ -337,11 +424,15 @@
         display: flex;
         align-items: center;
         justify-content: center;
+        flex-shrink: 0;
+        overflow: hidden;
         color: #1e3a8a;
         border-radius: 24px;
         background: white;
         font-size: 32px;
         font-weight: 800;
+        line-height: 1;
+        text-transform: uppercase;
     }
 
     .applicant-badge {
@@ -539,6 +630,16 @@
         background: #fffbeb;
     }
 
+    .review-status {
+        color: #6d28d9;
+        background: #f5f3ff;
+    }
+
+    .interview-status {
+        color: #0369a1;
+        background: #f0f9ff;
+    }
+
     .accepted-status {
         color: #047857;
         background: #ecfdf5;
@@ -583,6 +684,23 @@
         text-decoration: none;
         font-size: 9px;
         font-weight: 800;
+        transition: 0.3s;
+    }
+
+        .cv-button:hover {
+            color: white;
+            background: #059669;
+            transform: translateY(-2px);
+        }
+
+    .no-cv-message {
+        padding: 10px;
+        margin-top: 15px;
+        color: #64748b;
+        border-radius: 9px;
+        background: #f1f5f9;
+        text-align: center;
+        font-size: 9px;
     }
 
     .decision-actions {
@@ -614,7 +732,7 @@
 
     .accept-button {
         color: white;
-        background: linear-gradient(90deg, #059669, #10b981);
+        background: linear-gradient( 90deg, #059669, #10b981);
     }
 
         .reject-button:hover,

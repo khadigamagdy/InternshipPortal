@@ -8,13 +8,36 @@
         "Portfolio",
         new { slug = Model.Portfolio.PortfolioSlug },
         Context.Request.Scheme);
+
+    var hasVerifiedActivity =
+        Model.CompletedTrainings.Any() ||
+        Model.ApprovedTrainingHours > 0 ||
+        Model.AverageRating > 0;
+
+    var studentInitial =
+        string.IsNullOrWhiteSpace(Model.Student.FullName)
+            ? "S"
+            : Model.Student.FullName
+                .Trim()
+                .Substring(0, 1)
+                .ToUpper();
+
+    var headline =
+        string.IsNullOrWhiteSpace(Model.Portfolio.Headline)
+            ? "Software Engineering Student"
+            : Model.Portfolio.Headline;
+
+    var bio =
+        string.IsNullOrWhiteSpace(Model.Portfolio.Bio)
+            ? "This student has not added a professional biography yet."
+            : Model.Portfolio.Bio;
 }
 
 <style>
     .public-portfolio-page {
         min-height: 100vh;
         padding: 42px 0 75px;
-        background: radial-gradient(circle at top left, rgba(99, 102, 241, 0.15), transparent 34%), radial-gradient(circle at bottom right, rgba(14, 165, 233, 0.13), transparent 35%), #f8fafc;
+        background: radial-gradient( circle at top left, rgba(99, 102, 241, 0.15), transparent 34% ), radial-gradient( circle at bottom right, rgba(14, 165, 233, 0.13), transparent 35% ), #f8fafc;
     }
 
     .public-hero {
@@ -23,7 +46,7 @@
         padding: 48px;
         color: white;
         border-radius: 32px;
-        background: linear-gradient(135deg, #0f172a, #312e81 48%, #0891b2);
+        background: linear-gradient( 135deg, #0f172a, #312e81 48%, #0891b2 );
         box-shadow: 0 25px 60px rgba(30, 41, 59, 0.25);
         animation: publicEntrance 0.7s ease;
     }
@@ -67,6 +90,7 @@
 
     .public-avatar {
         min-width: 105px;
+        width: 105px;
         height: 105px;
         display: flex;
         align-items: center;
@@ -80,18 +104,28 @@
         box-shadow: 0 17px 37px rgba(15, 23, 42, 0.28);
     }
 
-    .verified-badge {
+    .verified-badge,
+    .public-badge {
         display: inline-flex;
         align-items: center;
         gap: 7px;
         padding: 7px 13px;
         margin-bottom: 11px;
-        color: #d1fae5;
         font-size: 12px;
         font-weight: 900;
-        border: 1px solid rgba(167, 243, 208, 0.3);
         border-radius: 30px;
+    }
+
+    .verified-badge {
+        color: #d1fae5;
+        border: 1px solid rgba(167, 243, 208, 0.3);
         background: rgba(16, 185, 129, 0.18);
+    }
+
+    .public-badge {
+        color: #dbeafe;
+        border: 1px solid rgba(191, 219, 254, 0.32);
+        background: rgba(59, 130, 246, 0.18);
     }
 
     .student-identity h1 {
@@ -149,6 +183,7 @@
         gap: 7px;
         font-size: 12px;
         font-weight: 800;
+        cursor: pointer;
     }
 
     .portfolio-statistics {
@@ -322,7 +357,7 @@
         overflow: hidden;
         color: white;
         font-size: 52px;
-        background: linear-gradient(135deg, #312e81, #6366f1, #06b6d4);
+        background: linear-gradient( 135deg, #312e81, #6366f1, #06b6d4 );
     }
 
         .project-image img {
@@ -338,6 +373,7 @@
 
     .featured-label {
         position: absolute;
+        z-index: 2;
         top: 13px;
         right: 13px;
         padding: 6px 10px;
@@ -387,6 +423,7 @@
 
     .project-links {
         display: flex;
+        flex-wrap: wrap;
         gap: 8px;
         padding-top: 13px;
         border-top: 1px solid #f1f5f9;
@@ -444,7 +481,7 @@
         color: white;
         font-size: 22px;
         border-radius: 16px;
-        background: linear-gradient(135deg, #059669, #06b6d4);
+        background: linear-gradient( 135deg, #059669, #06b6d4 );
     }
 
     .training-title {
@@ -557,6 +594,10 @@
         .verification-footer i {
             color: #10b981;
             font-size: 24px;
+        }
+
+        .verification-footer.public-footer i {
+            color: #3b82f6;
         }
 
         .verification-footer strong {
@@ -681,45 +722,64 @@
             <div class="hero-layout">
                 <div class="student-identity">
                     <div class="public-avatar">
-                        @(string.IsNullOrWhiteSpace(Model.Student.FullName)
-                                                ? "S"
-                                                : Model.Student.FullName.Substring(0, 1).ToUpper())
+                        @studentInitial
                     </div>
 
                     <div>
-                        <span class="verified-badge">
-                            <i class="bi bi-patch-check-fill"></i>
-                            Verified Student Portfolio
-                        </span>
+                        @if (hasVerifiedActivity)
+                        {
+                            <span class="verified-badge">
+                                <i class="bi bi-patch-check-fill"></i>
+                                Verified Student Portfolio
+                            </span>
+                        }
+                        else
+                        {
+                            <span class="public-badge">
+                                <i class="bi bi-person-badge-fill"></i>
+                                Public Student Portfolio
+                            </span>
+                        }
 
                         <h1>@Model.Student.FullName</h1>
 
                         <p class="professional-headline">
-                            @Model.Portfolio.Headline
+                            @headline
                         </p>
 
                         <div class="education-line">
-                            <span>
-                                <i class="bi bi-mortarboard-fill me-1"></i>
-                                @Model.Student.University
-                            </span>
+                            @if (!string.IsNullOrWhiteSpace(
+                                Model.Student.University))
+                            {
+                                <span>
+                                    <i class="bi bi-mortarboard-fill me-1"></i>
+                                    @Model.Student.University
+                                </span>
+                            }
 
-                            <span>
-                                <i class="bi bi-book-fill me-1"></i>
-                                @Model.Student.Specialization
-                            </span>
+                            @if (!string.IsNullOrWhiteSpace(
+                                Model.Student.Specialization))
+                            {
+                                <span>
+                                    <i class="bi bi-book-fill me-1"></i>
+                                    @Model.Student.Specialization
+                                </span>
+                            }
 
-                            <span>
-                                <i class="bi bi-calendar-check-fill me-1"></i>
-                                Class of @Model.Student.GraduationYear
-                            </span>
+                            @if (Model.Student.GraduationYear > 0)
+                            {
+                                <span>
+                                    <i class="bi bi-calendar-check-fill me-1"></i>
+                                    Class of @Model.Student.GraduationYear
+                                </span>
+                            }
                         </div>
                     </div>
                 </div>
 
                 <div class="hero-links">
                     @if (!string.IsNullOrWhiteSpace(
-                                        Model.Portfolio.GitHubUrl))
+                        Model.Portfolio.GitHubUrl))
                     {
                         <a href="@Model.Portfolio.GitHubUrl"
                            target="_blank"
@@ -731,7 +791,7 @@
                     }
 
                     @if (!string.IsNullOrWhiteSpace(
-                                        Model.Portfolio.LinkedInUrl))
+                        Model.Portfolio.LinkedInUrl))
                     {
                         <a href="@Model.Portfolio.LinkedInUrl"
                            target="_blank"
@@ -743,7 +803,7 @@
                     }
 
                     @if (!string.IsNullOrWhiteSpace(
-                                        Model.Portfolio.PersonalWebsiteUrl))
+                        Model.Portfolio.PersonalWebsiteUrl))
                     {
                         <a href="@Model.Portfolio.PersonalWebsiteUrl"
                            target="_blank"
@@ -820,7 +880,7 @@
 
                 <div>
                     <span class="stat-number">
-                        @Model.AverageRating.ToString("0.0")
+                        @(Model.AverageRating.ToString("0.0"))
                     </span>
 
                     <span class="stat-label">
@@ -834,7 +894,10 @@
             <div class="section-heading">
                 <div>
                     <h2>About Me</h2>
-                    <p>Professional background and career interests</p>
+
+                    <p>
+                        Professional background and career interests
+                    </p>
                 </div>
 
                 <div class="section-icon">
@@ -842,17 +905,20 @@
                 </div>
             </div>
 
-            <p class="about-text">@Model.Portfolio.Bio</p>
+            <p class="about-text">@bio</p>
         </section>
 
         @if (!string.IsNullOrWhiteSpace(
-                Model.Portfolio.SkillsSummary))
+            Model.Portfolio.SkillsSummary))
         {
             <section class="portfolio-section">
                 <div class="section-heading">
                     <div>
                         <h2>Technical Skills</h2>
-                        <p>Tools and technologies used by the student</p>
+
+                        <p>
+                            Tools and technologies used by the student
+                        </p>
                     </div>
 
                     <div class="section-icon">
@@ -862,9 +928,9 @@
 
                 <div class="skill-list">
                     @foreach (var skill in
-                                    Model.Portfolio.SkillsSummary.Split(
-                                    ',',
-                                    StringSplitOptions.RemoveEmptyEntries))
+                        Model.Portfolio.SkillsSummary.Split(
+                            ',',
+                            StringSplitOptions.RemoveEmptyEntries))
                     {
                         <span class="skill-chip">
                             @skill.Trim()
@@ -878,7 +944,10 @@
             <div class="section-heading">
                 <div>
                     <h2>Projects Showcase</h2>
-                    <p>Practical projects completed by the student</p>
+
+                    <p>
+                        Practical projects completed by the student
+                    </p>
                 </div>
 
                 <div class="section-icon">
@@ -902,10 +971,16 @@
 
                             <div class="project-image">
                                 @if (!string.IsNullOrWhiteSpace(
-                                                        project.ImagePath))
+                                    project.ImagePath))
                                 {
                                     <img src="@project.ImagePath"
-                                         alt="@project.Title" />
+                                         alt="@project.Title"
+                                         loading="lazy"
+                                         onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';" />
+
+                                    <i class="bi bi-code-square"
+                                       style="display:none;">
+                                    </i>
                                 }
                                 else
                                 {
@@ -920,26 +995,31 @@
                                     @project.Description
                                 </p>
 
-                                <div class="technology-list">
-                                    @foreach (var technology in
-                                                                project.Technologies.Split(
-                                                                ',',
-                                                                StringSplitOptions.RemoveEmptyEntries))
-                                    {
-                                        <span class="technology-chip">
-                                            @technology.Trim()
-                                        </span>
-                                    }
-                                </div>
+                                @if (!string.IsNullOrWhiteSpace(
+                                    project.Technologies))
+                                {
+                                    <div class="technology-list">
+                                        @foreach (var technology in
+                                            project.Technologies.Split(
+                                                ',',
+                                                StringSplitOptions
+                                                    .RemoveEmptyEntries))
+                                        {
+                                            <span class="technology-chip">
+                                                @technology.Trim()
+                                            </span>
+                                        }
+                                    </div>
+                                }
 
                                 @if (!string.IsNullOrWhiteSpace(
-                                                        project.ProjectUrl) ||
-                                                        !string.IsNullOrWhiteSpace(
-                                                        project.RepositoryUrl))
+                                        project.ProjectUrl) ||
+                                     !string.IsNullOrWhiteSpace(
+                                        project.RepositoryUrl))
                                 {
                                     <div class="project-links">
                                         @if (!string.IsNullOrWhiteSpace(
-                                                                    project.ProjectUrl))
+                                            project.ProjectUrl))
                                         {
                                             <a href="@project.ProjectUrl"
                                                target="_blank"
@@ -951,7 +1031,7 @@
                                         }
 
                                         @if (!string.IsNullOrWhiteSpace(
-                                                                    project.RepositoryUrl))
+                                            project.RepositoryUrl))
                                         {
                                             <a href="@project.RepositoryUrl"
                                                target="_blank"
@@ -972,8 +1052,12 @@
             {
                 <div class="empty-section">
                     <span>🚀</span>
+
                     <h3>No projects published yet</h3>
-                    <p>Student projects will appear here.</p>
+
+                    <p>
+                        Student projects will appear here.
+                    </p>
                 </div>
             }
         </section>
@@ -998,7 +1082,7 @@
             {
                 <div class="training-timeline">
                     @foreach (var application in
-                                    Model.CompletedTrainings)
+                        Model.CompletedTrainings)
                     {
                         <article class="training-card">
                             <div class="company-icon">
@@ -1016,26 +1100,34 @@
                                 </span>
 
                                 <div class="training-meta">
-                                    <span>
-                                        <i class="bi bi-geo-alt-fill me-1"></i>
-                                        @application.Internship.Location
-                                    </span>
+                                    @if (!string.IsNullOrWhiteSpace(
+                                        application.Internship.Location))
+                                    {
+                                        <span>
+                                            <i class="bi bi-geo-alt-fill me-1"></i>
+                                            @application.Internship.Location
+                                        </span>
+                                    }
 
                                     <span>
                                         <i class="bi bi-calendar-check me-1"></i>
-                                        @application.Internship.StartDate
-                                        .ToString("MMM yyyy")
+                                        @(application.Internship.StartDate
+                                            .ToString("MMM yyyy"))
                                         -
-                                        @application.Internship.EndDate
-                                        .ToString("MMM yyyy")
+                                        @(application.Internship.EndDate
+                                            .ToString("MMM yyyy"))
                                     </span>
 
-                                    @if (application.TrainingEnrollment != null)
+                                    @if (application
+                                        .TrainingEnrollment != null)
                                     {
                                         <span>
                                             <i class="bi bi-clock-fill me-1"></i>
-                                            @application.TrainingEnrollment
+
+                                            @application
+                                            .TrainingEnrollment
                                             .RequiredHours
+
                                             required hours
                                         </span>
                                     }
@@ -1046,11 +1138,13 @@
                                     <div class="evaluation-box">
                                         <div class="evaluation-stars">
                                             @for (var star = 1;
-                                                                            star <= 5;
-                                                                            star++)
+                                                star <= 5;
+                                                star++)
                                             {
                                                 if (star <=
-                                                application.Evaluation.Rating)
+                                                    application
+                                                        .Evaluation
+                                                        .Rating)
                                                 {
                                                     <i class="bi bi-star-fill"></i>
                                                 }
@@ -1061,14 +1155,21 @@
                                             }
                                         </div>
 
-                                        <p class="evaluation-feedback">
-                                            “@application.Evaluation.Feedback”
-                                        </p>
+                                        @if (!string.IsNullOrWhiteSpace(
+                                            application
+                                                .Evaluation
+                                                .Feedback))
+                                        {
+                                            <p class="evaluation-feedback">
+                                                “@application.Evaluation.Feedback”
+                                            </p>
+                                        }
 
                                         <a asp-controller="Certificate"
                                            asp-action="Index"
                                            asp-route-evaluationId="@application.Evaluation.Id"
                                            target="_blank"
+                                           rel="noopener noreferrer"
                                            class="certificate-link">
                                             <i class="bi bi-award-fill"></i>
                                             View Verified Certificate
@@ -1089,6 +1190,7 @@
             {
                 <div class="empty-section">
                     <span>🎓</span>
+
                     <h3>No completed training yet</h3>
 
                     <p>
@@ -1099,42 +1201,107 @@
             }
         </section>
 
-        <footer class="verification-footer">
-            <i class="bi bi-shield-check"></i>
+        @if (hasVerifiedActivity)
+        {
+            <footer class="verification-footer">
+                <i class="bi bi-shield-check"></i>
 
-            <strong>Verified by Internship Portal</strong>
+                <strong>
+                    Verified by Internship Portal
+                </strong>
 
-            <p>
-                Training records, approved hours, company evaluations
-                and certificates displayed here are generated from
-                verified platform activity.
-            </p>
-        </footer>
+                <p>
+                    Training records, approved hours, company
+                    evaluations and certificates displayed here
+                    are generated from verified platform activity.
+                </p>
+            </footer>
+        }
+        else
+        {
+            <footer class="verification-footer public-footer">
+                <i class="bi bi-person-vcard"></i>
+
+                <strong>
+                    Public Student Portfolio
+                </strong>
+
+                <p>
+                    Verified training records, approved hours and
+                    company evaluations will appear here after
+                    completing the training workflow.
+                </p>
+            </footer>
+        }
     </div>
 </div>
 
-<div class="copy-message" id="copyMessage">
+<div class="copy-message"
+     id="copyMessage">
     <i class="bi bi-check-circle-fill me-1"></i>
     Portfolio link copied successfully
 </div>
 
 @section Scripts {
     <script>
+        function showCopyMessage() {
+            const message =
+                document.getElementById("copyMessage");
+
+            if (!message) {
+                return;
+            }
+
+            message.classList.add("visible");
+
+            setTimeout(function() {
+                message.classList.remove("visible");
+            }, 2200);
+        }
+
         function copyPublicPortfolioUrl() {
-            const portfolioUrl = "@portfolioUrl";
+            const portfolioUrl =
+                        @Html.Raw(
+                                System.Text.Json.JsonSerializer.Serialize(
+                                        portfolioUrl));
 
-            navigator.clipboard
-                .writeText(portfolioUrl)
-                .then(function () {
-                    const message =
-                        document.getElementById("copyMessage");
+            if (navigator.clipboard &&
+                window.isSecureContext) {
+                navigator.clipboard
+                    .writeText(portfolioUrl)
+                    .then(showCopyMessage)
+                    .catch(function() {
+                        copyPortfolioUrlFallback(
+                            portfolioUrl);
+                    });
 
-                    message.classList.add("visible");
+                return;
+            }
 
-                    setTimeout(function () {
-                        message.classList.remove("visible");
-                    }, 2200);
-                });
+            copyPortfolioUrlFallback(portfolioUrl);
+        }
+
+        function copyPortfolioUrlFallback(
+            portfolioUrl) {
+            const temporaryInput =
+                document.createElement("textarea");
+
+            temporaryInput.value = portfolioUrl;
+            temporaryInput.style.position = "fixed";
+            temporaryInput.style.opacity = "0";
+
+            document.body.appendChild(
+                temporaryInput);
+
+            temporaryInput.focus();
+            temporaryInput.select();
+
+            document.execCommand("copy");
+
+            document.body.removeChild(
+                temporaryInput);
+
+            showCopyMessage();
         }
     </script>
 }

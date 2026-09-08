@@ -8,7 +8,7 @@
     .evaluation-page {
         min-height: 100vh;
         padding: 50px 0;
-        background: radial-gradient(circle at top left, rgba(245, 158, 11, 0.18), transparent 35%), radial-gradient(circle at bottom right, rgba(99, 102, 241, 0.16), transparent 35%);
+        background: radial-gradient( circle at top left, rgba(245, 158, 11, 0.18), transparent 35% ), radial-gradient( circle at bottom right, rgba(99, 102, 241, 0.16), transparent 35% );
     }
 
     .evaluation-container {
@@ -28,9 +28,10 @@
     .evaluation-header {
         position: relative;
         padding: 38px;
+        overflow: hidden;
         color: white;
         text-align: center;
-        background: linear-gradient(135deg, #4f46e5, #7c3aed, #0ea5e9);
+        background: linear-gradient( 135deg, #4f46e5, #7c3aed, #0ea5e9 );
     }
 
         .evaluation-header::before,
@@ -56,18 +57,27 @@
         }
 
     .header-icon {
+        position: relative;
+        z-index: 2;
         width: 76px;
         height: 76px;
         display: flex;
         align-items: center;
         justify-content: center;
         margin: 0 auto 17px;
-        font-size: 35px;
+        color: #fef3c7;
+        font-size: 40px;
         border: 1px solid rgba(255, 255, 255, 0.3);
         border-radius: 24px;
         background: rgba(255, 255, 255, 0.17);
         backdrop-filter: blur(10px);
         animation: floatIcon 2.5s ease-in-out infinite;
+    }
+
+    .evaluation-header h1,
+    .evaluation-header p {
+        position: relative;
+        z-index: 2;
     }
 
     .evaluation-header h1 {
@@ -116,6 +126,7 @@
         justify-content: center;
         color: #4f46e5;
         font-size: 21px;
+        font-weight: 900;
         border-radius: 14px;
         background: #e0e7ff;
     }
@@ -146,40 +157,112 @@
         text-align: center;
         border: 2px dashed #c7d2fe;
         border-radius: 20px;
-        background: linear-gradient(135deg, #f8fafc, #eef2ff);
+        background: linear-gradient( 135deg, #f8fafc, #eef2ff );
     }
 
     .rating-title {
-        margin-bottom: 16px;
+        margin-bottom: 19px;
         color: #475569;
         font-weight: 700;
     }
 
-    .star-rating {
+    .rating-options {
         display: flex;
-        flex-direction: row-reverse;
+        align-items: stretch;
         justify-content: center;
-        gap: 8px;
+        gap: 12px;
     }
 
-        .star-rating input {
-            display: none;
+    .rating-option {
+        position: relative;
+    }
+
+        .rating-option input {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            opacity: 0;
+            pointer-events: none;
         }
 
-        .star-rating label {
-            color: #cbd5e1;
-            font-size: 48px;
+        .rating-option label {
+            width: 105px;
+            min-height: 108px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            gap: 3px;
+            color: #94a3b8;
+            border: 2px solid #e2e8f0;
+            border-radius: 18px;
+            background: white;
             cursor: pointer;
-            transition: 0.2s;
+            transition: 0.25s;
         }
 
-            .star-rating label:hover,
-            .star-rating label:hover ~ label,
-            .star-rating input:checked ~ label {
-                color: #f59e0b;
-                transform: scale(1.12);
-                text-shadow: 0 7px 15px rgba(245, 158, 11, 0.3);
+            .rating-option label:hover {
+                color: #d97706;
+                border-color: #fbbf24;
+                background: #fffbeb;
+                transform: translateY(-5px);
+                box-shadow: 0 12px 23px rgba(245, 158, 11, 0.16);
             }
+
+        .rating-option input:focus + label {
+            outline: 4px solid rgba(99, 102, 241, 0.15);
+        }
+
+        .rating-option input:checked + label {
+            color: #b45309;
+            border-color: #f59e0b;
+            background: linear-gradient( 145deg, #fff7d6, #fef3c7 );
+            transform: translateY(-5px);
+            box-shadow: 0 14px 28px rgba(245, 158, 11, 0.24);
+        }
+
+    .rating-star {
+        line-height: 1;
+        font-size: 39px;
+    }
+
+    .rating-number {
+        color: #334155;
+        font-size: 15px;
+        font-weight: 900;
+    }
+
+    .rating-description {
+        color: #94a3b8;
+        font-size: 9px;
+        font-weight: 700;
+    }
+
+    .rating-option input:checked +
+    label .rating-number {
+        color: #92400e;
+    }
+
+    .rating-option input:checked +
+    label .rating-description {
+        color: #b45309;
+    }
+
+    .selected-rating-message {
+        display: none;
+        margin: 17px auto 0;
+        padding: 9px 15px;
+        width: fit-content;
+        color: #047857;
+        font-size: 12px;
+        font-weight: 800;
+        border-radius: 20px;
+        background: #d1fae5;
+    }
+
+        .selected-rating-message.visible {
+            display: block;
+        }
 
     .feedback-input {
         min-height: 150px;
@@ -215,6 +298,14 @@
             margin: 0;
         }
 
+    .field-validation-error {
+        display: block;
+        margin-top: 9px;
+        color: #dc2626;
+        font-size: 12px;
+        font-weight: 700;
+    }
+
     .form-actions {
         display: flex;
         gap: 12px;
@@ -228,8 +319,9 @@
         font-weight: 800;
         border: none;
         border-radius: 15px;
-        background: linear-gradient(135deg, #4f46e5, #7c3aed);
+        background: linear-gradient( 135deg, #4f46e5, #7c3aed );
         box-shadow: 0 10px 25px rgba(79, 70, 229, 0.25);
+        cursor: pointer;
         transition: 0.3s;
     }
 
@@ -287,12 +379,31 @@
             grid-template-columns: 1fr;
         }
 
-        .star-rating label {
-            font-size: 39px;
+        .rating-options {
+            flex-wrap: wrap;
+        }
+
+        .rating-option label {
+            width: 90px;
+            min-height: 95px;
+        }
+
+        .rating-star {
+            font-size: 33px;
         }
 
         .form-actions {
             flex-direction: column;
+        }
+    }
+
+    @@media (max-width: 480px) {
+        .rating-option label {
+            width: 75px;
+        }
+
+        .evaluation-header {
+            padding: 31px 18px;
         }
     }
 </style>
@@ -303,13 +414,14 @@
             <div class="evaluation-card">
                 <div class="evaluation-header">
                     <div class="header-icon">
-                        <i class="bi bi-star-fill"></i>
+                        ★
                     </div>
 
                     <h1>Evaluate Student</h1>
 
                     <p>
-                        Share your feedback about the student's training performance.
+                        Share your feedback about the student's
+                        training performance.
                     </p>
                 </div>
 
@@ -317,91 +429,183 @@
                     <div class="student-summary">
                         <div class="summary-item">
                             <div class="summary-icon">
-                                <i class="bi bi-person-fill"></i>
+                                S
                             </div>
 
                             <div>
-                                <span class="summary-label">Student</span>
-                                <span class="summary-value">@Model.StudentName</span>
+                                <span class="summary-label">
+                                    Student
+                                </span>
+
+                                <span class="summary-value">
+                                    @Model.StudentName
+                                </span>
                             </div>
                         </div>
 
                         <div class="summary-item">
                             <div class="summary-icon">
-                                <i class="bi bi-briefcase-fill"></i>
+                                💼
                             </div>
 
                             <div>
-                                <span class="summary-label">Internship</span>
-                                <span class="summary-value">@Model.InternshipTitle</span>
+                                <span class="summary-label">
+                                    Internship
+                                </span>
+
+                                <span class="summary-value">
+                                    @Model.InternshipTitle
+                                </span>
                             </div>
                         </div>
                     </div>
 
-                    <form asp-action="Create" method="post">
+                    <form asp-action="Create"
+                          method="post">
+
                         @Html.AntiForgeryToken()
 
-                        <input asp-for="InternshipApplicationId" type="hidden" />
-                        <input asp-for="StudentName" type="hidden" />
-                        <input asp-for="InternshipTitle" type="hidden" />
+                        <input asp-for="InternshipApplicationId"
+                               type="hidden" />
 
-                        <div asp-validation-summary="ModelOnly"></div>
+                        <input asp-for="StudentName"
+                               type="hidden" />
+
+                        <input asp-for="InternshipTitle"
+                               type="hidden" />
+
+                        <div asp-validation-summary="ModelOnly">
+                        </div>
 
                         <div class="rating-box">
                             <div class="rating-title">
-                                Select the student's performance rating
+                                Select the student's performance
+                                rating
                             </div>
 
-                            <div class="star-rating">
-                                <input asp-for="Rating"
-                                       type="radio"
-                                       value="5"
-                                       id="rating5" />
-                                <label for="rating5" title="Excellent">
-                                    <i class="bi bi-star-fill"></i>
-                                </label>
+                            <div class="rating-options">
+                                <div class="rating-option">
+                                    <input asp-for="Rating"
+                                           type="radio"
+                                           value="1"
+                                           id="rating1" />
 
-                                <input asp-for="Rating"
-                                       type="radio"
-                                       value="4"
-                                       id="rating4" />
-                                <label for="rating4" title="Very Good">
-                                    <i class="bi bi-star-fill"></i>
-                                </label>
+                                    <label for="rating1"
+                                           title="Needs Improvement">
+                                        <span class="rating-star">
+                                            ★
+                                        </span>
 
-                                <input asp-for="Rating"
-                                       type="radio"
-                                       value="3"
-                                       id="rating3" />
-                                <label for="rating3" title="Good">
-                                    <i class="bi bi-star-fill"></i>
-                                </label>
+                                        <span class="rating-number">
+                                            1
+                                        </span>
 
-                                <input asp-for="Rating"
-                                       type="radio"
-                                       value="2"
-                                       id="rating2" />
-                                <label for="rating2" title="Fair">
-                                    <i class="bi bi-star-fill"></i>
-                                </label>
+                                        <span class="rating-description">
+                                            Needs Improvement
+                                        </span>
+                                    </label>
+                                </div>
 
-                                <input asp-for="Rating"
-                                       type="radio"
-                                       value="1"
-                                       id="rating1" />
-                                <label for="rating1" title="Needs Improvement">
-                                    <i class="bi bi-star-fill"></i>
-                                </label>
+                                <div class="rating-option">
+                                    <input asp-for="Rating"
+                                           type="radio"
+                                           value="2"
+                                           id="rating2" />
+
+                                    <label for="rating2"
+                                           title="Fair">
+                                        <span class="rating-star">
+                                            ★
+                                        </span>
+
+                                        <span class="rating-number">
+                                            2
+                                        </span>
+
+                                        <span class="rating-description">
+                                            Fair
+                                        </span>
+                                    </label>
+                                </div>
+
+                                <div class="rating-option">
+                                    <input asp-for="Rating"
+                                           type="radio"
+                                           value="3"
+                                           id="rating3" />
+
+                                    <label for="rating3"
+                                           title="Good">
+                                        <span class="rating-star">
+                                            ★
+                                        </span>
+
+                                        <span class="rating-number">
+                                            3
+                                        </span>
+
+                                        <span class="rating-description">
+                                            Good
+                                        </span>
+                                    </label>
+                                </div>
+
+                                <div class="rating-option">
+                                    <input asp-for="Rating"
+                                           type="radio"
+                                           value="4"
+                                           id="rating4" />
+
+                                    <label for="rating4"
+                                           title="Very Good">
+                                        <span class="rating-star">
+                                            ★
+                                        </span>
+
+                                        <span class="rating-number">
+                                            4
+                                        </span>
+
+                                        <span class="rating-description">
+                                            Very Good
+                                        </span>
+                                    </label>
+                                </div>
+
+                                <div class="rating-option">
+                                    <input asp-for="Rating"
+                                           type="radio"
+                                           value="5"
+                                           id="rating5" />
+
+                                    <label for="rating5"
+                                           title="Excellent">
+                                        <span class="rating-star">
+                                            ★
+                                        </span>
+
+                                        <span class="rating-number">
+                                            5
+                                        </span>
+
+                                        <span class="rating-description">
+                                            Excellent
+                                        </span>
+                                    </label>
+                                </div>
                             </div>
 
-                            <span asp-validation-for="Rating"
-                                  class="text-danger d-block mt-2">
+                            <div class="selected-rating-message"
+                                 id="selectedRatingMessage">
+                            </div>
+
+                            <span asp-validation-for="Rating">
                             </span>
                         </div>
 
                         <div>
-                            <label asp-for="Feedback" class="form-label">
-                                <i class="bi bi-chat-left-text-fill me-2 text-primary"></i>
+                            <label asp-for="Feedback"
+                                   class="form-label">
                                 Performance Feedback
                             </label>
 
@@ -412,25 +616,24 @@
                                       placeholder="Write your feedback about the student's skills, commitment, teamwork and overall performance..."></textarea>
 
                             <div class="character-count">
-                                <span id="characterCount">0</span> / 1000 characters
+                                <span id="characterCount">0</span>
+                                / 1000 characters
                             </div>
 
-                            <span asp-validation-for="Feedback"
-                                  class="text-danger">
+                            <span asp-validation-for="Feedback">
                             </span>
                         </div>
 
                         <div class="form-actions">
-                            <button type="submit" class="submit-button">
-                                <i class="bi bi-check-circle-fill me-2"></i>
-                                Submit Evaluation
+                            <button type="submit"
+                                    class="submit-button">
+                                ✓ Submit Evaluation
                             </button>
 
                             <a asp-controller="Internship"
                                asp-action="MyInternships"
                                class="cancel-button text-decoration-none text-center">
-                                <i class="bi bi-arrow-left me-2"></i>
-                                Cancel
+                                ← Cancel
                             </a>
                         </div>
                     </form>
@@ -444,14 +647,93 @@
     <partial name="_ValidationScriptsPartial" />
 
     <script>
-        const feedbackInput = document.getElementById("feedbackInput");
-        const characterCount = document.getElementById("characterCount");
+        const feedbackInput =
+            document.getElementById("feedbackInput");
+
+        const characterCount =
+            document.getElementById("characterCount");
+
+        const ratingInputs =
+            document.querySelectorAll(
+                'input[name="Rating"]');
+
+        const selectedRatingMessage =
+            document.getElementById(
+                "selectedRatingMessage");
 
         function updateCharacterCount() {
-            characterCount.textContent = feedbackInput.value.length;
+            if (!feedbackInput ||
+                !characterCount) {
+                return;
+            }
+
+            characterCount.textContent =
+                feedbackInput.value.length;
         }
 
-        feedbackInput.addEventListener("input", updateCharacterCount);
+        function updateSelectedRating() {
+            const selectedRating =
+                document.querySelector(
+                    'input[name="Rating"]:checked');
+
+            if (!selectedRating ||
+                !selectedRatingMessage) {
+                return;
+            }
+
+            let description = "";
+
+            switch (selectedRating.value) {
+                case "1":
+                    description =
+                        "Needs Improvement";
+                    break;
+
+                case "2":
+                    description =
+                        "Fair";
+                    break;
+
+                case "3":
+                    description =
+                        "Good";
+                    break;
+
+                case "4":
+                    description =
+                        "Very Good";
+                    break;
+
+                case "5":
+                    description =
+                        "Excellent";
+                    break;
+            }
+
+            selectedRatingMessage.textContent =
+                "Selected rating: " +
+                selectedRating.value +
+                " out of 5 — " +
+                description;
+
+            selectedRatingMessage
+                .classList
+                .add("visible");
+        }
+
+        if (feedbackInput) {
+            feedbackInput.addEventListener(
+                "input",
+                updateCharacterCount);
+        }
+
+        ratingInputs.forEach(function(input) {
+            input.addEventListener(
+                "change",
+                updateSelectedRating);
+        });
+
         updateCharacterCount();
+        updateSelectedRating();
     </script>
 }

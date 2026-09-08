@@ -3,10 +3,33 @@
 @{
     ViewData["Title"] = "Training Certificate";
 
-    var application = Model.InternshipApplication;
-    var student = application.Student;
-    var internship = application.Internship;
-    var company = internship.Company;
+    var application =
+        Model.InternshipApplication;
+
+    var student =
+        application.Student;
+
+    var internship =
+        application.Internship;
+
+    var company =
+        internship.Company;
+
+    var completionDate =
+        Model.EvaluationDate.Date;
+
+    var displayedStartDate =
+        application.TrainingEnrollment?.StartDate.Date
+        ?? internship.StartDate.Date;
+
+    if (displayedStartDate >= completionDate)
+    {
+        displayedStartDate =
+            completionDate.AddMonths(-1);
+    }
+
+    var displayedEndDate =
+        completionDate;
 
     var certificateNumber =
         $"CERT-{Model.Id:D5}-{student.Id:D4}";
@@ -16,7 +39,7 @@
     .certificate-page {
         min-height: 100vh;
         padding: 40px 0;
-        background: radial-gradient(circle at top left, rgba(99, 102, 241, 0.16), transparent 35%), radial-gradient(circle at bottom right, rgba(245, 158, 11, 0.15), transparent 35%), #f8fafc;
+        background: radial-gradient( circle at top left, rgba(99, 102, 241, 0.16), transparent 35% ), radial-gradient( circle at bottom right, rgba(245, 158, 11, 0.15), transparent 35% ), #f8fafc;
     }
 
     .certificate-actions {
@@ -56,7 +79,7 @@
 
     .print-button {
         color: white;
-        background: linear-gradient(135deg, #4f46e5, #7c3aed);
+        background: linear-gradient( 135deg, #4f46e5, #7c3aed );
         box-shadow: 0 9px 23px rgba(79, 70, 229, 0.25);
     }
 
@@ -71,7 +94,7 @@
         margin: auto;
         padding: 12px;
         border-radius: 10px;
-        background: linear-gradient(135deg, #f59e0b, #7c3aed, #0ea5e9);
+        background: linear-gradient( 135deg, #f59e0b, #7c3aed, #0ea5e9 );
         box-shadow: 0 28px 65px rgba(15, 23, 42, 0.2);
         animation: certificateAppear 0.8s ease;
     }
@@ -83,7 +106,7 @@
         padding: 65px 75px;
         text-align: center;
         border: 3px solid #e2e8f0;
-        background: linear-gradient(rgba(255, 255, 255, 0.96), rgba(255, 255, 255, 0.96)), repeating-linear-gradient( 45deg, #eef2ff, #eef2ff 12px, #ffffff 12px, #ffffff 24px);
+        background: linear-gradient( rgba(255, 255, 255, 0.96), rgba(255, 255, 255, 0.96) ), repeating-linear-gradient( 45deg, #eef2ff, #eef2ff 12px, #ffffff 12px, #ffffff 24px );
     }
 
         .certificate::before,
@@ -122,9 +145,9 @@
         justify-content: center;
         margin: auto;
         color: white;
-        font-size: 35px;
+        font-size: 39px;
         border-radius: 24px;
-        background: linear-gradient(135deg, #4f46e5, #0ea5e9);
+        background: linear-gradient( 135deg, #4f46e5, #0ea5e9 );
         box-shadow: 0 12px 26px rgba(79, 70, 229, 0.24);
     }
 
@@ -195,6 +218,8 @@
     .rating-area {
         display: inline-flex;
         align-items: center;
+        justify-content: center;
+        flex-wrap: wrap;
         gap: 12px;
         padding: 11px 20px;
         margin-top: 22px;
@@ -207,7 +232,12 @@
         display: flex;
         gap: 3px;
         color: #f59e0b;
-        font-size: 20px;
+        font-size: 22px;
+        line-height: 1;
+    }
+
+    .certificate-star {
+        display: inline-block;
     }
 
     .empty-star {
@@ -255,19 +285,33 @@
         color: #92400e;
         border: 4px double #f59e0b;
         border-radius: 50%;
-        background: radial-gradient(circle, #fef3c7, #fde68a);
+        background: radial-gradient( circle, #fef3c7, #fde68a );
         box-shadow: 0 8px 22px rgba(245, 158, 11, 0.22);
         transform: rotate(-7deg);
     }
 
-        .certificate-seal i {
-            font-size: 30px;
-        }
+    .seal-check {
+        width: 31px;
+        height: 31px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-bottom: 3px;
+        color: white;
+        font-size: 21px;
+        font-weight: 900;
+        border-radius: 50%;
+        background: #f59e0b;
+    }
 
-        .certificate-seal strong {
-            font-size: 12px;
-            letter-spacing: 1px;
-        }
+    .certificate-seal strong {
+        font-size: 12px;
+        letter-spacing: 1px;
+    }
+
+    .certificate-seal span {
+        font-size: 11px;
+    }
 
     .certificate-number {
         margin-top: 35px;
@@ -365,15 +409,13 @@
             <a asp-controller="Evaluation"
                asp-action="MyEvaluations"
                class="certificate-button back-button">
-                <i class="bi bi-arrow-left"></i>
-                Back to My Evaluations
+                ← Back to My Evaluations
             </a>
 
             <button type="button"
                     class="certificate-button print-button"
                     onclick="window.print()">
-                <i class="bi bi-printer-fill"></i>
-                Print / Save as PDF
+                🖨 Print / Save as PDF
             </button>
         </div>
 
@@ -381,7 +423,7 @@
             <div class="certificate">
                 <div class="certificate-content">
                     <div class="portal-logo">
-                        <i class="bi bi-mortarboard-fill"></i>
+                        🎓
                     </div>
 
                     <div class="portal-name">
@@ -405,7 +447,8 @@
                     </div>
 
                     <div class="completion-text">
-                        For successfully completing the internship training program
+                        For successfully completing the
+                        internship training program
 
                         <span class="internship-name">
                             @internship.Title
@@ -418,57 +461,82 @@
                         </span>
 
                         from
+
                         <strong>
-                            @internship.StartDate.ToString("dd MMMM yyyy")
+                            @(displayedStartDate.ToString(
+                                "dd MMMM yyyy"))
                         </strong>
+
                         to
+
                         <strong>
-                            @internship.EndDate.ToString("dd MMMM yyyy")
+                            @(displayedEndDate.ToString(
+                                "dd MMMM yyyy"))
                         </strong>.
                     </div>
 
                     <div class="rating-area">
                         <div class="certificate-stars">
-                            @for (var star = 1; star <= 5; star++)
+                            @for (var star = 1;
+                                  star <= 5;
+                                  star++)
                             {
                                 if (star <= Model.Rating)
                                 {
-                                    <i class="bi bi-star-fill"></i>
+                                    <span class="certificate-star">
+                                        ★
+                                    </span>
                                 }
                                 else
                                 {
-                                    <i class="bi bi-star-fill empty-star"></i>
+                                    <span class="certificate-star empty-star">
+                                        ★
+                                    </span>
                                 }
                             }
                         </div>
 
                         <span class="rating-text">
-                            Performance Rating: @Model.Rating / 5
+                            Performance Rating:
+                            @Model.Rating / 5
                         </span>
                     </div>
 
                     <div class="certificate-footer">
                         <div class="signature">
-                            <strong>@company.Name</strong>
-                            <span>Company Representative</span>
+                            <strong>
+                                @company.Name
+                            </strong>
+
+                            <span>
+                                Company Representative
+                            </span>
                         </div>
 
                         <div class="certificate-seal">
-                            <i class="bi bi-patch-check-fill"></i>
+                            <div class="seal-check">
+                                ✓
+                            </div>
+
                             <strong>VERIFIED</strong>
                             <span>Certificate</span>
                         </div>
 
                         <div class="signature">
                             <strong>
-                                @Model.EvaluationDate.ToString("dd MMMM yyyy")
+                                @(completionDate.ToString(
+                                    "dd MMMM yyyy"))
                             </strong>
-                            <span>Date of Completion</span>
+
+                            <span>
+                                Date of Completion
+                            </span>
                         </div>
                     </div>
 
                     <div class="certificate-number">
-                        Certificate Number: @certificateNumber
+                        Certificate Number:
+                        @certificateNumber
                     </div>
                 </div>
             </div>

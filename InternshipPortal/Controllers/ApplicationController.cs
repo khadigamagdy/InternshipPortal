@@ -47,7 +47,8 @@ namespace InternshipPortal.Controllers
             }
 
             var internship = await context.Internships
-                .Include(internship => internship.Company)
+                .Include(internship =>
+                    internship.Company)
                 .FirstOrDefaultAsync(internship =>
                     internship.Id == internshipId &&
                     internship.IsApproved &&
@@ -58,10 +59,22 @@ namespace InternshipPortal.Controllers
                 return NotFound();
             }
 
-            if (internship.ApplicationDeadline < DateTime.Today)
+            if (internship.ApplicationDeadline <
+                DateTime.Today)
             {
                 TempData["Error"] =
                     "The application deadline has passed.";
+
+                return RedirectToAction(
+                    "Details",
+                    "Internship",
+                    new { id = internshipId });
+            }
+
+            if (internship.AvailablePositions <= 0)
+            {
+                TempData["Error"] =
+                    "There are no available positions for this internship.";
 
                 return RedirectToAction(
                     "Details",
@@ -117,7 +130,8 @@ namespace InternshipPortal.Controllers
             }
 
             var internship = await context.Internships
-                .Include(internship => internship.Company)
+                .Include(internship =>
+                    internship.Company)
                 .FirstOrDefaultAsync(internship =>
                     internship.Id == model.InternshipId &&
                     internship.IsApproved &&
@@ -132,11 +146,19 @@ namespace InternshipPortal.Controllers
             model.CompanyName = internship.Company.Name;
             model.CurrentCVPath = student.CVPath;
 
-            if (internship.ApplicationDeadline < DateTime.Today)
+            if (internship.ApplicationDeadline <
+                DateTime.Today)
             {
                 ModelState.AddModelError(
                     string.Empty,
                     "The application deadline has passed.");
+            }
+
+            if (internship.AvailablePositions <= 0)
+            {
+                ModelState.AddModelError(
+                    string.Empty,
+                    "There are no available positions for this internship.");
             }
 
             var alreadyApplied =
@@ -157,7 +179,7 @@ namespace InternshipPortal.Controllers
             {
                 var extension = Path
                     .GetExtension(model.CVFile.FileName)
-                    .ToLower();
+                    .ToLowerInvariant();
 
                 if (extension != ".pdf")
                 {
@@ -166,7 +188,15 @@ namespace InternshipPortal.Controllers
                         "Only PDF files are allowed.");
                 }
 
-                if (model.CVFile.Length > 5 * 1024 * 1024)
+                if (model.CVFile.Length == 0)
+                {
+                    ModelState.AddModelError(
+                        nameof(model.CVFile),
+                        "The selected CV file is empty.");
+                }
+
+                if (model.CVFile.Length >
+                    5 * 1024 * 1024)
                 {
                     ModelState.AddModelError(
                         nameof(model.CVFile),
@@ -198,9 +228,12 @@ namespace InternshipPortal.Controllers
 
                 Directory.CreateDirectory(uploadsFolder);
 
+                var extension = Path
+                    .GetExtension(model.CVFile.FileName)
+                    .ToLowerInvariant();
+
                 var fileName =
-                    $"{Guid.NewGuid()}" +
-                    $"{Path.GetExtension(model.CVFile.FileName)}";
+                    $"{Guid.NewGuid()}{extension}";
 
                 var filePath = Path.Combine(
                     uploadsFolder,
@@ -216,40 +249,49 @@ namespace InternshipPortal.Controllers
                     $"/uploads/application-cvs/{fileName}";
             }
 
-            var application = new InternshipApplication
-            {
-                StudentId = student.Id,
-                InternshipId = model.InternshipId,
-                CoverLetter = model.CoverLetter,
-                CVPath = cvPath,
-                Status = ApplicationStatus.Pending,
-                AppliedAt = DateTime.Now
-            };
+            var currentDate = DateTime.Now;
+
+            var application =
+                new InternshipApplication
+                {
+                    StudentId = student.Id,
+                    InternshipId = model.InternshipId,
+                    CoverLetter = model.CoverLetter,
+                    CVPath = cvPath,
+                    Status = ApplicationStatus.Pending,
+                    AppliedAt = currentDate
+                };
 
             application.StatusHistory.Add(
                 new ApplicationStatusHistory
                 {
                     PreviousStatus = null,
-                    NewStatus = ApplicationStatus.Pending,
-                    Note = "The student submitted the application.",
-                    ChangedAt = DateTime.Now,
+                    NewStatus =
+                        ApplicationStatus.Pending,
+                    Note =
+                        "The student submitted the application.",
+                    ChangedAt = currentDate,
                     ChangedByUserId = userId
                 });
 
-            context.InternshipApplications.Add(application);
+            context.InternshipApplications.Add(
+                application);
 
             context.Notifications.Add(
                 new Notification
                 {
-                    Title = "New Internship Application",
+                    Title =
+                        "New Internship Application",
 
                     Message =
                         $"{student.FullName} applied for " +
                         $"'{internship.Title}'.",
 
-                    UserId = internship.Company.UserId,
+                    UserId =
+                        internship.Company.UserId,
+
                     IsRead = false,
-                    CreatedAt = DateTime.Now
+                    CreatedAt = currentDate
                 });
 
             await context.SaveChangesAsync();
@@ -257,7 +299,8 @@ namespace InternshipPortal.Controllers
             TempData["Success"] =
                 "Your application has been submitted successfully.";
 
-            return RedirectToAction(nameof(MyApplications));
+            return RedirectToAction(
+                nameof(MyApplications));
         }
 
         [Authorize(Roles = "Student")]
@@ -309,7 +352,8 @@ namespace InternshipPortal.Controllers
             var userId = userManager.GetUserId(User);
 
             var internship = await context.Internships
-                .Include(internship => internship.Company)
+                .Include(internship =>
+                    internship.Company)
                 .FirstOrDefaultAsync(internship =>
                     internship.Id == internshipId &&
                     internship.Company.UserId == userId);
@@ -348,7 +392,8 @@ namespace InternshipPortal.Controllers
         [Authorize(Roles = "Company")]
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> StartReview(int id)
+        public async Task<IActionResult> StartReview(
+            int id)
         {
             var userId = userManager.GetUserId(User);
 
@@ -368,28 +413,38 @@ namespace InternshipPortal.Controllers
                 TempData["ErrorMessage"] =
                     "Only pending applications can be moved to review.";
 
-                return RedirectToApplicants(application);
+                return RedirectToApplicants(
+                    application);
             }
 
-            var previousStatus = application.Status;
+            var previousStatus =
+                application.Status;
+
+            var currentDate =
+                DateTime.Now;
 
             application.Status =
                 ApplicationStatus.UnderReview;
 
-            application.ReviewedAt = DateTime.Now;
+            application.ReviewedAt =
+                currentDate;
 
             AddStatusHistory(
                 application,
                 previousStatus,
                 ApplicationStatus.UnderReview,
                 "The company started reviewing the application.",
-                userId);
+                userId,
+                currentDate);
 
             context.Notifications.Add(
                 new Notification
                 {
-                    UserId = application.Student.UserId,
-                    Title = "Application Under Review",
+                    UserId =
+                        application.Student.UserId,
+
+                    Title =
+                        "Application Under Review",
 
                     Message =
                         $"Your application for " +
@@ -397,7 +452,7 @@ namespace InternshipPortal.Controllers
                         $"is now being reviewed.",
 
                     IsRead = false,
-                    CreatedAt = DateTime.Now
+                    CreatedAt = currentDate
                 });
 
             await context.SaveChangesAsync();
@@ -405,13 +460,15 @@ namespace InternshipPortal.Controllers
             TempData["SuccessMessage"] =
                 "The application is now under review.";
 
-            return RedirectToApplicants(application);
+            return RedirectToApplicants(
+                application);
         }
 
         [Authorize(Roles = "Company")]
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Accept(int id)
+        public async Task<IActionResult> Accept(
+            int id)
         {
             var userId = userManager.GetUserId(User);
 
@@ -432,83 +489,68 @@ namespace InternshipPortal.Controllers
                 ApplicationStatus.InterviewScheduled
             };
 
-            if (!allowedStatuses.Contains(application.Status))
+            if (!allowedStatuses.Contains(
+                application.Status))
             {
                 TempData["ErrorMessage"] =
                     "This application cannot be accepted.";
 
-                return RedirectToApplicants(application);
+                return RedirectToApplicants(
+                    application);
             }
 
-            if (application.Internship.AvailablePositions <= 0)
+            if (application.Internship
+                .AvailablePositions <= 0)
             {
                 TempData["ErrorMessage"] =
                     "There are no available positions remaining.";
 
-                return RedirectToApplicants(application);
+                return RedirectToApplicants(
+                    application);
             }
 
-            if (application.TrainingEnrollment != null)
+            var enrollmentExists =
+                await context.TrainingEnrollments
+                    .AnyAsync(enrollment =>
+                        enrollment.InternshipApplicationId ==
+                            application.Id);
+
+            if (enrollmentExists)
             {
                 TempData["ErrorMessage"] =
                     "A training enrollment already exists for this application.";
 
-                return RedirectToApplicants(application);
+                return RedirectToApplicants(
+                    application);
             }
 
-            var previousStatus = application.Status;
-            var currentDate = DateTime.Now;
+            var previousStatus =
+                application.Status;
+
+            var currentDate =
+                DateTime.Now;
 
             application.Status =
                 ApplicationStatus.Accepted;
 
-            application.ReviewedAt = currentDate;
+            application.ReviewedAt =
+                currentDate;
 
-            application.Internship.AvailablePositions--;
+            application.Internship
+                .AvailablePositions--;
 
             AddStatusHistory(
                 application,
                 previousStatus,
                 ApplicationStatus.Accepted,
                 "The company accepted the application and created the training enrollment.",
-                userId);
-
-            var startDate =
-                application.Internship.StartDate;
-
-            if (startDate.Date < DateTime.Today)
-            {
-                startDate = DateTime.Today;
-            }
-
-            var expectedEndDate =
-                application.Internship.EndDate;
-
-            if (expectedEndDate.Date < startDate.Date)
-            {
-                expectedEndDate =
-                    startDate.AddMonths(3);
-            }
+                userId,
+                currentDate);
 
             var trainingEnrollment =
-                new TrainingEnrollment
-                {
-                    InternshipApplicationId =
-                        application.Id,
-
-                    StartDate = startDate,
-
-                    ExpectedEndDate =
-                        expectedEndDate,
-
-                    RequiredHours = 120,
-
-                    Status =
-                        TrainingStatus
-                            .PendingUniversityApproval,
-
-                    CreatedAt = currentDate
-                };
+                CreateTrainingEnrollment(
+                    application,
+                    currentDate);
 
             context.TrainingEnrollments.Add(
                 trainingEnrollment);
@@ -516,15 +558,18 @@ namespace InternshipPortal.Controllers
             context.Notifications.Add(
                 new Notification
                 {
-                    Title = "Application Accepted",
+                    Title =
+                        "Application Accepted",
 
                     Message =
                         $"Congratulations! Your application for " +
                         $"'{application.Internship.Title}' " +
                         $"has been accepted. Your training record " +
-                        $"was created and is waiting for approval.",
+                        $"was created and is waiting for university approval.",
 
-                    UserId = application.Student.UserId,
+                    UserId =
+                        application.Student.UserId,
+
                     IsRead = false,
                     CreatedAt = currentDate
                 });
@@ -534,15 +579,100 @@ namespace InternshipPortal.Controllers
             TempData["SuccessMessage"] =
                 "Student accepted and training enrollment created successfully.";
 
-            return RedirectToApplicants(application);
+            return RedirectToApplicants(
+                application);
         }
 
         [Authorize(Roles = "Company")]
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Reject(int id)
+        public async Task<IActionResult>
+            CreateTrainingEnrollment(int id)
         {
-            var userId = userManager.GetUserId(User);
+            var userId =
+                userManager.GetUserId(User);
+
+            var application =
+                await GetCompanyApplicationAsync(
+                    id,
+                    userId);
+
+            if (application == null)
+            {
+                return NotFound();
+            }
+
+            if (application.Status !=
+                ApplicationStatus.Accepted)
+            {
+                TempData["ErrorMessage"] =
+                    "A training enrollment can only be created for an accepted application.";
+
+                return RedirectToApplicants(
+                    application);
+            }
+
+            var enrollmentExists =
+                await context.TrainingEnrollments
+                    .AnyAsync(enrollment =>
+                        enrollment.InternshipApplicationId ==
+                            application.Id);
+
+            if (enrollmentExists)
+            {
+                TempData["ErrorMessage"] =
+                    "A training enrollment already exists for this application.";
+
+                return RedirectToApplicants(
+                    application);
+            }
+
+            var currentDate =
+                DateTime.Now;
+
+            var trainingEnrollment =
+                CreateTrainingEnrollment(
+                    application,
+                    currentDate);
+
+            context.TrainingEnrollments.Add(
+                trainingEnrollment);
+
+            context.Notifications.Add(
+                new Notification
+                {
+                    UserId =
+                        application.Student.UserId,
+
+                    Title =
+                        "Training Enrollment Created",
+
+                    Message =
+                        $"Your training record for " +
+                        $"'{application.Internship.Title}' " +
+                        $"has been created and is waiting for university approval.",
+
+                    IsRead = false,
+                    CreatedAt = currentDate
+                });
+
+            await context.SaveChangesAsync();
+
+            TempData["SuccessMessage"] =
+                "Training enrollment created successfully.";
+
+            return RedirectToApplicants(
+                application);
+        }
+
+        [Authorize(Roles = "Company")]
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Reject(
+            int id)
+        {
+            var userId =
+                userManager.GetUserId(User);
 
             var application =
                 await GetCompanyApplicationAsync(
@@ -561,29 +691,38 @@ namespace InternshipPortal.Controllers
                 ApplicationStatus.InterviewScheduled
             };
 
-            if (!allowedStatuses.Contains(application.Status))
+            if (!allowedStatuses.Contains(
+                application.Status))
             {
                 TempData["ErrorMessage"] =
                     "This application cannot be rejected.";
 
-                return RedirectToApplicants(application);
+                return RedirectToApplicants(
+                    application);
             }
 
-            var previousStatus = application.Status;
+            var previousStatus =
+                application.Status;
+
+            var currentDate =
+                DateTime.Now;
 
             application.Status =
                 ApplicationStatus.Rejected;
 
-            application.ReviewedAt = DateTime.Now;
+            application.ReviewedAt =
+                currentDate;
 
             AddStatusHistory(
                 application,
                 previousStatus,
                 ApplicationStatus.Rejected,
                 "The company rejected the application.",
-                userId);
+                userId,
+                currentDate);
 
-            foreach (var interview in application.Interviews)
+            foreach (var interview in
+                application.Interviews)
             {
                 if (interview.Status ==
                         InterviewStatus.Pending ||
@@ -598,7 +737,8 @@ namespace InternshipPortal.Controllers
             context.Notifications.Add(
                 new Notification
                 {
-                    Title = "Application Status Updated",
+                    Title =
+                        "Application Status Updated",
 
                     Message =
                         $"Your application for " +
@@ -606,9 +746,11 @@ namespace InternshipPortal.Controllers
                         $"was not accepted. Keep exploring " +
                         $"other opportunities.",
 
-                    UserId = application.Student.UserId,
+                    UserId =
+                        application.Student.UserId,
+
                     IsRead = false,
-                    CreatedAt = DateTime.Now
+                    CreatedAt = currentDate
                 });
 
             await context.SaveChangesAsync();
@@ -616,7 +758,8 @@ namespace InternshipPortal.Controllers
             TempData["SuccessMessage"] =
                 "Student application rejected successfully.";
 
-            return RedirectToApplicants(application);
+            return RedirectToApplicants(
+                application);
         }
 
         private async Task<InternshipApplication?>
@@ -624,7 +767,8 @@ namespace InternshipPortal.Controllers
                 int applicationId,
                 string? companyUserId)
         {
-            return await context.InternshipApplications
+            return await context
+                .InternshipApplications
                 .Include(application =>
                     application.Student)
                 .Include(application =>
@@ -643,12 +787,59 @@ namespace InternshipPortal.Controllers
                         companyUserId);
         }
 
+        private TrainingEnrollment
+            CreateTrainingEnrollment(
+                InternshipApplication application,
+                DateTime currentDate)
+        {
+            var startDate =
+                application.Internship.StartDate.Date;
+
+            if (startDate < DateTime.Today)
+            {
+                startDate =
+                    DateTime.Today;
+            }
+
+            var expectedEndDate =
+                application.Internship.EndDate.Date;
+
+            if (expectedEndDate < startDate)
+            {
+                expectedEndDate =
+                    startDate.AddMonths(3);
+            }
+
+            return new TrainingEnrollment
+            {
+                InternshipApplicationId =
+                    application.Id,
+
+                StartDate =
+                    startDate,
+
+                ExpectedEndDate =
+                    expectedEndDate,
+
+                RequiredHours =
+                    120,
+
+                Status =
+                    TrainingStatus
+                        .PendingUniversityApproval,
+
+                CreatedAt =
+                    currentDate
+            };
+        }
+
         private void AddStatusHistory(
             InternshipApplication application,
             ApplicationStatus previousStatus,
             ApplicationStatus newStatus,
             string note,
-            string? changedByUserId)
+            string? changedByUserId,
+            DateTime changedAt)
         {
             context.ApplicationStatusHistories.Add(
                 new ApplicationStatusHistory
@@ -656,11 +847,20 @@ namespace InternshipPortal.Controllers
                     InternshipApplicationId =
                         application.Id,
 
-                    PreviousStatus = previousStatus,
-                    NewStatus = newStatus,
-                    Note = note,
-                    ChangedAt = DateTime.Now,
-                    ChangedByUserId = changedByUserId
+                    PreviousStatus =
+                        previousStatus,
+
+                    NewStatus =
+                        newStatus,
+
+                    Note =
+                        note,
+
+                    ChangedAt =
+                        changedAt,
+
+                    ChangedByUserId =
+                        changedByUserId
                 });
         }
 

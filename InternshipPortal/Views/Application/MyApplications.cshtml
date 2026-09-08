@@ -3,6 +3,17 @@
 
 @{
     ViewData["Title"] = "My Applications";
+
+    var inProgressCount = Model.Count(application =>
+        application.Status == ApplicationStatus.Pending ||
+        application.Status == ApplicationStatus.UnderReview ||
+        application.Status == ApplicationStatus.InterviewScheduled);
+
+    var acceptedCount = Model.Count(application =>
+        application.Status == ApplicationStatus.Accepted);
+
+    var rejectedCount = Model.Count(application =>
+        application.Status == ApplicationStatus.Rejected);
 }
 
 <div class="applications-page">
@@ -63,12 +74,8 @@
                 </span>
 
                 <div>
-                    <strong>
-                        @Model.Count(a =>
-                            a.Status == ApplicationStatus.Pending)
-                    </strong>
-
-                    <small>Pending</small>
+                    <strong>@inProgressCount</strong>
+                    <small>In Progress</small>
                 </div>
             </div>
 
@@ -78,11 +85,7 @@
                 </span>
 
                 <div>
-                    <strong>
-                        @Model.Count(a =>
-                            a.Status == ApplicationStatus.Accepted)
-                    </strong>
-
+                    <strong>@acceptedCount</strong>
                     <small>Accepted</small>
                 </div>
             </div>
@@ -93,11 +96,7 @@
                 </span>
 
                 <div>
-                    <strong>
-                        @Model.Count(a =>
-                            a.Status == ApplicationStatus.Rejected)
-                    </strong>
-
+                    <strong>@rejectedCount</strong>
                     <small>Rejected</small>
                 </div>
             </div>
@@ -108,10 +107,22 @@
             <section class="applications-list">
                 @foreach (var application in Model)
                 {
+                    var hasBeenReviewed =
+                        application.Status !=
+                        ApplicationStatus.Pending;
+
+                    var decisionMade =
+                        application.Status ==
+                            ApplicationStatus.Accepted ||
+                        application.Status ==
+                            ApplicationStatus.Rejected ||
+                        application.Status ==
+                            ApplicationStatus.Completed;
+
                     <article class="application-card">
                         <div class="application-top">
                             <div class="company-logo">
-                                @if (!string.IsNullOrEmpty(
+                                @if (!string.IsNullOrWhiteSpace(
                                     application.Internship
                                         .Company.LogoPath))
                                 {
@@ -144,8 +155,8 @@
 
                                     <span>
                                         📅 Applied
-                                        @application.AppliedAt
-                                        .ToString("dd MMM yyyy")
+                                        @(application.AppliedAt
+                                            .ToString("dd MMM yyyy"))
                                     </span>
                                 </div>
                             </div>
@@ -156,6 +167,20 @@
                                 {
                                     <span class="status pending">
                                         ⏳ Pending
+                                    </span>
+                                }
+                                else if (application.Status ==
+                                          ApplicationStatus.UnderReview)
+                                {
+                                    <span class="status review">
+                                        🔍 Under Review
+                                    </span>
+                                }
+                                else if (application.Status ==
+                                          ApplicationStatus.InterviewScheduled)
+                                {
+                                    <span class="status interview">
+                                        📅 Interview Scheduled
                                     </span>
                                 }
                                 else if (application.Status ==
@@ -172,7 +197,8 @@
                                         ✕ Rejected
                                     </span>
                                 }
-                                else
+                                else if (application.Status ==
+                                          ApplicationStatus.Completed)
                                 {
                                     <span class="status completed">
                                         ★ Completed
@@ -188,56 +214,45 @@
                             </div>
 
                             <div class="progress-line
-                                @(application.Status !=
-                                    ApplicationStatus.Pending
+                                @(hasBeenReviewed
                                     ? "completed-line"
                                     : "")">
                             </div>
 
                             <div class="progress-step
-                                @(application.Status !=
-                                    ApplicationStatus.Pending
+                                @(hasBeenReviewed
                                     ? "completed-step"
                                     : "current-step")">
 
                                 <span>
-                                    @if (application.Status ==
-                                         ApplicationStatus.Pending)
-                                    {
-                                        <text>2</text>
-                                    }
-                                    else
-                                    {
-                                        <text>✓</text>
-                                    }
+                                    @(hasBeenReviewed ? "✓" : "2")
                                 </span>
 
                                 <small>Reviewed</small>
                             </div>
 
                             <div class="progress-line
-                                @(application.Status ==
-                                    ApplicationStatus.Accepted ||
-                                    application.Status ==
-                                    ApplicationStatus.Completed
+                                @(decisionMade
                                     ? "completed-line"
                                     : "")">
                             </div>
 
                             <div class="progress-step
-                                @(application.Status ==
-                                    ApplicationStatus.Accepted ||
-                                    application.Status ==
-                                    ApplicationStatus.Completed
+                                @(decisionMade
                                     ? "completed-step"
-                                    : "")">
+                                    : hasBeenReviewed
+                                        ? "current-step"
+                                        : "")">
 
-                                <span>3</span>
+                                <span>
+                                    @(decisionMade ? "✓" : "3")
+                                </span>
+
                                 <small>Decision</small>
                             </div>
                         </div>
 
-                        @if (!string.IsNullOrEmpty(
+                        @if (!string.IsNullOrWhiteSpace(
                             application.CoverLetter))
                         {
                             <div class="cover-letter-preview">
@@ -247,34 +262,44 @@
                             </div>
                         }
 
-                        <div class="application-footer">
-                            <div class="application-files">
-                                @if (!string.IsNullOrEmpty(
-                                    application.CVPath))
-                                {
-                                    <a href="@application.CVPath"
-                                       target="_blank"
-                                       class="cv-button">
-                                        📄 View Submitted CV
-                                    </a>
-                                }
-
-                                <a asp-controller="Internship"
-                                   asp-action="Details"
-                                   asp-route-id="@application.InternshipId"
-                                   class="details-button">
-                                    View Internship
-                                </a>
-                            </div>
-
-                            <span class="application-date">
-                                Application ID:
-                                #@application.Id
-                            </span>
-                        </div>
-
                         @if (application.Status ==
-                             ApplicationStatus.Accepted)
+                             ApplicationStatus.UnderReview)
+                        {
+                            <div class="decision-message review-message">
+                                <span>🔍</span>
+
+                                <div>
+                                    <strong>
+                                        Application Under Review
+                                    </strong>
+
+                                    <p>
+                                        The company is currently
+                                        reviewing your application.
+                                    </p>
+                                </div>
+                            </div>
+                        }
+                        else if (application.Status ==
+                                  ApplicationStatus.InterviewScheduled)
+                        {
+                            <div class="decision-message interview-message">
+                                <span>📅</span>
+
+                                <div>
+                                    <strong>
+                                        Interview Scheduled
+                                    </strong>
+
+                                    <p>
+                                        Check your interview details
+                                        and respond to the invitation.
+                                    </p>
+                                </div>
+                            </div>
+                        }
+                        else if (application.Status ==
+                                  ApplicationStatus.Accepted)
                         {
                             <div class="decision-message accepted-message">
                                 <span>🎉</span>
@@ -290,6 +315,56 @@
                                     </p>
                                 </div>
                             </div>
+
+                            @if (application.TrainingEnrollment != null)
+                            {
+                                <div class="training-information">
+                                    <div>
+                                        <span class="training-icon">
+                                            🎓
+                                        </span>
+
+                                        <div>
+                                            <strong>
+                                                Training Enrollment
+                                            </strong>
+
+                                            <p>
+                                                Status:
+                                                @application
+                                                .TrainingEnrollment
+                                                .Status
+                                            </p>
+                                        </div>
+                                    </div>
+
+                                    <a asp-controller="TrainingLogbook"
+                                       asp-action="Index">
+                                        Open Training Logbook
+                                    </a>
+                                </div>
+                            }
+                            else
+                            {
+                                <div class="training-information pending-training">
+                                    <div>
+                                        <span class="training-icon">
+                                            ⏳
+                                        </span>
+
+                                        <div>
+                                            <strong>
+                                                Training Record Pending
+                                            </strong>
+
+                                            <p>
+                                                The company has not created
+                                                the training enrollment yet.
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+                            }
                         }
                         else if (application.Status ==
                                   ApplicationStatus.Rejected)
@@ -309,6 +384,51 @@
                                 </div>
                             </div>
                         }
+                        else if (application.Status ==
+                                  ApplicationStatus.Completed)
+                        {
+                            <div class="decision-message completed-message">
+                                <span>🏆</span>
+
+                                <div>
+                                    <strong>
+                                        Training Completed
+                                    </strong>
+
+                                    <p>
+                                        Your completed training can now
+                                        contribute to your verified portfolio.
+                                    </p>
+                                </div>
+                            </div>
+                        }
+
+                        <div class="application-footer">
+                            <div class="application-files">
+                                @if (!string.IsNullOrWhiteSpace(
+                                    application.CVPath))
+                                {
+                                    <a href="@application.CVPath"
+                                       target="_blank"
+                                       rel="noopener noreferrer"
+                                       class="cv-button">
+                                        📄 View Submitted CV
+                                    </a>
+                                }
+
+                                <a asp-controller="Internship"
+                                   asp-action="Details"
+                                   asp-route-id="@application.InternshipId"
+                                   class="details-button">
+                                    View Internship
+                                </a>
+                            </div>
+
+                            <span class="application-date">
+                                Application ID:
+                                #@application.Id
+                            </span>
+                        </div>
                     </article>
                 }
             </section>
@@ -340,7 +460,7 @@
     .applications-page {
         min-height: 100vh;
         padding: 40px 20px 70px;
-        background: radial-gradient(circle at top left, rgba(37, 99, 235, 0.09), transparent 30%), radial-gradient(circle at bottom right, rgba(16, 185, 129, 0.07), transparent 35%), #f5f7fb;
+        background: radial-gradient( circle at top left, rgba(37, 99, 235, 0.09), transparent 30%), radial-gradient( circle at bottom right, rgba(16, 185, 129, 0.07), transparent 35%), #f5f7fb;
     }
 
     .applications-container {
@@ -378,7 +498,7 @@
         justify-content: space-between;
         color: white;
         border-radius: 25px;
-        background: linear-gradient(135deg, #0f2b5b, #1d4ed8 58%, #059669);
+        background: linear-gradient( 135deg, #0f2b5b, #1d4ed8 58%, #059669);
         box-shadow: 0 20px 46px rgba(30, 64, 175, 0.2);
         animation: applicationsEntrance 0.7s ease;
     }
@@ -571,6 +691,16 @@
         background: #fef3c7;
     }
 
+    .review {
+        color: #6d28d9;
+        background: #ede9fe;
+    }
+
+    .interview {
+        color: #0369a1;
+        background: #e0f2fe;
+    }
+
     .accepted {
         color: #047857;
         background: #d1fae5;
@@ -667,6 +797,102 @@
             overflow: hidden;
         }
 
+    .decision-message {
+        padding: 14px;
+        margin-top: 17px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        border-radius: 12px;
+    }
+
+        .decision-message > span {
+            font-size: 24px;
+        }
+
+        .decision-message strong {
+            font-size: 10px;
+        }
+
+        .decision-message p {
+            margin: 3px 0 0;
+            font-size: 8px;
+        }
+
+    .review-message {
+        color: #6d28d9;
+        background: #f5f3ff;
+    }
+
+    .interview-message {
+        color: #0369a1;
+        background: #f0f9ff;
+    }
+
+    .accepted-message {
+        color: #047857;
+        background: #ecfdf5;
+    }
+
+    .rejected-message {
+        color: #b45309;
+        background: #fffbeb;
+    }
+
+    .completed-message {
+        color: #6d28d9;
+        background: #f5f3ff;
+    }
+
+    .training-information {
+        padding: 14px;
+        margin-top: 13px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        color: #0369a1;
+        border: 1px solid #bae6fd;
+        border-radius: 12px;
+        background: #f0f9ff;
+    }
+
+        .training-information > div {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .training-information strong {
+            display: block;
+            font-size: 10px;
+        }
+
+        .training-information p {
+            margin: 3px 0 0;
+            font-size: 8px;
+        }
+
+        .training-information a {
+            padding: 8px 11px;
+            color: white;
+            border-radius: 9px;
+            background: #0284c7;
+            text-decoration: none;
+            font-size: 8px;
+            font-weight: 800;
+        }
+
+    .training-icon {
+        font-size: 24px;
+    }
+
+    .pending-training {
+        color: #b45309;
+        border-color: #fde68a;
+        background: #fffbeb;
+    }
+
     .application-footer {
         margin-top: 16px;
         display: flex;
@@ -701,38 +927,6 @@
     .application-date {
         color: #94a3b8;
         font-size: 8px;
-    }
-
-    .decision-message {
-        padding: 14px;
-        margin-top: 17px;
-        display: flex;
-        align-items: center;
-        gap: 10px;
-        border-radius: 12px;
-    }
-
-        .decision-message > span {
-            font-size: 24px;
-        }
-
-        .decision-message strong {
-            font-size: 10px;
-        }
-
-        .decision-message p {
-            margin: 3px 0 0;
-            font-size: 8px;
-        }
-
-    .accepted-message {
-        color: #047857;
-        background: #ecfdf5;
-    }
-
-    .rejected-message {
-        color: #b45309;
-        background: #fffbeb;
     }
 
     .empty-applications {
@@ -832,7 +1026,8 @@
             width: 38px;
         }
 
-        .application-footer {
+        .application-footer,
+        .training-information {
             align-items: flex-start;
             flex-direction: column;
             gap: 12px;

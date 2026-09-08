@@ -8,7 +8,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace InternshipPortal.Controllers
 {
-    [Authorize(Roles = "Company")]
+    [Authorize(Roles = "Company,UniversitySupervisor")]
     public class TrainingHoursReviewController : Controller
     {
         private readonly ApplicationDbContext context;
@@ -25,17 +25,18 @@ namespace InternshipPortal.Controllers
         [HttpGet]
         public async Task<IActionResult> Index()
         {
-            var companyUserId =
+            var currentUserId =
                 userManager.GetUserId(User);
 
-            var entries =
-                await context.TrainingHourEntries
+            var query =
+                context.TrainingHourEntries
                     .Include(entry =>
                         entry.TrainingEnrollment)
                     .ThenInclude(enrollment =>
                         enrollment.InternshipApplication)
                     .ThenInclude(application =>
                         application.Student)
+
                     .Include(entry =>
                         entry.TrainingEnrollment)
                     .ThenInclude(enrollment =>
@@ -44,13 +45,33 @@ namespace InternshipPortal.Controllers
                         application.Internship)
                     .ThenInclude(internship =>
                         internship.Company)
-                    .Where(entry =>
-                        entry
-                            .TrainingEnrollment
-                            .InternshipApplication
-                            .Internship
-                            .Company
-                            .UserId == companyUserId)
+
+                    .Include(entry =>
+                        entry.TrainingEnrollment)
+                    .AsQueryable();
+
+            if (User.IsInRole("Company"))
+            {
+                query = query.Where(entry =>
+                    entry
+                        .TrainingEnrollment
+                        .InternshipApplication
+                        .Internship
+                        .Company
+                        .UserId == currentUserId);
+            }
+            else if (User.IsInRole("UniversitySupervisor"))
+            {
+                query = query.Where(entry =>
+                    entry.TrainingEnrollment
+                        .UniversitySupervisorUser != null &&
+                    entry.TrainingEnrollment
+                        .UniversitySupervisorUser.Id ==
+                            currentUserId);
+            }
+
+            var entries =
+                await query
                     .OrderBy(entry =>
                         entry.Status ==
                             TrainingHourStatus.Pending
@@ -69,13 +90,13 @@ namespace InternshipPortal.Controllers
             int id,
             string? companyComment)
         {
-            var companyUserId =
+            var currentUserId =
                 userManager.GetUserId(User);
 
             var entry =
-                await GetCompanyEntryAsync(
+                await GetEntryAsync(
                     id,
-                    companyUserId);
+                    currentUserId);
 
             if (entry == null)
             {
@@ -114,6 +135,11 @@ namespace InternshipPortal.Controllers
                     .InternshipApplication
                     .Internship;
 
+            var approvedBy =
+                User.IsInRole("UniversitySupervisor")
+                    ? "University Supervisor"
+                    : internship.Company.Name;
+
             context.Notifications.Add(
                 new Notification
                 {
@@ -124,7 +150,7 @@ namespace InternshipPortal.Controllers
                     Message =
                         $"{entry.Hours:0.0} training hours " +
                         $"for {entry.TrainingDate:dd MMM yyyy} " +
-                        $"were approved by {internship.Company.Name}.",
+                        $"were approved by {approvedBy}.",
 
                     IsRead = false,
                     CreatedAt = DateTime.Now
@@ -144,13 +170,13 @@ namespace InternshipPortal.Controllers
             int id,
             string? companyComment)
         {
-            var companyUserId =
+            var currentUserId =
                 userManager.GetUserId(User);
 
             var entry =
-                await GetCompanyEntryAsync(
+                await GetEntryAsync(
                     id,
-                    companyUserId);
+                    currentUserId);
 
             if (entry == null)
             {
@@ -189,12 +215,6 @@ namespace InternshipPortal.Controllers
                     .InternshipApplication
                     .Student;
 
-            var internship =
-                entry
-                    .TrainingEnrollment
-                    .InternshipApplication
-                    .Internship;
-
             context.Notifications.Add(
                 new Notification
                 {
@@ -221,33 +241,55 @@ namespace InternshipPortal.Controllers
         }
 
         private async Task<TrainingHourEntry?>
-            GetCompanyEntryAsync(
+            GetEntryAsync(
                 int entryId,
-                string? companyUserId)
+                string? currentUserId)
         {
-            return await context.TrainingHourEntries
-                .Include(entry =>
-                    entry.TrainingEnrollment)
-                .ThenInclude(enrollment =>
-                    enrollment.InternshipApplication)
-                .ThenInclude(application =>
-                    application.Student)
-                .Include(entry =>
-                    entry.TrainingEnrollment)
-                .ThenInclude(enrollment =>
-                    enrollment.InternshipApplication)
-                .ThenInclude(application =>
-                    application.Internship)
-                .ThenInclude(internship =>
-                    internship.Company)
-                .FirstOrDefaultAsync(entry =>
-                    entry.Id == entryId &&
+            var query =
+                context.TrainingHourEntries
+                    .Include(entry =>
+                        entry.TrainingEnrollment)
+                    .ThenInclude(enrollment =>
+                        enrollment.InternshipApplication)
+                    .ThenInclude(application =>
+                        application.Student)
+
+                    .Include(entry =>
+                        entry.TrainingEnrollment)
+                    .ThenInclude(enrollment =>
+                        enrollment.InternshipApplication)
+                    .ThenInclude(application =>
+                        application.Internship)
+                    .ThenInclude(internship =>
+                        internship.Company)
+
+                    .Include(entry =>
+                        entry.TrainingEnrollment)
+                    .AsQueryable();
+
+            if (User.IsInRole("Company"))
+            {
+                query = query.Where(entry =>
                     entry
                         .TrainingEnrollment
                         .InternshipApplication
                         .Internship
                         .Company
-                        .UserId == companyUserId);
+                        .UserId == currentUserId);
+            }
+            else if (User.IsInRole("UniversitySupervisor"))
+            {
+                query = query.Where(entry =>
+                    entry.TrainingEnrollment
+                        .UniversitySupervisorUser != null &&
+                    entry.TrainingEnrollment
+                        .UniversitySupervisorUser.Id ==
+                            currentUserId);
+            }
+
+            return await query
+                .FirstOrDefaultAsync(entry =>
+                    entry.Id == entryId);
         }
     }
 }

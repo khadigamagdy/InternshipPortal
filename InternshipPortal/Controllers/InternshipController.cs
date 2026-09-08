@@ -23,63 +23,95 @@ namespace InternshipPortal.Controllers
             this.userManager = userManager;
         }
 
+        [HttpGet]
         public async Task<IActionResult> Index(
             string? search,
             string? location,
             WorkMode? workMode)
         {
+            var today = DateTime.Today;
+
             var internships = context.Internships
-                .Include(i => i.Company)
-                .Where(i => i.IsApproved && i.IsActive)
+                .AsNoTracking()
+                .Include(internship =>
+                    internship.Company)
+                .Where(internship =>
+                    internship.IsApproved &&
+                    internship.IsActive &&
+                    internship.ApplicationDeadline >= today &&
+                    internship.AvailablePositions > 0)
                 .AsQueryable();
 
             if (!string.IsNullOrWhiteSpace(search))
             {
-                internships = internships.Where(i =>
-                    i.Title.Contains(search) ||
-                    i.Description.Contains(search) ||
-                    i.RequiredSkills.Contains(search) ||
-                    i.Company.Name.Contains(search));
+                var searchText =
+                    search.Trim();
+
+                internships = internships.Where(internship =>
+                    internship.Title.Contains(searchText) ||
+                    internship.Description.Contains(searchText) ||
+                    internship.RequiredSkills.Contains(searchText) ||
+                    internship.Company.Name.Contains(searchText));
             }
 
             if (!string.IsNullOrWhiteSpace(location))
             {
-                internships = internships.Where(i =>
-                    i.Location.Contains(location));
+                var locationText =
+                    location.Trim();
+
+                internships = internships.Where(internship =>
+                    internship.Location.Contains(locationText));
             }
 
             if (workMode.HasValue)
             {
-                internships = internships.Where(i =>
-                    i.WorkMode == workMode.Value);
+                internships = internships.Where(internship =>
+                    internship.WorkMode == workMode.Value);
             }
 
             ViewBag.Search = search;
             ViewBag.Location = location;
             ViewBag.WorkMode = workMode;
 
-            return View(await internships
-                .OrderByDescending(i => i.CreatedAt)
-                .ToListAsync());
+            var results = await internships
+                .OrderByDescending(internship =>
+                    internship.CreatedAt)
+                .ToListAsync();
+
+            return View(results);
         }
 
+        [HttpGet]
         public async Task<IActionResult> Details(int id)
         {
             var internship = await context.Internships
-                .Include(i => i.Company)
-                .Include(i => i.Applications)
-                .FirstOrDefaultAsync(i => i.Id == id);
+                .AsNoTracking()
+                .Include(internship =>
+                    internship.Company)
+                .Include(internship =>
+                    internship.Applications)
+                .FirstOrDefaultAsync(internship =>
+                    internship.Id == id);
 
             if (internship == null)
             {
                 return NotFound();
             }
 
-            var userId = userManager.GetUserId(User);
+            var userId =
+                userManager.GetUserId(User);
 
-            if (!internship.IsApproved &&
-                !User.IsInRole("Admin") &&
-                internship.Company.UserId != userId)
+            var isAdmin =
+                User.IsInRole("Admin");
+
+            var isOwner =
+                User.IsInRole("Company") &&
+                internship.Company.UserId == userId;
+
+            if ((!internship.IsApproved ||
+                 !internship.IsActive) &&
+                !isAdmin &&
+                !isOwner)
             {
                 return Forbid();
             }
@@ -88,12 +120,16 @@ namespace InternshipPortal.Controllers
         }
 
         [Authorize(Roles = "Company")]
+        [HttpGet]
         public async Task<IActionResult> MyInternships()
         {
-            var userId = userManager.GetUserId(User);
+            var userId =
+                userManager.GetUserId(User);
 
             var company = await context.Companies
-                .FirstOrDefaultAsync(c => c.UserId == userId);
+                .AsNoTracking()
+                .FirstOrDefaultAsync(company =>
+                    company.UserId == userId);
 
             if (company == null)
             {
@@ -106,8 +142,11 @@ namespace InternshipPortal.Controllers
             }
 
             var internships = await context.Internships
-                .Where(i => i.CompanyId == company.Id)
-                .OrderByDescending(i => i.CreatedAt)
+                .AsNoTracking()
+                .Where(internship =>
+                    internship.CompanyId == company.Id)
+                .OrderByDescending(internship =>
+                    internship.CreatedAt)
                 .ToListAsync();
 
             return View(internships);
@@ -117,10 +156,13 @@ namespace InternshipPortal.Controllers
         [HttpGet]
         public async Task<IActionResult> Create()
         {
-            var userId = userManager.GetUserId(User);
+            var userId =
+                userManager.GetUserId(User);
 
-            var companyExists = await context.Companies
-                .AnyAsync(c => c.UserId == userId);
+            var companyExists =
+                await context.Companies
+                    .AnyAsync(company =>
+                        company.UserId == userId);
 
             if (!companyExists)
             {
@@ -132,13 +174,20 @@ namespace InternshipPortal.Controllers
                     "Company");
             }
 
-            var model = new InternshipFormViewModel
-            {
-                StartDate = DateTime.Today.AddDays(14),
-                EndDate = DateTime.Today.AddMonths(2),
-                ApplicationDeadline = DateTime.Today.AddDays(10),
-                AvailablePositions = 1
-            };
+            var model =
+                new InternshipFormViewModel
+                {
+                    StartDate =
+                        DateTime.Today.AddDays(14),
+
+                    EndDate =
+                        DateTime.Today.AddMonths(2),
+
+                    ApplicationDeadline =
+                        DateTime.Today.AddDays(10),
+
+                    AvailablePositions = 1
+                };
 
             return View(model);
         }
@@ -150,23 +199,14 @@ namespace InternshipPortal.Controllers
             InternshipFormViewModel model)
         {
             ValidateInternshipDates(model);
+            ValidateInternshipPayment(model);
 
-            if (model.IsPaid && model.Salary == null)
-            {
-                ModelState.AddModelError(
-                    "Salary",
-                    "Salary is required for a paid internship.");
-            }
-
-            if (!model.IsPaid)
-            {
-                model.Salary = null;
-            }
-
-            var userId = userManager.GetUserId(User);
+            var userId =
+                userManager.GetUserId(User);
 
             var company = await context.Companies
-                .FirstOrDefaultAsync(c => c.UserId == userId);
+                .FirstOrDefaultAsync(company =>
+                    company.UserId == userId);
 
             if (company == null)
             {
@@ -183,68 +223,125 @@ namespace InternshipPortal.Controllers
                 return View(model);
             }
 
-            var internship = new Internship
-            {
-                Title = model.Title,
-                Description = model.Description,
-                RequiredSkills = model.RequiredSkills,
-                Location = model.Location,
-                WorkMode = model.WorkMode,
-                StartDate = model.StartDate,
-                EndDate = model.EndDate,
-                ApplicationDeadline = model.ApplicationDeadline,
-                AvailablePositions = model.AvailablePositions,
-                IsPaid = model.IsPaid,
-                Salary = model.Salary,
-                IsApproved = false,
-                IsActive = true,
-                CreatedAt = DateTime.Now,
-                CompanyId = company.Id
-            };
+            var internship =
+                new Internship
+                {
+                    Title =
+                        model.Title.Trim(),
+
+                    Description =
+                        model.Description.Trim(),
+
+                    RequiredSkills =
+                        model.RequiredSkills.Trim(),
+
+                    Location =
+                        model.Location.Trim(),
+
+                    WorkMode =
+                        model.WorkMode,
+
+                    StartDate =
+                        model.StartDate,
+
+                    EndDate =
+                        model.EndDate,
+
+                    ApplicationDeadline =
+                        model.ApplicationDeadline,
+
+                    AvailablePositions =
+                        model.AvailablePositions,
+
+                    IsPaid =
+                        model.IsPaid,
+
+                    Salary =
+                        model.Salary,
+
+                    IsApproved =
+                        false,
+
+                    IsActive =
+                        true,
+
+                    CreatedAt =
+                        DateTime.Now,
+
+                    CompanyId =
+                        company.Id
+                };
 
             context.Internships.Add(internship);
+
             await context.SaveChangesAsync();
 
             TempData["Success"] =
                 "Internship created and sent for admin approval.";
 
-            return RedirectToAction(nameof(MyInternships));
+            return RedirectToAction(
+                nameof(MyInternships));
         }
 
         [Authorize(Roles = "Company")]
         [HttpGet]
         public async Task<IActionResult> Edit(int id)
         {
-            var userId = userManager.GetUserId(User);
+            var userId =
+                userManager.GetUserId(User);
 
             var internship = await context.Internships
-                .Include(i => i.Company)
-                .FirstOrDefaultAsync(i =>
-                    i.Id == id &&
-                    i.Company.UserId == userId);
+                .AsNoTracking()
+                .Include(internship =>
+                    internship.Company)
+                .FirstOrDefaultAsync(internship =>
+                    internship.Id == id &&
+                    internship.Company.UserId == userId);
 
             if (internship == null)
             {
                 return NotFound();
             }
 
-            var model = new InternshipFormViewModel
-            {
-                Id = internship.Id,
-                Title = internship.Title,
-                Description = internship.Description,
-                RequiredSkills = internship.RequiredSkills,
-                Location = internship.Location,
-                WorkMode = internship.WorkMode,
-                StartDate = internship.StartDate,
-                EndDate = internship.EndDate,
-                ApplicationDeadline =
-                    internship.ApplicationDeadline,
-                AvailablePositions =
-                    internship.AvailablePositions,
-                IsPaid = internship.IsPaid,
-                Salary = internship.Salary
-            };
+            var model =
+                new InternshipFormViewModel
+                {
+                    Id =
+                        internship.Id,
+
+                    Title =
+                        internship.Title,
+
+                    Description =
+                        internship.Description,
+
+                    RequiredSkills =
+                        internship.RequiredSkills,
+
+                    Location =
+                        internship.Location,
+
+                    WorkMode =
+                        internship.WorkMode,
+
+                    StartDate =
+                        internship.StartDate,
+
+                    EndDate =
+                        internship.EndDate,
+
+                    ApplicationDeadline =
+                        internship.ApplicationDeadline,
+
+                    AvailablePositions =
+                        internship.AvailablePositions,
+
+                    IsPaid =
+                        internship.IsPaid,
+
+                    Salary =
+                        internship.Salary
+                };
 
             return View(model);
         }
@@ -256,17 +353,21 @@ namespace InternshipPortal.Controllers
             InternshipFormViewModel model)
         {
             ValidateInternshipDates(model);
+            ValidateInternshipPayment(model);
 
-            if (model.IsPaid && model.Salary == null)
-            {
-                ModelState.AddModelError(
-                    "Salary",
-                    "Salary is required for a paid internship.");
-            }
+            var userId =
+                userManager.GetUserId(User);
 
-            if (!model.IsPaid)
+            var internship = await context.Internships
+                .Include(internship =>
+                    internship.Company)
+                .FirstOrDefaultAsync(internship =>
+                    internship.Id == model.Id &&
+                    internship.Company.UserId == userId);
+
+            if (internship == null)
             {
-                model.Salary = null;
+                return NotFound();
             }
 
             if (!ModelState.IsValid)
@@ -274,53 +375,65 @@ namespace InternshipPortal.Controllers
                 return View(model);
             }
 
-            var userId = userManager.GetUserId(User);
+            internship.Title =
+                model.Title.Trim();
 
-            var internship = await context.Internships
-                .Include(i => i.Company)
-                .FirstOrDefaultAsync(i =>
-                    i.Id == model.Id &&
-                    i.Company.UserId == userId);
+            internship.Description =
+                model.Description.Trim();
 
-            if (internship == null)
-            {
-                return NotFound();
-            }
+            internship.RequiredSkills =
+                model.RequiredSkills.Trim();
 
-            internship.Title = model.Title;
-            internship.Description = model.Description;
-            internship.RequiredSkills = model.RequiredSkills;
-            internship.Location = model.Location;
-            internship.WorkMode = model.WorkMode;
-            internship.StartDate = model.StartDate;
-            internship.EndDate = model.EndDate;
+            internship.Location =
+                model.Location.Trim();
+
+            internship.WorkMode =
+                model.WorkMode;
+
+            internship.StartDate =
+                model.StartDate;
+
+            internship.EndDate =
+                model.EndDate;
+
             internship.ApplicationDeadline =
                 model.ApplicationDeadline;
+
             internship.AvailablePositions =
                 model.AvailablePositions;
-            internship.IsPaid = model.IsPaid;
-            internship.Salary = model.Salary;
-            internship.IsApproved = false;
+
+            internship.IsPaid =
+                model.IsPaid;
+
+            internship.Salary =
+                model.Salary;
+
+            internship.IsApproved =
+                false;
 
             await context.SaveChangesAsync();
 
             TempData["Success"] =
                 "Internship updated and sent for approval again.";
 
-            return RedirectToAction(nameof(MyInternships));
+            return RedirectToAction(
+                nameof(MyInternships));
         }
 
         [Authorize(Roles = "Company")]
         [HttpGet]
         public async Task<IActionResult> Delete(int id)
         {
-            var userId = userManager.GetUserId(User);
+            var userId =
+                userManager.GetUserId(User);
 
             var internship = await context.Internships
-                .Include(i => i.Company)
-                .FirstOrDefaultAsync(i =>
-                    i.Id == id &&
-                    i.Company.UserId == userId);
+                .AsNoTracking()
+                .Include(internship =>
+                    internship.Company)
+                .FirstOrDefaultAsync(internship =>
+                    internship.Id == id &&
+                    internship.Company.UserId == userId);
 
             if (internship == null)
             {
@@ -334,15 +447,18 @@ namespace InternshipPortal.Controllers
         [HttpPost]
         [ActionName("Delete")]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DeleteConfirmed(int id)
+        public async Task<IActionResult> DeleteConfirmed(
+            int id)
         {
-            var userId = userManager.GetUserId(User);
+            var userId =
+                userManager.GetUserId(User);
 
             var internship = await context.Internships
-                .Include(i => i.Company)
-                .FirstOrDefaultAsync(i =>
-                    i.Id == id &&
-                    i.Company.UserId == userId);
+                .Include(internship =>
+                    internship.Company)
+                .FirstOrDefaultAsync(internship =>
+                    internship.Id == id &&
+                    internship.Company.UserId == userId);
 
             if (internship == null)
             {
@@ -351,47 +467,79 @@ namespace InternshipPortal.Controllers
 
             var hasApplications =
                 await context.InternshipApplications
-                    .AnyAsync(a => a.InternshipId == id);
+                    .AnyAsync(application =>
+                        application.InternshipId == id);
 
             if (hasApplications)
             {
                 TempData["Error"] =
                     "This internship cannot be deleted because it has applications.";
 
-                return RedirectToAction(nameof(MyInternships));
+                return RedirectToAction(
+                    nameof(MyInternships));
             }
 
             context.Internships.Remove(internship);
+
             await context.SaveChangesAsync();
 
             TempData["Success"] =
                 "Internship deleted successfully.";
 
-            return RedirectToAction(nameof(MyInternships));
+            return RedirectToAction(
+                nameof(MyInternships));
         }
 
         private void ValidateInternshipDates(
             InternshipFormViewModel model)
         {
-            if (model.ApplicationDeadline < DateTime.Today)
+            if (model.ApplicationDeadline.Date <
+                DateTime.Today)
             {
                 ModelState.AddModelError(
-                    "ApplicationDeadline",
+                    nameof(model.ApplicationDeadline),
                     "Application deadline cannot be in the past.");
             }
 
-            if (model.StartDate <= model.ApplicationDeadline)
+            if (model.StartDate.Date <=
+                model.ApplicationDeadline.Date)
             {
                 ModelState.AddModelError(
-                    "StartDate",
+                    nameof(model.StartDate),
                     "Start date must be after the application deadline.");
             }
 
-            if (model.EndDate <= model.StartDate)
+            if (model.EndDate.Date <=
+                model.StartDate.Date)
             {
                 ModelState.AddModelError(
-                    "EndDate",
+                    nameof(model.EndDate),
                     "End date must be after the start date.");
+            }
+
+            if (model.AvailablePositions <= 0)
+            {
+                ModelState.AddModelError(
+                    nameof(model.AvailablePositions),
+                    "At least one available position is required.");
+            }
+        }
+
+        private void ValidateInternshipPayment(
+            InternshipFormViewModel model)
+        {
+            if (model.IsPaid &&
+                (!model.Salary.HasValue ||
+                 model.Salary.Value <= 0))
+            {
+                ModelState.AddModelError(
+                    nameof(model.Salary),
+                    "A valid salary is required for a paid internship.");
+            }
+
+            if (!model.IsPaid)
+            {
+                model.Salary = null;
             }
         }
     }

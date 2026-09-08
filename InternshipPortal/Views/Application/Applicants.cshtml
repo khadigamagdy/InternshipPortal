@@ -271,7 +271,7 @@
         margin-top: 18px;
         border: 1px solid #c7d2fe;
         border-radius: 17px;
-        background: linear-gradient( 135deg, #f8faff, #f0f9ff);
+        background: linear-gradient(135deg, #f8faff, #f0f9ff);
     }
 
     .interview-heading {
@@ -501,7 +501,8 @@
         background: #ede9fe;
     }
 
-    .schedule-button {
+    .schedule-button,
+    .enrollment-button {
         color: #0369a1;
         background: #e0f2fe;
     }
@@ -540,7 +541,8 @@
         background: #4f46e5;
     }
 
-    .schedule-button:hover {
+    .schedule-button:hover,
+    .enrollment-button:hover {
         background: #0284c7;
     }
 
@@ -556,6 +558,11 @@
 
     .evaluate-button:hover {
         background: linear-gradient(135deg, #d97706, #ea580c);
+    }
+
+    .enrollment-created {
+        color: #047857;
+        background: #ecfdf5;
     }
 
     .empty-state {
@@ -664,6 +671,7 @@
 
 <div class="applicants-page">
     <div class="container">
+
         @if (TempData["SuccessMessage"] != null)
         {
             <div class="alert alert-success alert-dismissible fade show shadow-sm">
@@ -704,7 +712,8 @@
                             @if (internship != null)
                             {
                                 <span>
-                                    Manage applicants for @internship.Title
+                                    Manage applicants for
+                                    @internship.Title
                                 </span>
                             }
                             else
@@ -835,30 +844,52 @@
             {
                 var statusClass = application.Status switch
                 {
-                    ApplicationStatus.Accepted => "status-accepted",
-                    ApplicationStatus.Rejected => "status-rejected",
-                    ApplicationStatus.Completed => "status-completed",
-                    ApplicationStatus.UnderReview => "status-review",
-                    ApplicationStatus.InterviewScheduled => "status-interview",
+                    ApplicationStatus.Accepted =>
+                        "status-accepted",
+
+                    ApplicationStatus.Rejected =>
+                        "status-rejected",
+
+                    ApplicationStatus.Completed =>
+                        "status-completed",
+
+                    ApplicationStatus.UnderReview =>
+                        "status-review",
+
+                    ApplicationStatus.InterviewScheduled =>
+                        "status-interview",
+
                     _ => "status-pending"
                 };
 
                 var statusIcon = application.Status switch
                 {
-                    ApplicationStatus.Accepted => "bi-check-circle-fill",
-                    ApplicationStatus.Rejected => "bi-x-circle-fill",
-                    ApplicationStatus.Completed => "bi-award-fill",
-                    ApplicationStatus.UnderReview => "bi-search",
-                    ApplicationStatus.InterviewScheduled => "bi-calendar2-check-fill",
+                    ApplicationStatus.Accepted =>
+                        "bi-check-circle-fill",
+
+                    ApplicationStatus.Rejected =>
+                        "bi-x-circle-fill",
+
+                    ApplicationStatus.Completed =>
+                        "bi-award-fill",
+
+                    ApplicationStatus.UnderReview =>
+                        "bi-search",
+
+                    ApplicationStatus.InterviewScheduled =>
+                        "bi-calendar2-check-fill",
+
                     _ => "bi-hourglass-split"
                 };
 
                 var interviews = application.Interviews
-                    .OrderByDescending(item => item.ScheduledAt)
+                    .OrderByDescending(item =>
+                        item.ScheduledAt)
                     .ToList();
 
                 var timeline = application.StatusHistory
-                    .OrderByDescending(item => item.ChangedAt)
+                    .OrderByDescending(item =>
+                        item.ChangedAt)
                     .ToList();
 
                 <div class="applicant-card"
@@ -884,8 +915,9 @@
                                     <i class="bi bi-calendar3 me-1"></i>
 
                                     Applied on
-                                    @application.AppliedAt
-                                    .ToString("dd MMM yyyy - hh:mm tt")
+                                    @(application.AppliedAt
+                                        .ToString(
+                                            "dd MMM yyyy - hh:mm tt"))
                                 </span>
 
                                 <div class="student-details">
@@ -968,13 +1000,15 @@
 
                                             <div>
                                                 <strong>
-                                                    @interview.ScheduledAt
-                                                    .ToString("dd MMM yyyy")
+                                                    @(interview.ScheduledAt
+                                                        .ToString(
+                                                            "dd MMM yyyy"))
                                                 </strong>
 
                                                 <span>
-                                                    @interview.ScheduledAt
-                                                    .ToString("hh:mm tt")
+                                                    @(interview.ScheduledAt
+                                                        .ToString(
+                                                            "hh:mm tt"))
 
                                                     · @interview.DurationMinutes minutes
                                                 </span>
@@ -1088,8 +1122,9 @@
                                         </span>
 
                                         <span class="timeline-date">
-                                            @history.ChangedAt
-                                            .ToString("dd MMM yyyy - hh:mm tt")
+                                            @(history.ChangedAt
+                                                .ToString(
+                                                    "dd MMM yyyy - hh:mm tt"))
 
                                             @if (history.ChangedByUser != null)
                                             {
@@ -1189,13 +1224,38 @@
                         @if (application.Status ==
                             ApplicationStatus.Accepted)
                         {
-                            <a asp-controller="Evaluation"
-                               asp-action="Create"
-                               asp-route-applicationId="@application.Id"
-                               class="action-link evaluate-button">
-                                <i class="bi bi-star-fill"></i>
-                                Evaluate Student
-                            </a>
+                            @if (application.TrainingEnrollment == null)
+                            {
+                                <form asp-controller="Application"
+                                      asp-action="CreateTrainingEnrollment"
+                                      asp-route-id="@application.Id"
+                                      method="post">
+
+                                    @Html.AntiForgeryToken()
+
+                                    <button type="submit"
+                                            class="action-button enrollment-button"
+                                            onclick="return confirm('Create the training enrollment for this student?');">
+                                        <i class="bi bi-journal-plus"></i>
+                                        Create Training Enrollment
+                                    </button>
+                                </form>
+                            }
+                            else
+                            {
+                                <span class="status-badge enrollment-created">
+                                    <i class="bi bi-journal-check"></i>
+                                    Training Enrollment Created
+                                </span>
+
+                                <a asp-controller="Evaluation"
+                                   asp-action="Create"
+                                   asp-route-applicationId="@application.Id"
+                                   class="action-link evaluate-button">
+                                    <i class="bi bi-star-fill"></i>
+                                    Evaluate Student
+                                </a>
+                            }
                         }
 
                         @if (application.Status ==

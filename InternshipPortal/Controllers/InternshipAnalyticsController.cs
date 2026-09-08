@@ -28,9 +28,12 @@ namespace InternshipPortal.Controllers
             var currentUserId =
                 userManager.GetUserId(User);
 
-            var isAdmin = User.IsInRole("Admin");
+            var isAdmin =
+                User.IsInRole("Admin");
 
-            var companyName = "Platform Analytics";
+            var companyName =
+                "Platform Analytics";
+
             int? companyId = null;
 
             if (!isAdmin)
@@ -50,19 +53,23 @@ namespace InternshipPortal.Controllers
                         "Company");
                 }
 
-                companyId = company.Id;
-                companyName = company.Name;
+                companyId =
+                    company.Id;
+
+                companyName =
+                    company.Name;
             }
 
-            var internshipsQuery = context.Internships
-                .AsNoTracking()
-                .Include(internship =>
-                    internship.Company)
-                .Include(internship =>
-                    internship.Applications)
-                .ThenInclude(application =>
-                    application.Evaluation)
-                .AsQueryable();
+            var internshipsQuery =
+                context.Internships
+                    .AsNoTracking()
+                    .Include(internship =>
+                        internship.Company)
+                    .Include(internship =>
+                        internship.Applications)
+                    .ThenInclude(application =>
+                        application.Evaluation)
+                    .AsQueryable();
 
             if (companyId.HasValue)
             {
@@ -73,17 +80,20 @@ namespace InternshipPortal.Controllers
             }
 
             var internships =
-                await internshipsQuery.ToListAsync();
+                await internshipsQuery
+                    .ToListAsync();
 
-            var applications = internships
-                .SelectMany(internship =>
-                    internship.Applications)
-                .ToList();
+            var applications =
+                internships
+                    .SelectMany(internship =>
+                        internship.Applications)
+                    .ToList();
 
-            var totalApplications = applications.Count;
+            var totalApplications =
+                applications.Count;
 
-            var pendingApplications = applications.Count(
-                application =>
+            var pendingApplications =
+                applications.Count(application =>
                     application.Status ==
                         ApplicationStatus.Pending ||
                     application.Status ==
@@ -91,226 +101,280 @@ namespace InternshipPortal.Controllers
                     application.Status ==
                         ApplicationStatus.InterviewScheduled);
 
-            var acceptedApplications = applications.Count(
-                application =>
+            var acceptedApplications =
+                applications.Count(application =>
                     application.Status ==
                         ApplicationStatus.Accepted ||
                     application.Status ==
                         ApplicationStatus.Completed);
 
-            var rejectedApplications = applications.Count(
-                application =>
+            var rejectedApplications =
+                applications.Count(application =>
                     application.Status ==
                         ApplicationStatus.Rejected);
 
-            var completedTrainings = applications.Count(
-                application =>
+            var completedTrainings =
+                applications.Count(application =>
                     application.Status ==
                         ApplicationStatus.Completed);
 
-            var reviewedApplications = applications
-                .Where(application =>
-                    application.ReviewedAt.HasValue &&
-                    application.ReviewedAt.Value >=
-                        application.AppliedAt)
-                .ToList();
+            var reviewedApplications =
+                applications
+                    .Where(application =>
+                        application.ReviewedAt.HasValue &&
+                        application.ReviewedAt.Value >=
+                            application.AppliedAt)
+                    .ToList();
 
             var averageReviewHours =
                 reviewedApplications.Any()
-                    ? reviewedApplications.Average(application =>
-                        (application.ReviewedAt!.Value -
-                         application.AppliedAt).TotalHours)
+                    ? reviewedApplications.Average(
+                        application =>
+                            (application.ReviewedAt!.Value -
+                             application.AppliedAt)
+                            .TotalHours)
                     : 0;
 
-            var ratings = applications
-                .Where(application =>
-                    application.Evaluation != null)
-                .Select(application =>
-                    application.Evaluation!.Rating)
-                .ToList();
+            var ratings =
+                applications
+                    .Where(application =>
+                        application.Evaluation != null)
+                    .Select(application =>
+                        application.Evaluation!.Rating)
+                    .ToList();
 
-            var averageRating = ratings.Any()
-                ? ratings.Average()
-                : 0;
+            var averageRating =
+                ratings.Any()
+                    ? ratings.Average()
+                    : 0;
 
             var performance =
-                internships.Select(internship =>
-                {
-                    var internshipApplications =
-                        internship.Applications.ToList();
-
-                    var internshipTotal =
-                        internshipApplications.Count;
-
-                    var internshipAccepted =
-                        internshipApplications.Count(
-                            application =>
-                                application.Status ==
-                                    ApplicationStatus.Accepted ||
-                                application.Status ==
-                                    ApplicationStatus.Completed);
-
-                    var internshipRejected =
-                        internshipApplications.Count(
-                            application =>
-                                application.Status ==
-                                    ApplicationStatus.Rejected);
-
-                    var internshipCompleted =
-                        internshipApplications.Count(
-                            application =>
-                                application.Status ==
-                                    ApplicationStatus.Completed);
-
-                    var internshipRatings =
-                        internshipApplications
-                            .Where(application =>
-                                application.Evaluation != null)
-                            .Select(application =>
-                                application.Evaluation!.Rating)
-                            .ToList();
-
-                    var internshipAverageRating =
-                        internshipRatings.Any()
-                            ? internshipRatings.Average()
-                            : 0;
-
-                    var internshipReviewed =
-                        internshipApplications
-                            .Where(application =>
-                                application.ReviewedAt.HasValue &&
-                                application.ReviewedAt.Value >=
-                                    application.AppliedAt)
-                            .ToList();
-
-                    var internshipReviewHours =
-                        internshipReviewed.Any()
-                            ? internshipReviewed.Average(
-                                application =>
-                                    (application.ReviewedAt!.Value -
-                                     application.AppliedAt)
-                                    .TotalHours)
-                            : 0;
-
-                    var acceptanceRate =
-                        CalculatePercentage(
-                            internshipAccepted,
-                            internshipTotal);
-
-                    var completionRate =
-                        CalculatePercentage(
-                            internshipCompleted,
-                            internshipAccepted);
-
-                    var qualityScore =
-                        CalculateQualityScore(
-                            internshipTotal,
-                            acceptanceRate,
-                            completionRate,
-                            internshipAverageRating,
-                            internshipReviewHours);
-
-                    return new InternshipPerformanceViewModel
+                internships
+                    .Select(internship =>
                     {
-                        InternshipId = internship.Id,
-                        InternshipTitle = internship.Title,
-                        CompanyName =
-                            internship.Company.Name,
-                        IsActive = internship.IsActive,
-                        TotalApplications =
-                            internshipTotal,
-                        AcceptedApplications =
-                            internshipAccepted,
-                        RejectedApplications =
-                            internshipRejected,
-                        CompletedTrainings =
-                            internshipCompleted,
-                        RemainingPositions =
-                            internship.AvailablePositions,
-                        AcceptanceRate =
-                            acceptanceRate,
-                        CompletionRate =
-                            completionRate,
-                        AverageRating =
-                            internshipAverageRating,
-                        AverageReviewHours =
-                            internshipReviewHours,
-                        QualityScore =
-                            qualityScore
-                    };
-                })
-                .OrderByDescending(item =>
-                    item.QualityScore)
-                .ThenByDescending(item =>
-                    item.TotalApplications)
-                .ToList();
+                        var internshipApplications =
+                            internship.Applications
+                                .ToList();
+
+                        var internshipTotal =
+                            internshipApplications.Count;
+
+                        var internshipAccepted =
+                            internshipApplications.Count(
+                                application =>
+                                    application.Status ==
+                                        ApplicationStatus.Accepted ||
+                                    application.Status ==
+                                        ApplicationStatus.Completed);
+
+                        var internshipRejected =
+                            internshipApplications.Count(
+                                application =>
+                                    application.Status ==
+                                        ApplicationStatus.Rejected);
+
+                        var internshipCompleted =
+                            internshipApplications.Count(
+                                application =>
+                                    application.Status ==
+                                        ApplicationStatus.Completed);
+
+                        var internshipRatings =
+                            internshipApplications
+                                .Where(application =>
+                                    application.Evaluation != null)
+                                .Select(application =>
+                                    application.Evaluation!.Rating)
+                                .ToList();
+
+                        var internshipAverageRating =
+                            internshipRatings.Any()
+                                ? internshipRatings.Average()
+                                : 0;
+
+                        var internshipReviewed =
+                            internshipApplications
+                                .Where(application =>
+                                    application.ReviewedAt.HasValue &&
+                                    application.ReviewedAt.Value >=
+                                        application.AppliedAt)
+                                .ToList();
+
+                        var internshipReviewHours =
+                            internshipReviewed.Any()
+                                ? internshipReviewed.Average(
+                                    application =>
+                                        (application.ReviewedAt!.Value -
+                                         application.AppliedAt)
+                                        .TotalHours)
+                                : 0;
+
+                        var acceptanceRate =
+                            CalculatePercentage(
+                                internshipAccepted,
+                                internshipTotal);
+
+                        var completionRate =
+                            CalculatePercentage(
+                                internshipCompleted,
+                                internshipAccepted);
+
+                        var qualityScore =
+                            CalculateQualityScore(
+                                internshipTotal,
+                                acceptanceRate,
+                                completionRate,
+                                internshipAverageRating,
+                                internshipReviewHours);
+
+                        return new InternshipPerformanceViewModel
+                        {
+                            InternshipId =
+                                internship.Id,
+
+                            InternshipTitle =
+                                internship.Title,
+
+                            CompanyName =
+                                internship.Company.Name,
+
+                            IsActive =
+                                internship.IsApproved &&
+                                internship.IsActive,
+
+                            TotalApplications =
+                                internshipTotal,
+
+                            AcceptedApplications =
+                                internshipAccepted,
+
+                            RejectedApplications =
+                                internshipRejected,
+
+                            CompletedTrainings =
+                                internshipCompleted,
+
+                            RemainingPositions =
+                                internship.AvailablePositions,
+
+                            AcceptanceRate =
+                                acceptanceRate,
+
+                            CompletionRate =
+                                completionRate,
+
+                            AverageRating =
+                                internshipAverageRating,
+
+                            AverageReviewHours =
+                                internshipReviewHours,
+
+                            QualityScore =
+                                qualityScore
+                        };
+                    })
+                    .OrderByDescending(item =>
+                        item.QualityScore)
+                    .ThenByDescending(item =>
+                        item.TotalApplications)
+                    .ToList();
 
             var bestInternship =
                 performance.FirstOrDefault(item =>
+                    item.IsActive &&
                     item.TotalApplications > 0);
 
             var monthlyTrends =
-                BuildMonthlyTrends(applications);
+                BuildMonthlyTrends(
+                    applications);
 
-            var model = new InternshipAnalyticsViewModel
-            {
-                IsAdminView = isAdmin,
-                DashboardOwnerName = companyName,
-                TotalInternships = internships.Count,
-                ActiveInternships = internships.Count(
-                    internship =>
-                        internship.IsActive),
-                TotalApplications = totalApplications,
-                PendingApplications = pendingApplications,
-                AcceptedApplications = acceptedApplications,
-                RejectedApplications = rejectedApplications,
-                CompletedTrainings = completedTrainings,
+            var model =
+                new InternshipAnalyticsViewModel
+                {
+                    IsAdminView =
+                        isAdmin,
 
-                AcceptanceRate =
-                    CalculatePercentage(
+                    DashboardOwnerName =
+                        companyName,
+
+                    TotalInternships =
+                        internships.Count,
+
+                    ActiveInternships =
+                        internships.Count(internship =>
+                            internship.IsApproved &&
+                            internship.IsActive),
+
+                    TotalApplications =
+                        totalApplications,
+
+                    PendingApplications =
+                        pendingApplications,
+
+                    AcceptedApplications =
                         acceptedApplications,
-                        totalApplications),
 
-                RejectionRate =
-                    CalculatePercentage(
+                    RejectedApplications =
                         rejectedApplications,
-                        totalApplications),
 
-                CompletionRate =
-                    CalculatePercentage(
+                    CompletedTrainings =
                         completedTrainings,
-                        acceptedApplications),
 
-                AverageRating = averageRating,
-                AverageReviewHours = averageReviewHours,
+                    AcceptanceRate =
+                        CalculatePercentage(
+                            acceptedApplications,
+                            totalApplications),
 
-                BestInternshipTitle =
-                    bestInternship?.InternshipTitle ??
-                    "No data yet",
+                    RejectionRate =
+                        CalculatePercentage(
+                            rejectedApplications,
+                            totalApplications),
 
-                BestInternshipScore =
-                    bestInternship?.QualityScore ?? 0,
+                    CompletionRate =
+                        CalculatePercentage(
+                            completedTrainings,
+                            acceptedApplications),
 
-                InternshipPerformance = performance,
-                MonthlyTrends = monthlyTrends
-            };
+                    AverageRating =
+                        averageRating,
+
+                    AverageReviewHours =
+                        averageReviewHours,
+
+                    BestInternshipTitle =
+                        bestInternship?.InternshipTitle ??
+                        "No data yet",
+
+                    BestInternshipScore =
+                        bestInternship?.QualityScore ?? 0,
+
+                    InternshipPerformance =
+                        performance,
+
+                    MonthlyTrends =
+                        monthlyTrends
+                };
 
             return View(model);
         }
 
         private static List<MonthlyApplicationTrendViewModel>
             BuildMonthlyTrends(
-                List<Models.InternshipApplication> applications)
+                List<Models.InternshipApplication>
+                    applications)
         {
             var trends =
                 new List<MonthlyApplicationTrendViewModel>();
 
-            var currentMonth = new DateTime(
-                DateTime.Today.Year,
-                DateTime.Today.Month,
-                1);
+            var currentMonth =
+                new DateTime(
+                    DateTime.Today.Year,
+                    DateTime.Today.Month,
+                    1);
 
-            for (var index = 5; index >= 0; index--)
+            for (var index = 5;
+                 index >= 0;
+                 index--)
             {
                 var monthStart =
                     currentMonth.AddMonths(-index);
@@ -319,16 +383,20 @@ namespace InternshipPortal.Controllers
                     monthStart.AddMonths(1);
 
                 var monthlyApplications =
-                    applications.Where(application =>
-                        application.AppliedAt >= monthStart &&
-                        application.AppliedAt < monthEnd)
-                    .ToList();
+                    applications
+                        .Where(application =>
+                            application.AppliedAt >=
+                                monthStart &&
+                            application.AppliedAt <
+                                monthEnd)
+                        .ToList();
 
                 trends.Add(
                     new MonthlyApplicationTrendViewModel
                     {
                         MonthName =
-                            monthStart.ToString("MMM yyyy"),
+                            monthStart.ToString(
+                                "MMM yyyy"),
 
                         Applications =
                             monthlyApplications.Count,
@@ -373,13 +441,15 @@ namespace InternshipPortal.Controllers
             double averageRating,
             double averageReviewHours)
         {
-            if (totalApplications == 0)
+            if (totalApplications <= 0)
             {
                 return 0;
             }
 
             var demandScore =
-                Math.Min(totalApplications * 2, 20);
+                Math.Min(
+                    totalApplications * 2,
+                    20);
 
             var acceptanceScore =
                 Math.Min(
@@ -423,7 +493,8 @@ namespace InternshipPortal.Controllers
                 responseScore;
 
             return Math.Min(
-                Convert.ToInt32(Math.Round(totalScore)),
+                Convert.ToInt32(
+                    Math.Round(totalScore)),
                 100);
         }
     }

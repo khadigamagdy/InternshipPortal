@@ -30,8 +30,8 @@
                 <h1>My Internships</h1>
 
                 <p>
-                    Create, update and manage your
-                    internship opportunities and applicants.
+                    Create, update and manage your internship
+                    opportunities and applicants.
                 </p>
             </div>
 
@@ -57,7 +57,9 @@
 
                 <div>
                     <strong>
-                        @Model.Count(i => i.IsApproved)
+                        @Model.Count(internship =>
+                            internship.IsApproved &&
+                            internship.IsActive)
                     </strong>
 
                     <small>Approved</small>
@@ -69,8 +71,9 @@
 
                 <div>
                     <strong>
-                        @Model.Count(i =>
-                            !i.IsApproved && i.IsActive)
+                        @Model.Count(internship =>
+                            !internship.IsApproved &&
+                            internship.IsActive)
                     </strong>
 
                     <small>Pending Approval</small>
@@ -82,7 +85,8 @@
 
                 <div>
                     <strong>
-                        @Model.Count(i => !i.IsActive)
+                        @Model.Count(internship =>
+                            !internship.IsActive)
                     </strong>
 
                     <small>Inactive or Rejected</small>
@@ -103,30 +107,54 @@
 
                             <div class="internship-title">
                                 <div class="status-row">
-                                    @if (internship.IsApproved &&
-                                         internship.IsActive)
+                                    @if (!internship.IsActive)
                                     {
-                                        <span class="status approved">
-                                            Approved
+                                        <span class="status rejected">
+                                            Rejected or Inactive
                                         </span>
                                     }
-                                    else if (!internship.IsApproved &&
-                                             internship.IsActive)
+                                    else if (!internship.IsApproved)
                                     {
                                         <span class="status pending">
                                             Pending Approval
                                         </span>
                                     }
+                                    else if (internship.ApplicationDeadline <
+                                             DateTime.Today)
+                                    {
+                                        <span class="status expired">
+                                            Applications Closed
+                                        </span>
+                                    }
+                                    else if (internship.AvailablePositions <= 0)
+                                    {
+                                        <span class="status filled">
+                                            Positions Filled
+                                        </span>
+                                    }
                                     else
                                     {
-                                        <span class="status rejected">
-                                            Rejected or Inactive
+                                        <span class="status approved">
+                                            Approved
                                         </span>
                                     }
 
                                     <span class="status work-mode">
                                         @internship.WorkMode
                                     </span>
+
+                                    @if (internship.IsPaid)
+                                    {
+                                        <span class="status paid">
+                                            Paid
+                                        </span>
+                                    }
+                                    else
+                                    {
+                                        <span class="status unpaid">
+                                            Unpaid
+                                        </span>
+                                    }
                                 </div>
 
                                 <h2>@internship.Title</h2>
@@ -149,7 +177,7 @@
                             <div>
                                 <span>👥</span>
 
-                                <small>Positions</small>
+                                <small>Available Positions</small>
 
                                 <strong>
                                     @internship.AvailablePositions
@@ -162,8 +190,8 @@
                                 <small>Deadline</small>
 
                                 <strong>
-                                    @internship.ApplicationDeadline
-                                    .ToString("dd MMM yyyy")
+                                    @(internship.ApplicationDeadline
+                                        .ToString("dd MMM yyyy"))
                                 </strong>
                             </div>
 
@@ -176,8 +204,9 @@
                                     @if (internship.IsPaid)
                                     {
                                         <text>
-                                            @internship.Salary?
-                                            .ToString("N0")
+                                            @(internship.Salary?
+                                                .ToString("N0")
+                                                ?? "Not specified")
                                             EGP
                                         </text>
                                     }
@@ -191,14 +220,23 @@
 
                         <div class="skills-box">
                             <strong>Required Skills</strong>
-                            <p>@internship.RequiredSkills</p>
+
+                            @if (string.IsNullOrWhiteSpace(
+                                internship.RequiredSkills))
+                            {
+                                <p>No required skills specified.</p>
+                            }
+                            else
+                            {
+                                <p>@internship.RequiredSkills</p>
+                            }
                         </div>
 
                         <div class="card-footer">
                             <span class="created-date">
                                 Created
-                                @internship.CreatedAt
-                                .ToString("dd MMM yyyy")
+                                @(internship.CreatedAt
+                                    .ToString("dd MMM yyyy"))
                             </span>
 
                             <div class="action-buttons">
@@ -260,7 +298,7 @@
     .internships-page {
         min-height: 100vh;
         padding: 40px 20px 70px;
-        background: radial-gradient(circle at top left, rgba(2, 132, 199, 0.09), transparent 30%), radial-gradient(circle at bottom right, rgba(124, 58, 237, 0.08), transparent 35%), #f5f7fb;
+        background: radial-gradient( circle at top left, rgba(2, 132, 199, 0.09), transparent 30%), radial-gradient( circle at bottom right, rgba(124, 58, 237, 0.08), transparent 35%), #f5f7fb;
     }
 
     .page-container {
@@ -295,7 +333,7 @@
         justify-content: space-between;
         color: white;
         border-radius: 25px;
-        background: linear-gradient(135deg, #082f49, #0369a1 55%, #6d28d9);
+        background: linear-gradient( 135deg, #082f49, #0369a1 55%, #6d28d9);
         box-shadow: 0 20px 45px rgba(3, 105, 161, 0.2);
         animation: pageEntrance 0.7s ease;
     }
@@ -438,7 +476,7 @@
         align-items: center;
         justify-content: center;
         border-radius: 17px;
-        background: linear-gradient(135deg, #dbeafe, #ede9fe);
+        background: linear-gradient( 135deg, #dbeafe, #ede9fe);
         font-size: 28px;
     }
 
@@ -470,9 +508,29 @@
         background: #fee2e2;
     }
 
+    .expired {
+        color: #9a3412;
+        background: #ffedd5;
+    }
+
+    .filled {
+        color: #1e40af;
+        background: #dbeafe;
+    }
+
     .work-mode {
         color: #6d28d9;
         background: #ede9fe;
+    }
+
+    .paid {
+        color: #047857;
+        background: #d1fae5;
+    }
+
+    .unpaid {
+        color: #475569;
+        background: #e2e8f0;
     }
 
     .internship-title h2 {
@@ -635,7 +693,7 @@
         margin-top: 12px;
         color: white;
         border-radius: 9px;
-        background: linear-gradient(90deg, #0284c7, #7c3aed);
+        background: linear-gradient( 90deg, #0284c7, #7c3aed);
         text-decoration: none;
         font-size: 9px;
         font-weight: 800;
@@ -681,6 +739,7 @@
         }
 
             .information-grid > div {
+                padding: 11px 13px;
                 border-right: none;
             }
 

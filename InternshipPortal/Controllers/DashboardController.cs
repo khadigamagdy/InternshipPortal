@@ -62,6 +62,12 @@ namespace InternshipPortal.Controllers
                     currentUser);
             }
 
+            if (User.IsInRole("UniversitySupervisor"))
+            {
+                return await CreateUniversitySupervisorDashboardAsync(
+                    currentUser);
+            }
+
             return Forbid();
         }
 
@@ -448,6 +454,26 @@ namespace InternshipPortal.Controllers
             };
 
             return View("Index", model);
+        }
+
+        private Task<IActionResult>
+            CreateUniversitySupervisorDashboardAsync(
+                IdentityUser currentUser)
+        {
+            var model = new DashboardViewModel
+            {
+                AccountType = "UniversitySupervisor",
+
+                DisplayName =
+                    currentUser.Email ??
+                    currentUser.UserName ??
+                    "University Supervisor",
+
+                ProfileCompleted = true
+            };
+
+            return Task.FromResult<IActionResult>(
+                View("Index", model));
         }
     }
 }
